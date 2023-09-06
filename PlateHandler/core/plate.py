@@ -55,6 +55,12 @@ class Plate(sdRDM.DataModel):
         multiple=True,
     )
 
+    wavelengths: List[int] = Field(
+        description="Measured wavelengths in nm",
+        default_factory=ListPlus,
+        multiple=True
+    )
+
     species: List[Species] = Field(
         description="List of species present in wells of the plate",
         default_factory=ListPlus,
@@ -205,7 +211,8 @@ class Plate(sdRDM.DataModel):
 
         for row_id in row_ids:
             for column_id, init_conc in zip(range(self.n_columns), init_concs):
-                wells = self.get("wells", "id", f"{row_id}{column_id+1}")[0]
+                wells = (well for well in self.wells if well.id ==
+                         f"{row_id}{column_id+1}")
                 for well in wells:
                     well.add_species_condition(
                         species_type=species,

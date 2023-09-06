@@ -23,6 +23,10 @@
     - Type: Well
     - Description: List of wells on the plate
     - Multiple: True
+- wavelengths
+    - Type: int
+    - Description: Measured wavelengths in nm
+    - Multiple: True
 - species
     - Type: Species
     - Description: List of species present in wells of the plate
