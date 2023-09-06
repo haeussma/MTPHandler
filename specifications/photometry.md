@@ -23,6 +23,10 @@
     - Type: Well
     - Description: List of wells on the plate
     - Multiple: True
+- species
+    - Type: Species
+    - Description: List of species present in wells of the plate
+    - Multiple: True
 
 ### Well
 
@@ -43,21 +47,52 @@
 - volume_unit
     - Type: string
     - Description: Unit of the volume
-- init_conc
-    - Type: float
-    - Description: Initial concentration of the species
-- conc_unit
-    - Type: str
-    - Description: Concentration unit
+- species_conditions
+    - Type: SpeciesCondition
+    - Multiple: True
+    - Description: List of species conditions
 - x_position
     - Type: integer
     - Description: X position of the well on the plate
 - y_position
     - Type: integer
     - Description: Y position of the well on the plate
+- wavelength
+    - Type: int
+    - Description: Wavelength of the measurement
+
+
+### Species
+
 - species_id
     - Type: str
     - Description: ID of the species
-- wavelegth
-    - Type: int
-    - Description: Wavelength of the measurement
+- name
+    - Type: str
+    - Description: Name of the species
+- __type__
+    - Type: SpeciesType
+    - Description: Type of the species
+
+### SpeciesCondition
+
+- species_type
+    - Type: @Species.type
+    - Description: Reference to species
+- init_conc
+    - Type: float
+    - Description: Initial concentration of the species
+- conc_unit
+    - Type: str
+    - Description: Concentration unit
+
+## Enumerations
+
+### SpeciesType
+
+```python
+BUFFER = "buffer"
+ENZYME = "enzyme"
+SUBSTRATE = "substrate"
+```
+
