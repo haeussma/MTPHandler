@@ -2,9 +2,9 @@
 classDiagram
     Plate *-- Well
     Plate *-- Species
-    Well *-- SpeciesCondition
+    Well *-- InitCondition
     Species *-- SpeciesType
-    SpeciesCondition *-- Species
+    InitCondition *-- Species
     
     class Plate {
         +integer n_rows
@@ -13,6 +13,7 @@ classDiagram
         +str temperature_unit
         +float ph
         +Well[0..*] wells
+        +int[0..*] measured_wavelengths
         +Species[0..*] species
     }
     
@@ -22,22 +23,22 @@ classDiagram
         +str time_unit
         +float reaction_volume
         +string volume_unit
-        +SpeciesCondition[0..*] species_conditions
+        +InitCondition[0..*] init_conditions
         +integer x_position
         +integer y_position
         +int wavelength
     }
     
     class Species {
-        +str species_id
-        +str name
         +SpeciesType type*
+        +str name
     }
     
-    class SpeciesCondition {
-        +Species species_type
+    class InitCondition {
+        +Species species
         +float init_conc
         +str conc_unit
+        +bool was_blanked*
     }
     
     class SpeciesType {
@@ -45,6 +46,8 @@ classDiagram
         +BUFFER
         +ENZYME
         +SUBSTRATE
+        +PRODUCT
+        +INHIBITOR
     }
     
 ```

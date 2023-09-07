@@ -58,7 +58,7 @@ def read_spectramax(
         ph=ph,
         n_rows=n_rows,
         n_columns=n_columns,
-        wavelengths=list(data_dict.keys()),
+        measured_wavelengths=list(data_dict.keys()),
     )
 
     # Check time data consistency

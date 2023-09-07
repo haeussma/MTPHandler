@@ -7,7 +7,7 @@ from sdRDM.base.utils import forge_signature, IDGenerator
 
 
 from .species import Species
-from .well import Well
+from ..tools.well import Well
 
 
 @forge_signature
@@ -105,7 +105,7 @@ class Blank(sdRDM.DataModel):
     def get_well_ids_reference(cls, value):
         """Extracts the ID from a given object to create a reference"""
 
-        from .well import Well
+        from ..tools.well import Well
 
         if isinstance(value, Well):
             return value.id

@@ -19,17 +19,12 @@ class Species(sdRDM.DataModel):
         xml="@id",
     )
 
-    species_id: Optional[str] = Field(
-        default=None,
-        description="ID of the species",
+    type: SpeciesType = Field(
+        ...,
+        description="Type of the species",
     )
 
     name: Optional[str] = Field(
         default=None,
         description="Name of the species",
-    )
-
-    type: SpeciesType = Field(
-        ...,
-        description="Type of the species",
     )

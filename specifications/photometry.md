@@ -1,4 +1,4 @@
-# Spectrophotometry data model
+# Datamodel to handel microtiter plate photometry data
 
 ## Modules
 
@@ -23,7 +23,7 @@
     - Type: Well
     - Description: List of wells on the plate
     - Multiple: True
-- wavelengths
+- measured_wavelengths
     - Type: int
     - Description: Measured wavelengths in nm
     - Multiple: True
@@ -51,10 +51,10 @@
 - volume_unit
     - Type: string
     - Description: Unit of the volume
-- species_conditions
-    - Type: SpeciesCondition
+- init_conditions
+    - Type: InitCondition
     - Multiple: True
-    - Description: List of species conditions
+    - Description: List of initial conditions of different species
 - x_position
     - Type: integer
     - Description: X position of the well on the plate
@@ -68,20 +68,17 @@
 
 ### Species
 
-- species_id
-    - Type: str
-    - Description: ID of the species
-- name
-    - Type: str
-    - Description: Name of the species
 - __type__
     - Type: SpeciesType
     - Description: Type of the species
+- name
+    - Type: str
+    - Description: Name of the species
 
-### SpeciesCondition
+### InitCondition
 
-- species_type
-    - Type: @Species.type
+- species
+    - Type: @Species.id
     - Description: Reference to species
 - init_conc
     - Type: float
@@ -89,6 +86,10 @@
 - conc_unit
     - Type: str
     - Description: Concentration unit
+- __was_blanked__
+    - Type: bool
+    - Description: Whether the species' absorption contribution was subtracted from the absorption signal
+    - Default: False
 
 ## Enumerations
 
@@ -98,5 +99,7 @@
 BUFFER = "buffer"
 ENZYME = "enzyme"
 SUBSTRATE = "substrate"
+PRODUCT = "product"
+INHIBITOR = "inhibitor"
 ```
 

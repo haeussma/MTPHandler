@@ -1,15 +1,17 @@
+import re
 import sdRDM
+import numpy as np
 
-from typing import List, Optional, Literal
+from typing import Dict, List, Optional, Literal
 from pydantic import Field
 from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
 
 
-from .species import Species
-from .speciescondition import SpeciesCondition
-from .speciestype import SpeciesType
+from .initcondition import InitCondition
 from .well import Well
+from .species import Species
+from .speciestype import SpeciesType
 from PlateHandler.tools.spectramax_reader import read_spectramax
 
 
@@ -55,10 +57,10 @@ class Plate(sdRDM.DataModel):
         multiple=True,
     )
 
-    wavelengths: List[int] = Field(
+    measured_wavelengths: List[int] = Field(
         description="Measured wavelengths in nm",
         default_factory=ListPlus,
-        multiple=True
+        multiple=True,
     )
 
     species: List[Species] = Field(
@@ -74,7 +76,7 @@ class Plate(sdRDM.DataModel):
         time_unit: Optional[str] = None,
         reaction_volume: Optional[float] = None,
         volume_unit: Optional[str] = None,
-        species_conditions: List[SpeciesCondition] = ListPlus(),
+        init_conditions: List[InitCondition] = ListPlus(),
         x_position: Optional[int] = None,
         y_position: Optional[int] = None,
         wavelength: Optional[int] = None,
@@ -90,7 +92,7 @@ class Plate(sdRDM.DataModel):
             time_unit (): Unit of the time. Defaults to None
             reaction_volume (): Volume of the reaction. Defaults to None
             volume_unit (): Unit of the volume. Defaults to None
-            species_conditions (): List of species conditions. Defaults to ListPlus()
+            init_conditions (): List of initial conditions of different species. Defaults to ListPlus()
             x_position (): X position of the well on the plate. Defaults to None
             y_position (): Y position of the well on the plate. Defaults to None
             wavelength (): Wavelength of the measurement. Defaults to None
@@ -102,7 +104,7 @@ class Plate(sdRDM.DataModel):
             "time_unit": time_unit,
             "reaction_volume": reaction_volume,
             "volume_unit": volume_unit,
-            "species_conditions": species_conditions,
+            "init_conditions": init_conditions,
             "x_position": x_position,
             "y_position": y_position,
             "wavelength": wavelength,
@@ -116,11 +118,7 @@ class Plate(sdRDM.DataModel):
         return self.wells[-1]
 
     def add_to_species(
-        self,
-        type: SpeciesType,
-        species_id: Optional[str] = None,
-        name: Optional[str] = None,
-        id: Optional[str] = None,
+        self, type: SpeciesType, name: Optional[str] = None, id: Optional[str] = None
     ) -> None:
         """
         This method adds an object of type 'Species' to attribute species
@@ -128,22 +126,27 @@ class Plate(sdRDM.DataModel):
         Args:
             id (str): Unique identifier of the 'Species' object. Defaults to 'None'.
             type (): Type of the species.
-            species_id (): ID of the species. Defaults to None
             name (): Name of the species. Defaults to None
         """
 
         params = {
             "type": type,
-            "species_id": species_id,
             "name": name,
+            "id": id,
         }
 
-        if id is not None:
-            params["id"] = id
+        new_species = Species(**params)
 
-        self.species.append(Species(**params))
+        if any([species.id == new_species.id for species in self.species]):
+            self.species = [new_species if species.id ==
+                            new_species.id else species for species in self.species]
 
-        return self.species[-1]
+            return new_species
+
+        else:
+            self.species.append(new_species)
+
+            return new_species
 
     def assign_species(
             self,
@@ -167,19 +170,6 @@ class Plate(sdRDM.DataModel):
             self._species_to_rows(species, init_concs, conc_unit)
 
         return
-
-    def assign_species_to_all(
-        self,
-        species: Species,
-        init_conc: float,
-        conc_unit: str
-    ):
-        nu_species = Species(**species.__dict__)
-        nu_species.init_conc = init_conc
-        nu_species.conc_unit = conc_unit
-
-        for well in self.wells:
-            well._update_species(nu_species)
 
     def assign_species_conditions_to_rows(
         self,
@@ -211,17 +201,102 @@ class Plate(sdRDM.DataModel):
 
         for row_id in row_ids:
             for column_id, init_conc in zip(range(self.n_columns), init_concs):
+
+                # if the concentration of a species is 0, it is not added, since its not present
+                if init_conc == 0:
+                    continue
+
                 wells = (well for well in self.wells if well.id ==
                          f"{row_id}{column_id+1}")
                 for well in wells:
-                    well.add_species_condition(
-                        species_type=species,
+                    well.add_to_init_conditions(
+                        species=species,
                         init_conc=init_conc,
                         conc_unit=conc_unit,
                     )
 
-    def assign_species_conditions_to_columns(self):
-        raise NotImplementedError()
+    def assign_species_conditions_to_all_except(
+            self,
+            well_ids: List[str],
+            species: Species,
+            init_conc: float,
+            conc_unit: str
+    ):
+
+        if not isinstance(well_ids, list):
+            well_ids = [well_ids]
+
+        if not isinstance(init_conc, float):
+            raise AttributeError(
+                "Argument 'init_conc' must be a float."
+            )
+
+        # Check well_id correctness
+        self._validate_well_id(well_ids)
+
+        wells = (well for well in self.wells if well.id not in well_ids)
+        for well in wells:
+            well.add_species_condition(
+                species_type=species,
+                init_conc=init_conc,
+                conc_unit=conc_unit,
+            )
+
+    def blank_species(
+            self,
+            species: Species,
+            wavelength: int,
+    ):
+
+        # get wells with specified wavelength:
+        if not wavelength in self.measured_wavelengths:
+            raise AttributeError(
+                f"Plate does not contain measurements with wavelength {wavelength} nm."
+            )
+        wells = [well for well in self.wells if well.wavelength == wavelength]
+
+        # get wells for blanking
+        blank_wells = self._get_blanks_for_species(wells, species)
+
+        # calculate mean absorption across all measured blank values
+        species_abso_contribution = [
+            np.mean([well.absorption for well in blank_wells])][0]
+
+        # apply to wells where species is present
+        for well in wells:
+            if any(condition.species == species.id for condition in well.init_conditions):
+                well.absorption = [
+                    absorption - species_abso_contribution for absorption in well.absorption]
+                blanked_species = well._get_species_condition(species)
+                blanked_species.was_blanked = True
+
+    @staticmethod
+    def _get_blanks_for_species(wells: List[Well], species: Species) -> List[Well]:
+
+        blank_wells = []
+
+        for well in wells:
+            species_blanked_status = [
+                condition.was_blanked for condition in well.init_conditions]
+            if not species_blanked_status.count(False) == 1:
+                continue
+
+            if well.init_conditions[species_blanked_status.index(False)].species == species.id:
+                blank_wells.append(well)
+                print(
+                    f"added {well.id}, with condition length: {len(well.init_conditions)} and [0] being {well.init_conditions[species_blanked_status.index(False)].species}")
+
+        return blank_wells
+
+    @staticmethod
+    def _validate_well_id(well_ids) -> bool:
+
+        WELL_ID = re.compile(r"[A-Z][1-9]\d?")
+
+        if not all(WELL_ID.match(well_id) for well_id in well_ids):
+            raise ValueError(
+                f"Invalid well id(s) provided: {[well for well in well_ids if not WELL_ID.match(well)]}"
+            )
 
     @classmethod
     def from_file(
