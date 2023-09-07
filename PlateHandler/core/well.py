@@ -105,6 +105,22 @@ class Well(sdRDM.DataModel):
         else:
             self.init_conditions.append(new_condition)
 
+    def _contains_species(self, species: Species) -> bool:
+
+        for condition in self.init_conditions:
+            if condition.species == species.id:
+                return True
+
+        return False
+
+    def _get_species_condition(self, species: Species) -> InitCondition:
+
+        for condition in self.init_conditions:
+            if condition.species == species.id:
+                return condition
+
+        raise ValueError(f"Species {species} not found in well {self.id}")
+
     def _get_species_condition(self, species: Species) -> InitCondition:
 
         for condition in self.init_conditions:
