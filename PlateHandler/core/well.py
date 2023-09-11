@@ -109,12 +109,11 @@ class Well(sdRDM.DataModel):
 
         for condition in self.init_conditions:
             if condition.species == species.id:
-                print("yes therer is species")
                 return True
 
         return False
 
-    def _all_blanked_except_species(self, species: Species) -> bool:
+    def _is_blanked(self, species: Species) -> bool:
 
         other_species_blanked = []
         for condition in self.init_conditions:

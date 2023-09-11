@@ -340,6 +340,14 @@ class Plate(sdRDM.DataModel):
                 conc_unit=conc_unit,
             )
 
+    def get_well(self, _id: str) -> Well:
+
+        for well in self.wells:
+            if well.id == _id:
+                return well
+
+        raise ValueError(f"No well found with id {_id}")
+
     def blank_species(
             self,
             species: Species,
@@ -376,11 +384,11 @@ class Plate(sdRDM.DataModel):
 
         raise ValueError(f"No species found with id {_id}")
 
-    def _get_catalyst_id(self) -> bool:
+    def _get_catalyst(self) -> bool:
 
         for species in self.species:
             if species.type == SpeciesType.ENZYME.value:
-                return species.id
+                return species
 
         return None
 
@@ -397,8 +405,6 @@ class Plate(sdRDM.DataModel):
 
             if well.init_conditions[species_blanked_status.index(False)].species == species.id:
                 blank_wells.append(well)
-                print(
-                    f"added {well.id}, with condition length: {len(well.init_conditions)} and [0] being {well.init_conditions[species_blanked_status.index(False)].species}")
 
         return blank_wells
 
