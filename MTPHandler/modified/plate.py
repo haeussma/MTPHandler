@@ -6,10 +6,10 @@ from typing import Dict, List, Optional, Literal, Union
 from pydantic import Field
 from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
-from PlateHandler.core import vessel
-from PlateHandler.core.vessel import Vessel
+from MTPHandler.core import vessel
+from MTPHandler.core.vessel import Vessel
 
-from PlateHandler.modified.sboterm import SBOTerm
+from MTPHandler.modified.sboterm import SBOTerm
 
 
 from .abstractspecies import AbstractSpecies
@@ -19,7 +19,7 @@ from .initcondition import InitCondition
 from .well import Well
 from .species import Species
 from .speciestype import SpeciesType
-from PlateHandler.tools.spectramax_reader import read_spectramax
+from MTPHandler.tools.spectramax_reader import read_spectramax
 
 
 @forge_signature

@@ -6,9 +6,9 @@ from CaliPytion.core.analyte import Analyte
 from CaliPytion.core.standard import Standard
 from CaliPytion.core.series import Series
 import numpy as np
-from PlateHandler.modified.species import Species
-from PlateHandler.modified.plate import Plate
-from PlateHandler.modified.well import Well
+from MTPHandler.modified.species import Species
+from MTPHandler.modified.plate import Plate
+from MTPHandler.modified.well import Well
 
 
 def _get_standard_wells(

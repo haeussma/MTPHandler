@@ -1,15 +1,14 @@
-from re import S
 from typing import Dict, List
 from sdRDM import DataModel
 from collections import defaultdict
 from datetime import datetime
 
-from PlateHandler.modified import species
-from PlateHandler.modified.initcondition import InitCondition
-from PlateHandler.modified.reactant import Reactant
-from PlateHandler.modified.plate import Plate
-from PlateHandler.modified.protein import Protein
-from PlateHandler.modified.well import Well
+from MTPHandler.modified import species
+from MTPHandler.modified.initcondition import InitCondition
+from MTPHandler.modified.reactant import Reactant
+from MTPHandler.modified.plate import Plate
+from MTPHandler.modified.protein import Protein
+from MTPHandler.modified.well import Well
 
 URL = "url"
 COMMIT = "commit"
