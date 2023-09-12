@@ -437,7 +437,7 @@ class Plate(sdRDM.DataModel):
     def _get_catalyst(self) -> bool:
 
         for species in self.species:
-            if species.type == SpeciesType.ENZYME.value:
+            if species.ontology == SBOTerm.CATALYST.value:
                 return species
 
         return None

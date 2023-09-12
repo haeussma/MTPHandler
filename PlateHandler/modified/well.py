@@ -109,7 +109,7 @@ class Well(sdRDM.DataModel):
     def _contains_species(self, species: Species) -> bool:
 
         for condition in self.init_conditions:
-            if condition.species == species.id:
+            if condition.species_id == species.id:
                 return True
 
         return False
@@ -118,7 +118,7 @@ class Well(sdRDM.DataModel):
 
         other_species_blanked = []
         for condition in self.init_conditions:
-            if condition.species == species.id:
+            if condition.species_id == species.id:
                 species_was_blanked = condition.was_blanked
             else:
                 other_species_blanked.append(condition.was_blanked)
