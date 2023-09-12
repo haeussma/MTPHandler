@@ -28,9 +28,8 @@
     - Description: Measured wavelengths in nm
     - Multiple: True
 - species
-    - Type: Species
+    - Type: https://github.com/EnzymeML/enzymeml-specifications.git@AbstractSpecies, https://github.com/EnzymeML/enzymeml-specifications.git@Protein, https://github.com/EnzymeML/enzymeml-specifications.git@Reactant
     - Description: List of species present in wells of the plate
-    - Multiple: True
 
 ### Well
 
@@ -65,20 +64,10 @@
     - Type: int
     - Description: Wavelength of the measurement
 
-
-### Species
-
-- __type__
-    - Type: SpeciesType
-    - Description: Type of the species
-- name
-    - Type: str
-    - Description: Name of the species
-
 ### InitCondition
 
-- species
-    - Type: @Species.id
+- species_id
+    - Type: @AbstractSpecies.id
     - Description: Reference to species
 - init_conc
     - Type: float

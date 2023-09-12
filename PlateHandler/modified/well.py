@@ -6,6 +6,7 @@ from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
 
 
+from .abstractspecies import AbstractSpecies
 from .initcondition import InitCondition
 from .species import Species
 from .speciestype import SpeciesType
@@ -72,7 +73,7 @@ class Well(sdRDM.DataModel):
 
     def add_to_init_conditions(
         self,
-        species: Optional[Species] = None,
+        species: Optional[AbstractSpecies] = None,
         init_conc: Optional[float] = None,
         conc_unit: Optional[str] = None,
         was_blanked: bool = False,
@@ -90,7 +91,7 @@ class Well(sdRDM.DataModel):
         """
 
         params = {
-            "species": species,
+            "species_id": species.id,
             "init_conc": init_conc,
             "conc_unit": conc_unit,
             "was_blanked": was_blanked,
@@ -98,9 +99,9 @@ class Well(sdRDM.DataModel):
 
         new_condition = InitCondition(**params)
 
-        if any([condition.species == new_condition.species for condition in self.init_conditions]):
-            self.init_conditions = [new_condition if condition.species ==
-                                    new_condition.species else condition for condition in self.init_conditions]
+        if any([condition.species_id == new_condition.species_id for condition in self.init_conditions]):
+            self.init_conditions = [new_condition if condition.species_id ==
+                                    new_condition.species_id else condition for condition in self.init_conditions]
 
         else:
             self.init_conditions.append(new_condition)
@@ -138,7 +139,7 @@ class Well(sdRDM.DataModel):
     def _get_species_condition(self, species: Species) -> InitCondition:
 
         for condition in self.init_conditions:
-            if condition.species == species.id:
+            if condition.species_id == species.id:
                 return condition
 
         raise ValueError(f"Species {species} not found in well {self.id}")

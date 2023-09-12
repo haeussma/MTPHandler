@@ -2,12 +2,19 @@ import re
 import sdRDM
 import numpy as np
 
-from typing import Dict, List, Optional, Literal
+from typing import Dict, List, Optional, Literal, Union
 from pydantic import Field
 from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
+from PlateHandler.core import vessel
+from PlateHandler.core.vessel import Vessel
+
+from PlateHandler.modified.sboterm import SBOTerm
 
 
+from .abstractspecies import AbstractSpecies
+from .reactant import Reactant
+from .protein import Protein
 from .initcondition import InitCondition
 from .well import Well
 from .species import Species
@@ -63,10 +70,10 @@ class Plate(sdRDM.DataModel):
         multiple=True,
     )
 
-    species: List[Species] = Field(
-        description="List of species present in wells of the plate",
+    species: List[Union[AbstractSpecies, Protein, Reactant, None]] = Field(
         default_factory=ListPlus,
         multiple=True,
+        description="List of species present in wells of the plate",
     )
 
     def add_to_wells(
@@ -117,9 +124,7 @@ class Plate(sdRDM.DataModel):
 
         return self.wells[-1]
 
-    def add_to_species(
-        self, type: SpeciesType, name: Optional[str] = None, id: Optional[str] = None
-    ) -> None:
+    def _add_to_species(self, new_species: AbstractSpecies) -> AbstractSpecies:
         """
         This method adds an object of type 'Species' to attribute species
 
@@ -128,14 +133,6 @@ class Plate(sdRDM.DataModel):
             type (): Type of the species.
             name (): Name of the species. Defaults to None
         """
-
-        params = {
-            "type": type,
-            "name": name,
-            "id": id,
-        }
-
-        new_species = Species(**params)
 
         if any([species.id == new_species.id for species in self.species]):
             self.species = [new_species if species.id ==
@@ -147,6 +144,59 @@ class Plate(sdRDM.DataModel):
             self.species.append(new_species)
 
             return new_species
+
+    def add_protein(
+            self,
+            id: str,
+            name: str,
+            constant: bool,
+            sequence: str,
+            **kwargs
+    ):
+
+        # define abstract Vessel object
+        vessel = self._define_dummy_vessel()
+
+        params = {
+            "id": id,
+            "name": name,
+            "constant": constant,
+            "sequence": sequence,
+            "vessel_id": vessel.id,
+            **kwargs
+        }
+
+        return self._add_to_species(Protein(**params))
+
+    def add_reactant(
+            self,
+            id: str,
+            name: str,
+            constant: bool,
+            **kwargs
+    ):
+
+        # define abstract Vessel object
+        vessel = self._define_dummy_vessel()
+
+        params = {
+            "id": id,
+            "name": name,
+            "constant": constant,
+            "vessel_id": vessel.id,
+            **kwargs
+        }
+
+        return self._add_to_species(Reactant(**params))
+
+    def _define_dummy_vessel(self):
+
+        return Vessel(
+            id="plate0",
+            name="MTP 96 well",
+            volume=200,
+            unit="ul",
+        )
 
     def assign_species(
             self,
@@ -174,7 +224,7 @@ class Plate(sdRDM.DataModel):
     def assign_species_conditions_to_rows(
         self,
         row_ids: List[str],
-        species: Species,
+        species: AbstractSpecies,
         init_concs: List[float],
         conc_unit: str,
     ):
@@ -370,7 +420,7 @@ class Plate(sdRDM.DataModel):
 
         # apply to wells where species is present
         for well in wells:
-            if any(condition.species == species.id for condition in well.init_conditions):
+            if any(condition.species_id == species.id for condition in well.init_conditions):
                 well.absorption = [
                     absorption - species_abso_contribution for absorption in well.absorption]
                 blanked_species = well._get_species_condition(species)
@@ -403,7 +453,7 @@ class Plate(sdRDM.DataModel):
             if not species_blanked_status.count(False) == 1:
                 continue
 
-            if well.init_conditions[species_blanked_status.index(False)].species == species.id:
+            if well.init_conditions[species_blanked_status.index(False)].species_id == species.id:
                 blank_wells.append(well)
 
         return blank_wells

@@ -5,7 +5,7 @@ from pydantic import Field, validator
 from sdRDM.base.utils import forge_signature, IDGenerator
 
 
-from .species import Species
+from .abstractspecies import AbstractSpecies
 
 
 @forge_signature
@@ -19,9 +19,9 @@ class InitCondition(sdRDM.DataModel):
         xml="@id",
     )
 
-    species: Union[Species, str, None] = Field(
+    species_id: Union[AbstractSpecies, str, None] = Field(
         default=None,
-        reference="Species.id",
+        reference="AbstractSpecies.id",
         description="Reference to species",
     )
 
@@ -43,13 +43,13 @@ class InitCondition(sdRDM.DataModel):
         default=False,
     )
 
-    @validator("species")
+    @validator("species_id")
     def get_species_reference(cls, value):
         """Extracts the ID from a given object to create a reference"""
 
-        from .species import Species
+        from .abstractspecies import AbstractSpecies
 
-        if isinstance(value, Species):
+        if isinstance(value, AbstractSpecies):
             return value.id
         elif isinstance(value, str):
             return value
@@ -57,5 +57,6 @@ class InitCondition(sdRDM.DataModel):
             return value
         else:
             raise TypeError(
-                f"Expected types [Species, str] got '{type(value).__name__}' instead."
+                f"Expected types [AbstractSpecies, str] got '{type(value).__name__}'"
+                " instead."
             )
