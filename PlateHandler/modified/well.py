@@ -6,8 +6,10 @@ from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
 
 
-from .initcondition import InitCondition
 from .abstractspecies import AbstractSpecies
+from .initcondition import InitCondition
+from .species import Species
+from .speciestype import SpeciesType
 
 
 @forge_signature
@@ -89,15 +91,47 @@ class Well(sdRDM.DataModel):
         """
 
         params = {
-            "species": species,
+            "species_id": species.id,
             "init_conc": init_conc,
             "conc_unit": conc_unit,
             "was_blanked": was_blanked,
         }
 
-        if id is not None:
-            params["id"] = id
+        new_condition = InitCondition(**params)
 
-        self.init_conditions.append(InitCondition(**params))
+        if any([condition.species_id == new_condition.species_id for condition in self.init_conditions]):
+            self.init_conditions = [new_condition if condition.species_id ==
+                                    new_condition.species_id else condition for condition in self.init_conditions]
 
-        return self.init_conditions[-1]
+        else:
+            self.init_conditions.append(new_condition)
+
+    def _contains_species(self, species: Species) -> bool:
+
+        for condition in self.init_conditions:
+            if condition.species_id == species.id:
+                return True
+
+        return False
+
+    def _is_blanked(self, species: Species) -> bool:
+
+        other_species_blanked = []
+        for condition in self.init_conditions:
+            if condition.species_id == species.id:
+                species_was_blanked = condition.was_blanked
+            else:
+                other_species_blanked.append(condition.was_blanked)
+
+        if not species_was_blanked and all(other_species_blanked):
+            return True
+        else:
+            return False
+
+    def _get_species_condition(self, species: AbstractSpecies) -> InitCondition:
+
+        for condition in self.init_conditions:
+            if condition.species_id == species.id:
+                return condition
+
+        raise ValueError(f"Species {species} not found in well {self.id}")
