@@ -237,7 +237,7 @@ class Plate(sdRDM.DataModel):
             AttributeError: If multiple wavelengths were measured and no wavelength is specified.
 
         Returns:
-            List[Well]: Wells matching specified selection ccriteria.
+            List[Well]: Wells matching to specified selection criteria.
         """
 
         # handel wavelength
@@ -329,7 +329,7 @@ class Plate(sdRDM.DataModel):
                 "Argument 'init_conc' must be a float."
             )
 
-        # Check well_id correctness
+        # validate well_id
         self._validate_well_id(well_ids)
 
         wells = (well for well in self.wells if well.id not in well_ids)
