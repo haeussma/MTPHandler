@@ -10,6 +10,9 @@
 - n_columns
     - Type: integer
     - Description: Number of columns on the plate
+- created
+    - Type: datetime
+    - Description: Date and time when the plate was measured
 - temperature
     - Type: float
     - Description: Thermostat temperature

@@ -71,7 +71,7 @@ class Well(sdRDM.DataModel):
 
     def add_to_init_conditions(
         self,
-        species: Optional[AbstractSpecies] = None,
+        species_id: Optional[AbstractSpecies] = None,
         init_conc: Optional[float] = None,
         conc_unit: Optional[str] = None,
         was_blanked: bool = False,
@@ -82,14 +82,14 @@ class Well(sdRDM.DataModel):
 
         Args:
             id (str): Unique identifier of the 'InitCondition' object. Defaults to 'None'.
-            species (): Reference to species. Defaults to None
+            species_id (): Reference to species. Defaults to None
             init_conc (): Initial concentration of the species. Defaults to None
             conc_unit (): Concentration unit. Defaults to None
             was_blanked (): Whether the species' absorption contribution was subtracted from the absorption signal. Defaults to False
         """
 
         params = {
-            "species": species,
+            "species_id": species_id,
             "init_conc": init_conc,
             "conc_unit": conc_unit,
             "was_blanked": was_blanked,

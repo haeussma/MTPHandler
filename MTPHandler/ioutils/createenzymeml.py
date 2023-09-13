@@ -77,7 +77,7 @@ def create_enzymeml(
     # Create EnzymeMLDocument
     enzymeMLDocument = EnzymeML.EnzymeMLDocument(
         name=name,
-        created=datetime.now(),
+        created=plate.created,
         vessels=[plate._define_dummy_vessel()],
         reactants=reactants,
         proteins=proteins[0],
