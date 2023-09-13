@@ -1,4 +1,6 @@
 import re
+import os
+from datetime import datetime
 from copy import deepcopy
 import numpy as np
 from collections import defaultdict
@@ -16,6 +18,10 @@ def read_spectramax(
         temperature: float = None,
         temperature_unit: str = None,
 ) -> "Plate":
+
+    # Get date of measurement
+    created = datetime.fromtimestamp(os.path.getctime(
+        path)).strftime('%Y-%m-%d %H:%M:%S')
 
     # Extract temperature from path
     if not temperature:
@@ -56,6 +62,7 @@ def read_spectramax(
         temperature=temperature,
         temperature_unit=temperature_unit,
         ph=ph,
+        created=created,
         n_rows=n_rows,
         n_columns=n_columns,
         measured_wavelengths=list(data_dict.keys()),

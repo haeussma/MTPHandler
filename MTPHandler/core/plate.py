@@ -5,11 +5,12 @@ from pydantic import Field
 from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
 
+from datetime import datetime as Datetime
 
-from .initcondition import InitCondition
-from .well import Well
-from .abstractspecies import AbstractSpecies
 from .reactant import Reactant
+from .well import Well
+from .initcondition import InitCondition
+from .abstractspecies import AbstractSpecies
 from .protein import Protein
 
 
@@ -32,6 +33,11 @@ class Plate(sdRDM.DataModel):
     n_columns: Optional[int] = Field(
         default=None,
         description="Number of columns on the plate",
+    )
+
+    created: Optional[Datetime] = Field(
+        default=None,
+        description="Date and time when the plate was measured",
     )
 
     temperature: Optional[float] = Field(
