@@ -2660,6 +2660,9 @@
     }
   ],
   "__source__": {
-    "root": "EnzymeMLDocument"
+    "root": "EnzymeMLDocument",
+    "repo": "https://github.com/EnzymeML/enzymeml-specifications.git",
+    "commit": "72c3d8be4a094983667a7aa62fb599fbc9f7351c",
+    "url": "https://github.com/EnzymeML/enzymeml-specifications/tree/72c3d8be4a094983667a7aa62fb599fbc9f7351c"
   }
 }

@@ -10,15 +10,11 @@ from MTPHandler.modified.plate import Plate
 from MTPHandler.modified.protein import Protein
 from MTPHandler.modified.well import Well
 
-URL = "url"
-COMMIT = "commit"
-# EnzymeML = DataModel.from_git()
+# Specify EnzymeML version
+URL = "https://github.com/EnzymeML/enzymeml-specifications.git"
+COMMIT = "72c3d8be4a094983667a7aa62fb599fbc9f7351c"
 
-# TODO: Get EnzymeML lib based on git
-
-# Get EnzymeML data model
-EnzymeML = DataModel.from_markdown(
-    "test_scheme/enzymeml.md")
+EnzymeML = DataModel.from_git(URL, COMMIT)
 SBOTerm = EnzymeML.enums.SBOTerm
 DataTypes = EnzymeML.enums.DataTypes
 
