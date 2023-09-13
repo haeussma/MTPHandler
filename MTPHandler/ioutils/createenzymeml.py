@@ -28,7 +28,8 @@ def create_enzymeml(
         plate: Plate,
         reactant: Reactant,
         protein: Protein,
-        wavelength: int = None
+        wavelength: int = None,
+        path: str = None,
 ) -> EnzymeML.EnzymeMLDocument:
     """
     Creates an EnzymeML document based on the information of a `Plate`.
@@ -72,8 +73,6 @@ def create_enzymeml(
     proteins = [species for species in plate.species if species.ontology ==
                 SBOTerm.CATALYST.value],
 
-    print(proteins[0][0])
-
     # Create EnzymeMLDocument
     enzymeMLDocument = EnzymeML.EnzymeMLDocument(
         name=name,
@@ -84,7 +83,38 @@ def create_enzymeml(
         measurements=measurements
     )
 
+    if path:
+        write_doument(enzymeMLDocument, path)
+
     return enzymeMLDocument
+
+
+def write_doument(
+        enzymeMLDocument: EnzymeML.EnzymeMLDocument,
+        path: str
+):
+    """Writes file to specified path.
+    Supported formats are `json` and `yaml`.
+
+    Args:
+        enzymeMLDocument (EnzymeML.EnzymeMLDocument): `EnzymeMLDocument` object
+        path (str): Path to file
+
+    Raises:
+        ValueError: If path is not ending with `json` or `yaml`
+    """
+
+    format = path.split(".")[-1]
+
+    if format == "json":
+        outfile = enzymeMLDocument.json()
+    elif format == "yaml":
+        outfile = enzymeMLDocument.yaml()
+    else:
+        raise ValueError(f"Format {format} is not supported.")
+
+    with open(path, "w") as f:
+        f.write(outfile)
 
 
 def create_measurements(

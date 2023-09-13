@@ -75,12 +75,12 @@ def read_spectramax(
             for column in range(plate.n_columns):
                 plate.add_to_wells(
                     id=_coordinates_to_id(column, row),
-                    absorption=measurments[row, column, :],
+                    absorption=measurments[row, column, :].tolist(),
                     time_unit=time_unit,
                     x_position=column,
                     y_position=row,
                     wavelength=wavelength,
-                    time=time,
+                    time=time.tolist(),
                 )
 
     return plate
