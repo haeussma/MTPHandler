@@ -5,13 +5,13 @@ import numpy as np
 
 from CaliPytion import Calibrator, Standard
 from CaliPytion.modified.sample import Sample
-from MTPHandler.modified.species import Species
+from MTPHandler.modified.abstractspecies import AbstractSpecies
 from MTPHandler.modified.well import Well
 
 
 def _get_standard_wells(
         plate: "Plate",
-        species: Species,
+        species: AbstractSpecies,
         wavelength: int
 ) -> List[Well]:
 
@@ -45,7 +45,7 @@ def _get_standard_wells(
 
 def map_to_standard(
         plate: "Plate",
-        species: Species,
+        species: AbstractSpecies,
         wavelength: int = None,
 ) -> Standard:
 
@@ -83,7 +83,7 @@ def map_to_standard(
 
 def initialize_calibrator(
         plate: "Plate",
-        species: Species,
+        species: AbstractSpecies,
         wavelength: int = None,
         cutoff: float = 3,
 ) -> Calibrator:

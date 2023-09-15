@@ -9,7 +9,6 @@ from CaliPytion import Standard
 
 from .abstractspecies import AbstractSpecies
 from .initcondition import InitCondition
-from .species import Species
 from .speciestype import SpeciesType
 
 
@@ -100,6 +99,8 @@ class Well(sdRDM.DataModel):
 
         new_condition = InitCondition(**params)
 
+        print(f"assigning to {self.id} {init_conc}")
+
         if any([condition.species_id == new_condition.species_id for condition in self.init_conditions]):
             self.init_conditions = [new_condition if condition.species_id ==
                                     new_condition.species_id else condition for condition in self.init_conditions]
@@ -107,7 +108,7 @@ class Well(sdRDM.DataModel):
         else:
             self.init_conditions.append(new_condition)
 
-    def _contains_species(self, species: Species) -> bool:
+    def _contains_species(self, species: AbstractSpecies) -> bool:
 
         for condition in self.init_conditions:
             if condition.species_id == species.id:

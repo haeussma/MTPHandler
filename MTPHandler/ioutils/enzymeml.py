@@ -5,7 +5,6 @@ from datetime import datetime
 
 from CaliPytion import Standard
 
-from MTPHandler.modified import species
 from MTPHandler.modified.initcondition import InitCondition
 from MTPHandler.modified.reactant import Reactant
 from MTPHandler.modified.protein import Protein

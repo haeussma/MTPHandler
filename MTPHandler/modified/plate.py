@@ -18,7 +18,7 @@ from .reactant import Reactant
 from .protein import Protein
 from .initcondition import InitCondition
 from .well import Well
-from .species import Species
+from .abstractspecies import AbstractSpecies
 from .speciestype import SpeciesType
 from MTPHandler.tools.spectramax_reader import read_spectramax
 
@@ -207,8 +207,8 @@ class Plate(sdRDM.DataModel):
     def assign_species(
             self,
             ids: List[str],
-            species: Species,
-            init_concs: List[float],
+            species: AbstractSpecies,
+            init_conc: Union[float, List[float]],
             conc_unit: str,
             to: Literal["all", "rows", "columns", "except"]
     ):
@@ -219,15 +219,97 @@ class Plate(sdRDM.DataModel):
                 f"Argument 'to' must be one of {cases}."
             )
 
-        if to == "all":
-            self.assign_species_to_all(species, init_concs[0], conc_unit)
+        if not isinstance(init_conc, list):
+            init_conc = [init_conc]
 
-        if to == "rows":
-            self._species_to_rows(species, init_concs, conc_unit)
+        if not isinstance(ids, list):
+            ids = [ids]
+
+        if to == "all":
+            self.assign_species_to_all(species, init_conc, conc_unit)
+
+        elif to == "columns":
+            self.assign_species_to_columns(
+                column_ids=ids,
+                species=species,
+                init_concs=init_conc,
+                conc_unit=conc_unit
+            )
+
+        elif to == "rows":
+            self.assign_species_to_rows(
+                row_ids=ids,
+                species=species,
+                init_concs=init_conc,
+                conc_unit=conc_unit
+            )
+
+        else:
+            self.assign_species_to_all_except(
+                well_ids=ids,
+                species=species,
+                init_conc=init_conc,
+                conc_unit=conc_unit
+            )
 
         return
 
-    def assign_species_conditions_to_rows(
+    def assign_species_to_all(
+            self,
+            species: AbstractSpecies,
+            init_conc: float,
+            conc_unit: str,
+    ):
+        if not len(init_conc) == 1:
+            raise AttributeError(
+                "Argument 'init_conc' must be a float, when assigning to all wells."
+            )
+
+        for well in self.wells:
+            well.add_to_init_conditions(
+                species=species,
+                init_conc=init_conc[0],
+                conc_unit=conc_unit,
+            )
+
+    def assign_species_to_columns(
+        self,
+        column_ids: List[int],
+        species: AbstractSpecies,
+        init_concs: List[float],
+        conc_unit: str,
+    ):
+
+        # Handle column_ids
+        if not all([isinstance(column_id, int) for column_id in column_ids]):
+            raise AttributeError(
+                "Argument 'column_ids' must be a list of integers."
+            )
+
+        if not all([column_id <= self.n_columns for column_id in column_ids]):
+            raise AttributeError(
+                f"Argument 'column_ids' must be a list of integers between 1 and {self.n_columns+1}."
+            )
+
+        # Handle init_concs
+        if len(init_concs) == 1:
+            init_concs = init_concs * self.n_rows
+
+        if not len(init_concs) == self.n_rows:
+            raise AttributeError(
+                f"Argument 'init_concs' must be a list of length {self.n_rows}."
+            )
+
+        for column_id in column_ids:
+            for row_id, init_conc in zip(range(self.n_rows), init_concs):
+
+                [well.add_to_init_conditions(
+                    species=species,
+                    init_conc=init_conc,
+                    conc_unit=conc_unit,
+                ) for well in self.wells if well.y_position == row_id and well.x_position == column_id-1]
+
+    def assign_species_to_rows(
         self,
         row_ids: List[str],
         species: AbstractSpecies,
@@ -235,41 +317,30 @@ class Plate(sdRDM.DataModel):
         conc_unit: str,
     ):
         # Handle row_ids
-        if not isinstance(row_ids, list):
-            row_ids = [row_ids]
-
         if not all([isinstance(row_id, str) for row_id in row_ids]):
             raise AttributeError(
                 "Argument 'row_ids' must be a list of strings."
             )
 
-        # Handle init_concs
-        if not isinstance(init_concs, list):
-            init_concs = [init_concs]
+        row_ids = [_id.upper() for _id in row_ids]
 
+        # Handle init_concs
         if len(init_concs) == 1:
             init_concs = init_concs * self.n_columns
-        else:
-            if len(init_concs) is not self.n_columns:
-                raise AttributeError(
-                    "Argument 'init_conc' must be a list of length equal to the number of columns."
-                )
+
+        if not len(init_concs) == self.n_columns:
+            raise AttributeError(
+                f"Argument 'init_concs' must be a list of length {self.n_columns}."
+            )
 
         for row_id in row_ids:
             for column_id, init_conc in zip(range(self.n_columns), init_concs):
 
-                # if the concentration of a species is 0, it is not added, since its not present
-                if init_conc == 0:
-                    continue
-
-                wells = (well for well in self.wells if well.id ==
-                         f"{row_id}{column_id+1}")
-                for well in wells:
-                    well.add_to_init_conditions(
-                        species=species,
-                        init_conc=init_conc,
-                        conc_unit=conc_unit,
-                    )
+                [well.add_to_init_conditions(
+                    species=species,
+                    init_conc=init_conc,
+                    conc_unit=conc_unit,
+                ) for well in self.wells if well.x_position == column_id and well.y_position == ord(row_id)-65]
 
     def get_wells(
             self,
@@ -369,20 +440,17 @@ class Plate(sdRDM.DataModel):
         raise ValueError(
             f"No well found with x position {x_position} and y position {y_position}")
 
-    def assign_species_conditions_to_all_except(
+    def assign_species_to_all_except(
             self,
             well_ids: List[str],
-            species: Species,
+            species: AbstractSpecies,
             init_conc: float,
             conc_unit: str
     ):
 
-        if not isinstance(well_ids, list):
-            well_ids = [well_ids]
-
-        if not isinstance(init_conc, float):
+        if not len(init_conc) == 1:
             raise AttributeError(
-                "Argument 'init_conc' must be a float."
+                "Argument 'init_conc' must be a float, when assigning to all wells."
             )
 
         # validate well_id
@@ -390,9 +458,9 @@ class Plate(sdRDM.DataModel):
 
         wells = (well for well in self.wells if well.id not in well_ids)
         for well in wells:
-            well.add_species_condition(
-                species_type=species,
-                init_conc=init_conc,
+            well.add_to_init_conditions(
+                species=species,
+                init_conc=init_conc[0],
                 conc_unit=conc_unit,
             )
 
@@ -406,7 +474,7 @@ class Plate(sdRDM.DataModel):
 
     def calibrate(
             self,
-            species: Species,
+            species: AbstractSpecies,
             wavelength: int,
             cutoff: float = 3,
     ) -> Calibrator:
@@ -440,7 +508,7 @@ class Plate(sdRDM.DataModel):
 
     def blank_species(
             self,
-            species: Species,
+            species: AbstractSpecies,
             wavelength: int,
     ):
 
@@ -466,7 +534,7 @@ class Plate(sdRDM.DataModel):
                 blanked_species = well._get_species_condition(species)
                 blanked_species.was_blanked = True
 
-    def get_species(self, _id: str) -> Species:
+    def get_species(self, _id: str) -> AbstractSpecies:
 
         for species in self.species:
             if species.id == _id:
@@ -483,7 +551,7 @@ class Plate(sdRDM.DataModel):
         return None
 
     @staticmethod
-    def _get_blanks(wells: List[Well], species: Species) -> List[Well]:
+    def _get_blanks(wells: List[Well], species: AbstractSpecies) -> List[Well]:
 
         blank_wells = []
 
