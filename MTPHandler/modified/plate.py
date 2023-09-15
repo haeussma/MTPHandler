@@ -8,10 +8,10 @@ from typing import Dict, List, Optional, Literal, Union
 from pydantic import Field
 from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
-from MTPHandler.core import vessel
-from MTPHandler.core.vessel import Vessel
+from CaliPytion import Calibrator, Standard
+from MTPHandler.ioutils import initialize_calibrator, create_enzymeml
 
-
+from .vessel import Vessel
 from .sboterm import SBOTerm
 from .abstractspecies import AbstractSpecies
 from .reactant import Reactant
@@ -403,6 +403,40 @@ class Plate(sdRDM.DataModel):
                 return well
 
         raise ValueError(f"No well found with id {_id}")
+
+    def calibrate(
+            self,
+            species: Species,
+            wavelength: int,
+            cutoff: float = 3,
+    ) -> Calibrator:
+
+        return initialize_calibrator(
+            plate=self,
+            species=species,
+            wavelength=wavelength,
+            cutoff=cutoff,
+        )
+
+    def to_enzymeml(
+            self,
+            name: str,
+            reactant: Reactant,
+            standard: Standard,
+            protein: Protein,
+            wavelength: int = None,
+            path: str = None,
+    ) -> "EnzymeML":
+
+        return create_enzymeml(
+            name=name,
+            plate=self,
+            reactant=reactant,
+            standard=standard,
+            protein=protein,
+            wavelength=wavelength,
+            path=path,
+        )
 
     def blank_species(
             self,

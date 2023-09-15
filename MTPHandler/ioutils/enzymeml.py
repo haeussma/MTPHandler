@@ -3,10 +3,11 @@ from sdRDM import DataModel
 from collections import defaultdict
 from datetime import datetime
 
+from CaliPytion import Standard
+
 from MTPHandler.modified import species
 from MTPHandler.modified.initcondition import InitCondition
 from MTPHandler.modified.reactant import Reactant
-from MTPHandler.modified.plate import Plate
 from MTPHandler.modified.protein import Protein
 from MTPHandler.modified.well import Well
 
@@ -21,8 +22,9 @@ DataTypes = EnzymeML.enums.DataTypes
 
 def create_enzymeml(
         name: str,
-        plate: Plate,
+        plate: "Plate",
         reactant: Reactant,
+        standard: Standard,
         protein: Protein,
         wavelength: int = None,
         path: str = None,
@@ -62,6 +64,7 @@ def create_enzymeml(
         wavelength=wavelength,
         reactant=reactant,
         protein=protein,
+        standard=standard,
     )
 
     reactants = [species for species in plate.species if species.ontology ==
@@ -114,10 +117,11 @@ def write_doument(
 
 
 def create_measurements(
-        plate: Plate,
+        plate: "Plate",
         wavelength: int,
         reactant: Reactant,
         protein: Protein,
+        standard: Standard,
 ) -> List[EnzymeML.Measurement]:
     """
     Creates a list of measurements based on the information of a `Plate`.
@@ -182,7 +186,8 @@ def create_measurements(
         measurement.species = get_measurement_species(
             measurement=measurement,
             wells=replicate_wells,
-            reactant=reactant
+            reactant=reactant,
+            standard=standard,
         )
 
         measurements.append(measurement)
@@ -196,6 +201,7 @@ def get_measurement_species(
         measurement: EnzymeML.Measurement,
         wells: List[Well],
         reactant: Reactant,
+        standard: Standard
 ) -> List[EnzymeML.MeasurementData]:
     """
     Creates a list of `MeasurementData` objects for a `Measurement` object.
@@ -224,6 +230,7 @@ def get_measurement_species(
             measurement_data.replicates = get_replicates(
                 measurement_data=measurement_data,
                 wells=wells,
+                standard=standard
             )
 
         measurement_datas.append(measurement_data)
@@ -234,6 +241,7 @@ def get_measurement_species(
 def get_replicates(
         measurement_data: EnzymeML.MeasurementData,
         wells: List[Well],
+        standard: Standard
 ) -> List[EnzymeML.Replicate]:
     """
     Creates a list of `Replicate` objects for a `MeasurementData` object.
@@ -247,18 +255,40 @@ def get_replicates(
     """
 
     replicates = []
-    for well in wells:
-        replicate = EnzymeML.Replicate(
-            id=well.id,
-            species_id=measurement_data.species_id,
-            measurement_id=measurement_data.measurement_id,
-            data_type=DataTypes.ABSORPTION,
-            data_unit="dimensionless",
-            time_unit=well.time_unit,
-            time=well.time,
-            data=well.absorption,
-        )
-        replicates.append(replicate)
+    if standard:
+
+        units = [sample.conc_unit for sample in standard.samples]
+        if not all([u == units[0] for u in units]):
+            raise ValueError(
+                "Concentration units of standard samples are not equal.")
+        unit = str(units[0])
+
+        for well in wells:
+            replicate = EnzymeML.Replicate(
+                id=well.id,
+                species_id=measurement_data.species_id,
+                measurement_id=measurement_data.measurement_id,
+                data_type=DataTypes.CONCENTRATION,
+                data_unit=unit,
+                time_unit=well.time_unit,
+                time=well.time,
+                data=well.to_concentration(standard=standard),
+            )
+            replicates.append(replicate)
+
+    else:
+        for well in wells:
+            replicate = EnzymeML.Replicate(
+                id=well.id,
+                species_id=measurement_data.species_id,
+                measurement_id=measurement_data.measurement_id,
+                data_type=DataTypes.ABSORPTION,
+                data_unit="dimensionless",
+                time_unit=well.time_unit,
+                time=well.time,
+                data=well.absorption,
+            )
+            replicates.append(replicate)
 
     return replicates
 
@@ -289,7 +319,7 @@ def get_replicates_mapping(
 
 
 def get_catalyzed_wells(
-        plate: Plate,
+        plate: "Plate",
         wavelength: int,
         reactant: Reactant,
         protein: Protein,
@@ -318,7 +348,7 @@ def get_catalyzed_wells(
         if not well._contains_species(protein):
             continue
 
-        if not well._is_blanked(reactant):
+        if not well._is_blanked(reactant.id):
             continue
 
         reaction_wells.append(well)

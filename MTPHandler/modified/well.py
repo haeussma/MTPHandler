@@ -5,6 +5,7 @@ from pydantic import Field
 from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
 
+from CaliPytion import Standard
 
 from .abstractspecies import AbstractSpecies
 from .initcondition import InitCondition
@@ -114,12 +115,13 @@ class Well(sdRDM.DataModel):
 
         return False
 
-    def _is_blanked(self, species: Species) -> bool:
+    def _is_blanked(self, species_id: str) -> bool:
 
         other_species_blanked = []
         for condition in self.init_conditions:
-            if condition.species_id == species.id:
+            if condition.species_id == species_id:
                 species_was_blanked = condition.was_blanked
+
             else:
                 other_species_blanked.append(condition.was_blanked)
 
@@ -135,3 +137,19 @@ class Well(sdRDM.DataModel):
                 return condition
 
         raise ValueError(f"Species {species} not found in well {self.id}")
+
+    def to_concentration(self, standard: Standard, **kwargs) -> list[float]:
+
+        if not standard.model_result.was_fitted:
+            raise ValueError(
+                f"Standard {standard.id} was not fitted for species {standard.species_id}")
+
+        if not self._is_blanked(standard.species_id):
+            raise ValueError(
+                f"Well {self.id} was not blanked for species {standard.species_id}")
+
+        if not self.wavelength == standard.wavelength:
+            raise ValueError(
+                f"Standard at {standard.wavelength} nm not applicable for well {self.id} measured at {self.wavelength}")
+
+        return standard.model_result.calculate(self.absorption, **kwargs)
