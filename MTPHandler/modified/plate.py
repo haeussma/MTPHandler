@@ -1,4 +1,7 @@
+from collections import defaultdict
+import copy
 import re
+from types import NoneType
 import sdRDM
 import numpy as np
 
@@ -206,11 +209,11 @@ class Plate(sdRDM.DataModel):
 
     def assign_species(
             self,
-            ids: List[str],
             species: AbstractSpecies,
             init_conc: Union[float, List[float]],
             conc_unit: str,
-            to: Literal["all", "rows", "columns", "except"]
+            to: Literal["all", "rows", "columns", "except"],
+            ids: Union[str, List[str], int, List[int]] = None,
     ):
 
         cases = ["rows", "columns", "all", "except"]
@@ -222,7 +225,7 @@ class Plate(sdRDM.DataModel):
         if not isinstance(init_conc, list):
             init_conc = [init_conc]
 
-        if not isinstance(ids, list):
+        if not isinstance(ids, list) and not isinstance(ids, NoneType):
             ids = [ids]
 
         if to == "all":
@@ -317,12 +320,16 @@ class Plate(sdRDM.DataModel):
         conc_unit: str,
     ):
         # Handle row_ids
+        if not row_ids:
+            row_ids = [chr(i) for i in range(65, 65+self.n_rows)]
+
         if not all([isinstance(row_id, str) for row_id in row_ids]):
             raise AttributeError(
                 "Argument 'row_ids' must be a list of strings."
             )
 
-        row_ids = [_id.upper() for _id in row_ids]
+        else:
+            row_ids = [_id.upper() for _id in row_ids]
 
         # Handle init_concs
         if len(init_concs) == 1:
@@ -333,6 +340,7 @@ class Plate(sdRDM.DataModel):
                 f"Argument 'init_concs' must be a list of length {self.n_columns}."
             )
 
+        # Add concentration array to wells in rows
         for row_id in row_ids:
             for column_id, init_conc in zip(range(self.n_columns), init_concs):
 
@@ -506,6 +514,18 @@ class Plate(sdRDM.DataModel):
             path=path,
         )
 
+    def _already_blanked(self, wells: List[Well], species: AbstractSpecies) -> bool:
+
+        wells = [well for well in wells if well._contains_species(species)]
+
+        wells = [well for well in wells if well._get_species_condition(
+            species).init_conc != 0]
+
+        if all([well._get_species_condition(species).was_blanked for well in wells]):
+            return True
+        else:
+            return False
+
     def blank_species(
             self,
             species: AbstractSpecies,
@@ -519,20 +539,51 @@ class Plate(sdRDM.DataModel):
             )
         wells = self.get_wells(wavelength=wavelength)
 
+        if self._already_blanked(wells=wells, species=species):
+            print(f"{species.name} was already blanked.")
+            return
+
         # get wells for blanking
-        blank_wells = self._get_blanks(wells, species)
+        blank_wells = self._get_blanks(wells=wells, species=species)
 
-        # calculate mean absorption across all measured blank values
-        species_abso_contribution = [
-            np.mean([well.absorption for well in blank_wells])][0]
+        # get mapping of concentration to blank wells
+        blank_well_mapping = self._get_blank_conc_mapping(
+            wells=blank_wells, species=species)
 
-        # apply to wells where species is present
+        conc_mean_blank_mapping = {}
+        for conc, blanking_wells in blank_well_mapping.items():
+
+            mean_absorption = np.mean(
+                [well.absorption for well in blanking_wells])
+            conc_mean_blank_mapping[conc] = mean_absorption
+
+        # apply to wells where species is present in respective concentration
+        blanked_wells = []
         for well in wells:
-            if any(condition.species_id == species.id for condition in well.init_conditions):
-                well.absorption = [
-                    absorption - species_abso_contribution for absorption in well.absorption]
-                blanked_species = well._get_species_condition(species)
-                blanked_species.was_blanked = True
+
+            if species.id not in [condition.species_id for condition in well.init_conditions]:
+                continue
+
+            condition = well._get_species_condition(species)
+
+            if condition.was_blanked:
+                continue
+
+            if condition.init_conc not in conc_mean_blank_mapping.keys():
+                print(
+                    f"Well {well.id} was not blanked for initial {species.name} concentration {condition.init_conc} ({condition.conc_unit})."
+                )
+                continue
+
+            well.absorption = [
+                absorption - conc_mean_blank_mapping[condition.init_conc] for absorption in well.absorption]
+
+            blanked_wells.append(well.id)
+
+            condition.was_blanked = True
+
+        print(
+            f"Blanked {len(blanked_wells)} wells containing {species.name}.")
 
     def get_species(self, _id: str) -> AbstractSpecies:
 
@@ -554,17 +605,43 @@ class Plate(sdRDM.DataModel):
     def _get_blanks(wells: List[Well], species: AbstractSpecies) -> List[Well]:
 
         blank_wells = []
-
         for well in wells:
-            species_blanked_status = [
-                condition.was_blanked for condition in well.init_conditions]
-            if not species_blanked_status.count(False) == 1:
+
+            # ignore virtual species with concentration of 0
+            conditions = [
+                condition for condition in well.init_conditions if condition.init_conc != 0]
+
+            # ignore species that were already blanked
+            conditions = [
+                condition for condition in conditions if condition.was_blanked == False]
+
+            # if not exactly one species was not blanked, continue
+            if not len(conditions) == 1:
                 continue
 
-            if well.init_conditions[species_blanked_status.index(False)].species_id == species.id:
-                blank_wells.append(well)
+            # if the species is not the one to be blanked, continue
+            if not conditions[0].species_id == species.id:
+                continue
+
+            blank_wells.append(well)
+
+        if len(blank_wells) == 0:
+            raise AttributeError(
+                f"No wells for calculating the blank found for {species.name} ({species.id}). "
+                "You might need to blank another species first."
+            )
 
         return blank_wells
+
+    def _get_blank_conc_mapping(self, wells: List[Well], species: AbstractSpecies) -> Dict[float, List[Well]]:
+
+        blank_conc_mapping = defaultdict(list)
+        for well in wells:
+            condition = well._get_species_condition(species)
+
+            blank_conc_mapping[condition.init_conc].append(well)
+
+        return blank_conc_mapping
 
     @staticmethod
     def _validate_well_id(well_ids) -> bool:

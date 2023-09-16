@@ -99,8 +99,6 @@ class Well(sdRDM.DataModel):
 
         new_condition = InitCondition(**params)
 
-        print(f"assigning to {self.id} {init_conc}")
-
         if any([condition.species_id == new_condition.species_id for condition in self.init_conditions]):
             self.init_conditions = [new_condition if condition.species_id ==
                                     new_condition.species_id else condition for condition in self.init_conditions]
@@ -111,7 +109,7 @@ class Well(sdRDM.DataModel):
     def _contains_species(self, species: AbstractSpecies) -> bool:
 
         for condition in self.init_conditions:
-            if condition.species_id == species.id:
+            if condition.species_id == species.id and condition.init_conc != 0:
                 return True
 
         return False
@@ -120,7 +118,7 @@ class Well(sdRDM.DataModel):
 
         other_species_blanked = []
         for condition in self.init_conditions:
-            if condition.species_id == species_id:
+            if condition.species_id == species_id and condition.init_conc != 0:
                 species_was_blanked = condition.was_blanked
 
             else:
