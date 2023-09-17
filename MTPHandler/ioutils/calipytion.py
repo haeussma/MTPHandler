@@ -7,6 +7,7 @@ from CaliPytion import Calibrator, Standard
 from CaliPytion.modified.sample import Sample
 from MTPHandler.modified.abstractspecies import AbstractSpecies
 from MTPHandler.modified.well import Well
+from MTPHandler.modified.protein import Protein
 
 
 def _get_standard_wells(
@@ -26,18 +27,19 @@ def _get_standard_wells(
 
     wells = plate.get_wells(wavelength=wavelength)
 
-    # Subset of wells, that contain specified species, do not contain a catalyst, and are blanked
+    # Subset of wells, that contain specified species, do not contain a protein, and are blanked
+    protein_ids = [
+        species.id for species in plate.species if isinstance(species, Protein)]
+
     standard_wells = []
     for well in wells:
-        if not well._contains_species(species):
+        if not well._contains_species(species.id):
             continue
 
-        if plate._get_catalyst():
-            catalyst = plate._get_catalyst()
-            if well._contains_species(catalyst):
-                continue
+        if any([well._contains_species(catalyst_id) for catalyst_id in protein_ids]):
+            continue
 
-        if well._is_blanked(species.id):
+        if well._is_blanked_for(species.id):
             standard_wells.append(well)
 
     return standard_wells
@@ -58,7 +60,7 @@ def map_to_standard(
     # Map wells to samples of a standard
     samples = []
     for well in standard_wells:
-        condition = well._get_species_condition(species)
+        condition = well._get_species_condition(species.id)
         samples.append(
             Sample(
                 id=well.id,
@@ -85,7 +87,7 @@ def initialize_calibrator(
         plate: "Plate",
         species: AbstractSpecies,
         wavelength: int = None,
-        cutoff: float = 3,
+        cutoff: float = None,
 ) -> Calibrator:
 
     standard = map_to_standard(

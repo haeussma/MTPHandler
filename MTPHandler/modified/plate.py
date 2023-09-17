@@ -7,7 +7,7 @@ import numpy as np
 
 
 from datetime import datetime as Datetime
-from typing import Dict, List, Optional, Literal, Union
+from typing import Callable, Dict, List, Optional, Literal, Union
 from pydantic import Field
 from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
@@ -23,7 +23,6 @@ from .initcondition import InitCondition
 from .well import Well
 from .abstractspecies import AbstractSpecies
 from .speciestype import SpeciesType
-from MTPHandler.tools.spectramax_reader import read_spectramax
 
 
 @forge_signature
@@ -484,7 +483,7 @@ class Plate(sdRDM.DataModel):
             self,
             species: AbstractSpecies,
             wavelength: int,
-            cutoff: float = 3,
+            cutoff: float = None,
     ) -> Calibrator:
 
         return initialize_calibrator(
@@ -497,9 +496,8 @@ class Plate(sdRDM.DataModel):
     def to_enzymeml(
             self,
             name: str,
-            reactant: Reactant,
-            standard: Standard,
-            protein: Protein,
+            detected_reactant: Reactant,
+            reactant_standard: Standard = None,
             wavelength: int = None,
             path: str = None,
     ) -> "EnzymeML":
@@ -507,21 +505,20 @@ class Plate(sdRDM.DataModel):
         return create_enzymeml(
             name=name,
             plate=self,
-            reactant=reactant,
-            standard=standard,
-            protein=protein,
+            detected_reactant=detected_reactant,
+            reactant_standard=reactant_standard,
             wavelength=wavelength,
             path=path,
         )
 
     def _already_blanked(self, wells: List[Well], species: AbstractSpecies) -> bool:
 
-        wells = [well for well in wells if well._contains_species(species)]
+        wells = [well for well in wells if well._contains_species(species.id)]
 
         wells = [well for well in wells if well._get_species_condition(
-            species).init_conc != 0]
+            species.id).init_conc != 0]
 
-        if all([well._get_species_condition(species).was_blanked for well in wells]):
+        if all([well._get_species_condition(species.id).was_blanked for well in wells]):
             return True
         else:
             return False
@@ -564,7 +561,7 @@ class Plate(sdRDM.DataModel):
             if species.id not in [condition.species_id for condition in well.init_conditions]:
                 continue
 
-            condition = well._get_species_condition(species)
+            condition = well._get_species_condition(species.id)
 
             if condition.was_blanked:
                 continue
@@ -575,6 +572,8 @@ class Plate(sdRDM.DataModel):
                 )
                 continue
 
+            prior = well.absorption[3]
+
             well.absorption = [
                 absorption - conc_mean_blank_mapping[condition.init_conc] for absorption in well.absorption]
 
@@ -583,7 +582,8 @@ class Plate(sdRDM.DataModel):
             condition.was_blanked = True
 
         print(
-            f"Blanked {len(blanked_wells)} wells containing {species.name}.")
+            f"Blanked {len(blanked_wells)} wells containing {species.name}."
+        )
 
     def get_species(self, _id: str) -> AbstractSpecies:
 
@@ -592,14 +592,6 @@ class Plate(sdRDM.DataModel):
                 return species
 
         raise ValueError(f"No species found with id {_id}")
-
-    def _get_catalyst(self) -> bool:
-
-        for species in self.species:
-            if species.ontology == SBOTerm.CATALYST.value:
-                return species
-
-        return None
 
     @staticmethod
     def _get_blanks(wells: List[Well], species: AbstractSpecies) -> List[Well]:
@@ -637,7 +629,7 @@ class Plate(sdRDM.DataModel):
 
         blank_conc_mapping = defaultdict(list)
         for well in wells:
-            condition = well._get_species_condition(species)
+            condition = well._get_species_condition(species.id)
 
             blank_conc_mapping[condition.init_conc].append(well)
 
@@ -654,13 +646,6 @@ class Plate(sdRDM.DataModel):
             )
 
     @classmethod
-    def from_file(
-        cls,
-        path: str,
-        time: List[float],
-        time_unit: str,
-        ph: float = None,
-        temperature: float = None,
-        temperature_unit: str = None,
-    ):
-        return read_spectramax(cls, path, time, time_unit, ph, temperature, temperature_unit)
+    def from_reader(cls, reader: Callable, path: str, **kwargs):
+
+        return reader(cls, **kwargs)

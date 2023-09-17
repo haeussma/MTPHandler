@@ -22,9 +22,8 @@ DataTypes = EnzymeML.enums.DataTypes
 def create_enzymeml(
         name: str,
         plate: "Plate",
-        reactant: Reactant,
-        standard: Standard,
-        protein: Protein,
+        detected_reactant: Reactant,
+        reactant_standard: Standard,
         wavelength: int = None,
         path: str = None,
 ) -> EnzymeML.EnzymeMLDocument:
@@ -57,19 +56,21 @@ def create_enzymeml(
                 f"Argument 'wavelength' must be provided. Measured wavelengths are: {plate.measured_wavelengths}"
             )
 
+    # Get defined reactants and proteins
+    reactants = [
+        species for species in plate.species if isinstance(species, Reactant)]
+
+    proteins = [species for species in plate.species if isinstance(
+        species, Protein)]
+
     # Create measurements
     measurements = create_measurements(
         plate=plate,
         wavelength=wavelength,
-        reactant=reactant,
-        protein=protein,
-        standard=standard,
+        detected_reactant=detected_reactant,
+        reactant_standard=reactant_standard,
+        proteins=proteins
     )
-
-    reactants = [species for species in plate.species if species.ontology ==
-                 SBOTerm.SMALL_MOLECULE.value]
-    proteins = [species for species in plate.species if species.ontology ==
-                SBOTerm.CATALYST.value],
 
     # Create EnzymeMLDocument
     enzymeMLDocument = EnzymeML.EnzymeMLDocument(
@@ -77,7 +78,7 @@ def create_enzymeml(
         created=plate.created,
         vessels=[plate._define_dummy_vessel()],
         reactants=reactants,
-        proteins=proteins[0],
+        proteins=proteins,
         measurements=measurements
     )
 
@@ -118,9 +119,9 @@ def write_doument(
 def create_measurements(
         plate: "Plate",
         wavelength: int,
-        reactant: Reactant,
-        protein: Protein,
-        standard: Standard,
+        detected_reactant: Reactant,
+        reactant_standard: Standard,
+        proteins: List[Protein]
 ) -> List[EnzymeML.Measurement]:
     """
     Creates a list of measurements based on the information of a `Plate`.
@@ -146,8 +147,8 @@ def create_measurements(
     reaction_wells = get_catalyzed_wells(
         plate=plate,
         wavelength=wavelength,
-        reactant=reactant,
-        protein=protein,
+        detected_reactant=detected_reactant,
+        proteins=proteins
     )
 
     # Check consistency of time arrays and time units
@@ -159,21 +160,22 @@ def create_measurements(
         raise ValueError("Time values of wells are not equal.")
     time = reaction_wells[0].time
 
-    if not all(well._get_species_condition(reactant).conc_unit == reaction_wells[0]._get_species_condition(reactant).conc_unit for well in reaction_wells):
+    if not all(well._get_species_condition(detected_reactant.id).conc_unit == reaction_wells[0]._get_species_condition(detected_reactant.id).conc_unit for well in reaction_wells):
         raise ValueError("Concentration units of wells are not equal.")
-    conc_unit = reaction_wells[0]._get_species_condition(reactant).conc_unit
+    conc_unit = reaction_wells[0]._get_species_condition(
+        detected_reactant.id).conc_unit
 
     # Get mapping of replicates
     replicates_mapping = get_replicates_mapping(
         wells=reaction_wells,
-        reactant=reactant,
+        detected_reactant=detected_reactant,
     )
 
     # Create measurements
     measurements = []
     for init_conc, well_ids in replicates_mapping.items():
         measurement = EnzymeML.Measurement(
-            name=f"{reactant.name} {init_conc} {conc_unit}",
+            name=f"{detected_reactant.name} {init_conc} {conc_unit}",
             global_time=time,
             global_time_unit=time_unit,
             ph=plate.ph,
@@ -185,8 +187,8 @@ def create_measurements(
         measurement.species = get_measurement_species(
             measurement=measurement,
             wells=replicate_wells,
-            reactant=reactant,
-            standard=standard,
+            detected_reactant=detected_reactant,
+            reactant_standard=reactant_standard,
         )
 
         measurements.append(measurement)
@@ -199,8 +201,8 @@ def create_measurements(
 def get_measurement_species(
         measurement: EnzymeML.Measurement,
         wells: List[Well],
-        reactant: Reactant,
-        standard: Standard
+        detected_reactant: Reactant,
+        reactant_standard: Standard
 ) -> List[EnzymeML.MeasurementData]:
     """
     Creates a list of `MeasurementData` objects for a `Measurement` object.
@@ -225,11 +227,11 @@ def get_measurement_species(
             species_id=condition.species_id,
         )
 
-        if condition.species_id == reactant.id:
+        if condition.species_id == detected_reactant.id:
             measurement_data.replicates = get_replicates(
                 measurement_data=measurement_data,
                 wells=wells,
-                standard=standard
+                standard=reactant_standard
             )
 
         measurement_datas.append(measurement_data)
@@ -294,7 +296,7 @@ def get_replicates(
 
 def get_replicates_mapping(
         wells: List[Well],
-        reactant: Reactant
+        detected_reactant: Reactant
 ) -> Dict[float, List[str]]:
     """
     Creates a mapping of initial concentrations to well ids.
@@ -311,7 +313,7 @@ def get_replicates_mapping(
 
     replicates_mapping = defaultdict(list)
     for well in wells:
-        condition = well._get_species_condition(reactant)
+        condition = well._get_species_condition(detected_reactant.id)
         replicates_mapping[condition.init_conc].append(well.id)
 
     return replicates_mapping
@@ -320,8 +322,8 @@ def get_replicates_mapping(
 def get_catalyzed_wells(
         plate: "Plate",
         wavelength: int,
-        reactant: Reactant,
-        protein: Protein,
+        detected_reactant: Reactant,
+        proteins: List[Protein]
 ) -> List[Well]:
     """
     Returns a list of wells, that contain the specified species, 
@@ -337,19 +339,22 @@ def get_catalyzed_wells(
         List[Well]: List of `Well` objects
     """
 
-    # Subset of wells, that contain specified species, contain a catalyst and are blanked
-    reaction_wells = []
+    # Subset of wells, that contain one or more proteins, and one or more reactants that are `constant=False`
+
+    catalyzed_wells = []
     for well in plate.get_wells(wavelength=wavelength):
 
-        if not well._contains_species(reactant):
+        if not any([well._contains_species(protein.id) for protein in proteins]):
             continue
 
-        if not well._contains_species(protein):
+        if not well._contains_species(detected_reactant.id):
             continue
 
-        if not well._is_blanked(reactant.id):
+        if not well._is_blanked_for(detected_reactant.id):
             continue
 
-        reaction_wells.append(well)
+        catalyzed_wells.append(well)
 
-    return reaction_wells
+    print(f"Found {len(catalyzed_wells)} catalyzed wells")
+
+    return catalyzed_wells
