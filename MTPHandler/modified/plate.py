@@ -648,4 +648,4 @@ class Plate(sdRDM.DataModel):
     @classmethod
     def from_reader(cls, reader: Callable, path: str, **kwargs):
 
-        return reader(cls, **kwargs)
+        return reader(cls, path, **kwargs)
