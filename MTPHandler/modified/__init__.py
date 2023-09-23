@@ -1,4 +1,6 @@
 from .plate import Plate
+from .protein import Protein
+from .reactant import Reactant
 from .well import Well
 from .initcondition import InitCondition
 
