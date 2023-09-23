@@ -26,8 +26,7 @@ class AbstractSpecies(sdRDM.DataModel):
     )
 
     vessel_id: Union[Vessel, str] = Field(
-        ...,
-        reference="Vessel.id",
+        default="plate0",
         description="None",
     )
 
