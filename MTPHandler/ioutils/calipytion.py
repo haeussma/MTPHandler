@@ -11,11 +11,8 @@ from MTPHandler.modified.protein import Protein
 
 
 def _get_standard_wells(
-        plate: "Plate",
-        species: AbstractSpecies,
-        wavelength: int
+    plate: "Plate", species: AbstractSpecies, wavelength: int
 ) -> List[Well]:
-
     # handel wavelength
     if not wavelength:
         if len(plate.measured_wavelengths) == 1:
@@ -29,7 +26,8 @@ def _get_standard_wells(
 
     # Subset of wells, that contain specified species, do not contain a protein, and are blanked
     protein_ids = [
-        species.id for species in plate.species if isinstance(species, Protein)]
+        species.id for species in plate.species if isinstance(species, Protein)
+    ]
 
     standard_wells = []
     for well in wells:
@@ -46,11 +44,10 @@ def _get_standard_wells(
 
 
 def map_to_standard(
-        plate: "Plate",
-        species: AbstractSpecies,
-        wavelength: int = None,
+    plate: "Plate",
+    species: AbstractSpecies,
+    wavelength: int = None,
 ) -> Standard:
-
     standard_wells = _get_standard_wells(
         plate=plate,
         species=species,
@@ -66,7 +63,7 @@ def map_to_standard(
                 id=well.id,
                 concentration=condition.init_conc,
                 conc_unit=condition.conc_unit,
-                signal=np.mean(well.absorption)
+                signal=np.mean(well.absorption),
             )
         )
 
@@ -84,12 +81,11 @@ def map_to_standard(
 
 
 def initialize_calibrator(
-        plate: "Plate",
-        species: AbstractSpecies,
-        wavelength: int = None,
-        cutoff: float = None,
+    plate: "Plate",
+    species: AbstractSpecies,
+    wavelength: int = None,
+    cutoff: float = None,
 ) -> Calibrator:
-
     standard = map_to_standard(
         plate=plate,
         species=species,

@@ -143,8 +143,10 @@ class Plate(sdRDM.DataModel):
         """
 
         if any([species.id == new_species.id for species in self.species]):
-            self.species = [new_species if species.id ==
-                            new_species.id else species for species in self.species]
+            self.species = [
+                new_species if species.id == new_species.id else species
+                for species in self.species
+            ]
 
             return new_species
 
@@ -153,15 +155,7 @@ class Plate(sdRDM.DataModel):
 
             return new_species
 
-    def add_protein(
-            self,
-            id: str,
-            name: str,
-            constant: bool,
-            sequence: str,
-            **kwargs
-    ):
-
+    def add_protein(self, id: str, name: str, constant: bool, sequence: str, **kwargs):
         # define abstract Vessel object
         vessel = self._define_dummy_vessel()
 
@@ -171,19 +165,12 @@ class Plate(sdRDM.DataModel):
             "constant": constant,
             "sequence": sequence,
             "vessel_id": vessel.id,
-            **kwargs
+            **kwargs,
         }
 
         return self._add_to_species(Protein(**params))
 
-    def add_reactant(
-            self,
-            id: str,
-            name: str,
-            constant: bool,
-            **kwargs
-    ):
-
+    def add_reactant(self, id: str, name: str, constant: bool, **kwargs):
         # define abstract Vessel object
         vessel = self._define_dummy_vessel()
 
@@ -192,13 +179,12 @@ class Plate(sdRDM.DataModel):
             "name": name,
             "constant": constant,
             "vessel_id": vessel.id,
-            **kwargs
+            **kwargs,
         }
 
         return self._add_to_species(Reactant(**params))
 
     def _define_dummy_vessel(self):
-
         return Vessel(
             id="plate0",
             name="MTP 96 well",
@@ -207,19 +193,16 @@ class Plate(sdRDM.DataModel):
         )
 
     def assign_species(
-            self,
-            species: AbstractSpecies,
-            init_conc: Union[float, List[float]],
-            conc_unit: str,
-            to: Literal["all", "rows", "columns", "except"],
-            ids: Union[str, List[str], int, List[int]] = None,
+        self,
+        species: AbstractSpecies,
+        init_conc: Union[float, List[float]],
+        conc_unit: str,
+        to: Literal["all", "rows", "columns", "except"],
+        ids: Union[str, List[str], int, List[int]] = None,
     ):
-
         cases = ["rows", "columns", "all", "except"]
         if not to in cases:
-            raise AttributeError(
-                f"Argument 'to' must be one of {cases}."
-            )
+            raise AttributeError(f"Argument 'to' must be one of {cases}.")
 
         if not isinstance(init_conc, list):
             init_conc = [init_conc]
@@ -235,32 +218,26 @@ class Plate(sdRDM.DataModel):
                 column_ids=ids,
                 species=species,
                 init_concs=init_conc,
-                conc_unit=conc_unit
+                conc_unit=conc_unit,
             )
 
         elif to == "rows":
             self.assign_species_to_rows(
-                row_ids=ids,
-                species=species,
-                init_concs=init_conc,
-                conc_unit=conc_unit
+                row_ids=ids, species=species, init_concs=init_conc, conc_unit=conc_unit
             )
 
         else:
             self.assign_species_to_all_except(
-                well_ids=ids,
-                species=species,
-                init_conc=init_conc,
-                conc_unit=conc_unit
+                well_ids=ids, species=species, init_conc=init_conc, conc_unit=conc_unit
             )
 
         return
 
     def assign_species_to_all(
-            self,
-            species: AbstractSpecies,
-            init_conc: float,
-            conc_unit: str,
+        self,
+        species: AbstractSpecies,
+        init_conc: float,
+        conc_unit: str,
     ):
         if not len(init_conc) == 1:
             raise AttributeError(
@@ -281,12 +258,9 @@ class Plate(sdRDM.DataModel):
         init_concs: List[float],
         conc_unit: str,
     ):
-
         # Handle column_ids
         if not all([isinstance(column_id, int) for column_id in column_ids]):
-            raise AttributeError(
-                "Argument 'column_ids' must be a list of integers."
-            )
+            raise AttributeError("Argument 'column_ids' must be a list of integers.")
 
         if not all([column_id <= self.n_columns for column_id in column_ids]):
             raise AttributeError(
@@ -304,12 +278,15 @@ class Plate(sdRDM.DataModel):
 
         for column_id in column_ids:
             for row_id, init_conc in zip(range(self.n_rows), init_concs):
-
-                [well.add_to_init_conditions(
-                    species=species,
-                    init_conc=init_conc,
-                    conc_unit=conc_unit,
-                ) for well in self.wells if well.y_position == row_id and well.x_position == column_id-1]
+                [
+                    well.add_to_init_conditions(
+                        species=species,
+                        init_conc=init_conc,
+                        conc_unit=conc_unit,
+                    )
+                    for well in self.wells
+                    if well.y_position == row_id and well.x_position == column_id - 1
+                ]
 
     def assign_species_to_rows(
         self,
@@ -320,12 +297,10 @@ class Plate(sdRDM.DataModel):
     ):
         # Handle row_ids
         if not row_ids:
-            row_ids = [chr(i) for i in range(65, 65+self.n_rows)]
+            row_ids = [chr(i) for i in range(65, 65 + self.n_rows)]
 
         if not all([isinstance(row_id, str) for row_id in row_ids]):
-            raise AttributeError(
-                "Argument 'row_ids' must be a list of strings."
-            )
+            raise AttributeError("Argument 'row_ids' must be a list of strings.")
 
         else:
             row_ids = [_id.upper() for _id in row_ids]
@@ -342,19 +317,23 @@ class Plate(sdRDM.DataModel):
         # Add concentration array to wells in rows
         for row_id in row_ids:
             for column_id, init_conc in zip(range(self.n_columns), init_concs):
-
-                [well.add_to_init_conditions(
-                    species=species,
-                    init_conc=init_conc,
-                    conc_unit=conc_unit,
-                ) for well in self.wells if well.x_position == column_id and well.y_position == ord(row_id)-65]
+                [
+                    well.add_to_init_conditions(
+                        species=species,
+                        init_conc=init_conc,
+                        conc_unit=conc_unit,
+                    )
+                    for well in self.wells
+                    if well.x_position == column_id
+                    and well.y_position == ord(row_id) - 65
+                ]
 
     def get_wells(
-            self,
-            ids: List[str] = None,
-            rows: List[str] = None,
-            columns: List[int] = None,
-            wavelength: int = None,
+        self,
+        ids: List[str] = None,
+        rows: List[str] = None,
+        columns: List[int] = None,
+        wavelength: int = None,
     ) -> List[Well]:
         """
         Returns wells of a given wavelength, rows, columns, or individual ids
@@ -395,8 +374,9 @@ class Plate(sdRDM.DataModel):
             if not isinstance(rows, list):
                 rows = [rows]
 
-            well_rows = [self._get_wells_by_row_id(
-                row_id, wavelength) for row_id in rows]
+            well_rows = [
+                self._get_wells_by_row_id(row_id, wavelength) for row_id in rows
+            ]
 
             return [well for row in well_rows for well in row]
 
@@ -405,8 +385,10 @@ class Plate(sdRDM.DataModel):
             if not isinstance(columns, list):
                 columns = [columns]
 
-            well_columns = [self._get_wells_by_column_id(
-                column_id, wavelength) for column_id in columns]
+            well_columns = [
+                self._get_wells_by_column_id(column_id, wavelength)
+                for column_id in columns
+            ]
 
             return [well for column in well_columns for well in column]
 
@@ -415,7 +397,6 @@ class Plate(sdRDM.DataModel):
             return [well for well in self.wells if well.wavelength == wavelength]
 
     def _get_well_by_id(self, id: str, wavelength: int) -> Well:
-
         for well in self.wells:
             if well.id == id and well.wavelength == wavelength:
                 return well
@@ -423,38 +404,51 @@ class Plate(sdRDM.DataModel):
         raise ValueError(f"No well found with id {id}")
 
     def _get_wells_by_column_id(self, column_id: int, wavelength: int) -> Well:
+        x_position = column_id - 1
+        y_positions = [
+            well.y_position
+            for well in self.wells
+            if well.x_position == x_position and well.wavelength == wavelength
+        ]
 
-        x_position = column_id-1
-        y_positions = [well.y_position for well in self.wells if well.x_position ==
-                       x_position and well.wavelength == wavelength]
-
-        return [self._get_well_by_xy(x_position, y_pos, wavelength) for y_pos in y_positions]
+        return [
+            self._get_well_by_xy(x_position, y_pos, wavelength) for y_pos in y_positions
+        ]
 
     def _get_wells_by_row_id(self, row_id: str, wavelength: int) -> List[Well]:
+        y_position = ord(row_id) - 65
+        x_positions = [
+            well.x_position
+            for well in self.wells
+            if well.y_position == y_position and well.wavelength == wavelength
+        ]
 
-        y_position = ord(row_id)-65
-        x_positions = [well.x_position for well in self.wells if well.y_position ==
-                       y_position and well.wavelength == wavelength]
+        return [
+            self._get_well_by_xy(x_pos, y_position, wavelength) for x_pos in x_positions
+        ]
 
-        return [self._get_well_by_xy(x_pos, y_position, wavelength) for x_pos in x_positions]
-
-    def _get_well_by_xy(self, x_position: int, y_position: int, wavelength: int) -> Well:
-
+    def _get_well_by_xy(
+        self, x_position: int, y_position: int, wavelength: int
+    ) -> Well:
         for well in self.wells:
-            if well.x_position == x_position and well.y_position == y_position and well.wavelength == wavelength:
+            if (
+                well.x_position == x_position
+                and well.y_position == y_position
+                and well.wavelength == wavelength
+            ):
                 return well
 
         raise ValueError(
-            f"No well found with x position {x_position} and y position {y_position}")
+            f"No well found with x position {x_position} and y position {y_position}"
+        )
 
     def assign_species_to_all_except(
-            self,
-            well_ids: List[str],
-            species: AbstractSpecies,
-            init_conc: float,
-            conc_unit: str
+        self,
+        well_ids: List[str],
+        species: AbstractSpecies,
+        init_conc: float,
+        conc_unit: str,
     ):
-
         if not len(init_conc) == 1:
             raise AttributeError(
                 "Argument 'init_conc' must be a float, when assigning to all wells."
@@ -472,7 +466,6 @@ class Plate(sdRDM.DataModel):
             )
 
     def get_well(self, _id: str) -> Well:
-
         for well in self.wells:
             if well.id == _id:
                 return well
@@ -480,12 +473,11 @@ class Plate(sdRDM.DataModel):
         raise ValueError(f"No well found with id {_id}")
 
     def calibrate(
-            self,
-            species: AbstractSpecies,
-            wavelength: int,
-            cutoff: float = None,
+        self,
+        species: AbstractSpecies,
+        wavelength: int,
+        cutoff: float = None,
     ) -> Calibrator:
-
         return initialize_calibrator(
             plate=self,
             species=species,
@@ -494,14 +486,13 @@ class Plate(sdRDM.DataModel):
         )
 
     def to_enzymeml(
-            self,
-            name: str,
-            detected_reactant: Reactant,
-            reactant_standard: Standard = None,
-            wavelength: int = None,
-            path: str = None,
+        self,
+        name: str,
+        detected_reactant: Reactant,
+        reactant_standard: Standard = None,
+        wavelength: int = None,
+        path: str = None,
     ) -> "EnzymeML":
-
         return create_enzymeml(
             name=name,
             plate=self,
@@ -512,11 +503,13 @@ class Plate(sdRDM.DataModel):
         )
 
     def _already_blanked(self, wells: List[Well], species: AbstractSpecies) -> bool:
-
         wells = [well for well in wells if well._contains_species(species.id)]
 
-        wells = [well for well in wells if well._get_species_condition(
-            species.id).init_conc != 0]
+        wells = [
+            well
+            for well in wells
+            if well._get_species_condition(species.id).init_conc != 0
+        ]
 
         if all([well._get_species_condition(species.id).was_blanked for well in wells]):
             return True
@@ -524,11 +517,10 @@ class Plate(sdRDM.DataModel):
             return False
 
     def blank_species(
-            self,
-            species: AbstractSpecies,
-            wavelength: int,
+        self,
+        species: AbstractSpecies,
+        wavelength: int,
     ):
-
         # get wells with specified wavelength:
         if not wavelength in self.measured_wavelengths:
             raise AttributeError(
@@ -545,20 +537,20 @@ class Plate(sdRDM.DataModel):
 
         # get mapping of concentration to blank wells
         blank_well_mapping = self._get_blank_conc_mapping(
-            wells=blank_wells, species=species)
+            wells=blank_wells, species=species
+        )
 
         conc_mean_blank_mapping = {}
         for conc, blanking_wells in blank_well_mapping.items():
-
-            mean_absorption = np.mean(
-                [well.absorption for well in blanking_wells])
+            mean_absorption = np.nanmean([well.absorption for well in blanking_wells])
             conc_mean_blank_mapping[conc] = mean_absorption
 
         # apply to wells where species is present in respective concentration
         blanked_wells = []
         for well in wells:
-
-            if species.id not in [condition.species_id for condition in well.init_conditions]:
+            if species.id not in [
+                condition.species_id for condition in well.init_conditions
+            ]:
                 continue
 
             condition = well._get_species_condition(species.id)
@@ -575,18 +567,17 @@ class Plate(sdRDM.DataModel):
             prior = well.absorption[3]
 
             well.absorption = [
-                absorption - conc_mean_blank_mapping[condition.init_conc] for absorption in well.absorption]
+                absorption - conc_mean_blank_mapping[condition.init_conc]
+                for absorption in well.absorption
+            ]
 
             blanked_wells.append(well.id)
 
             condition.was_blanked = True
 
-        print(
-            f"Blanked {len(blanked_wells)} wells containing {species.name}."
-        )
+        print(f"Blanked {len(blanked_wells)} wells containing {species.name}.")
 
     def get_species(self, _id: str) -> AbstractSpecies:
-
         for species in self.species:
             if species.id == _id:
                 return species
@@ -595,17 +586,19 @@ class Plate(sdRDM.DataModel):
 
     @staticmethod
     def _get_blanks(wells: List[Well], species: AbstractSpecies) -> List[Well]:
-
         blank_wells = []
         for well in wells:
-
             # ignore virtual species with concentration of 0
             conditions = [
-                condition for condition in well.init_conditions if condition.init_conc != 0]
+                condition
+                for condition in well.init_conditions
+                if condition.init_conc != 0
+            ]
 
             # ignore species that were already blanked
             conditions = [
-                condition for condition in conditions if condition.was_blanked == False]
+                condition for condition in conditions if condition.was_blanked == False
+            ]
 
             # if not exactly one species was not blanked, continue
             if not len(conditions) == 1:
@@ -625,8 +618,9 @@ class Plate(sdRDM.DataModel):
 
         return blank_wells
 
-    def _get_blank_conc_mapping(self, wells: List[Well], species: AbstractSpecies) -> Dict[float, List[Well]]:
-
+    def _get_blank_conc_mapping(
+        self, wells: List[Well], species: AbstractSpecies
+    ) -> Dict[float, List[Well]]:
         blank_conc_mapping = defaultdict(list)
         for well in wells:
             condition = well._get_species_condition(species.id)
@@ -637,7 +631,6 @@ class Plate(sdRDM.DataModel):
 
     @staticmethod
     def _validate_well_id(well_ids) -> bool:
-
         WELL_ID = re.compile(r"[A-Z][1-9]\d?")
 
         if not all(WELL_ID.match(well_id) for well_id in well_ids):
@@ -647,5 +640,4 @@ class Plate(sdRDM.DataModel):
 
     @classmethod
     def from_reader(cls, reader: Callable, path: str, **kwargs):
-
         return reader(cls, path, **kwargs)
