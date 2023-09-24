@@ -4,6 +4,9 @@ import re
 from types import NoneType
 import sdRDM
 import numpy as np
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import plotly.express as px
 
 
 from datetime import datetime as Datetime
@@ -250,6 +253,7 @@ class Plate(sdRDM.DataModel):
                 init_conc=init_conc[0],
                 conc_unit=conc_unit,
             )
+        print(f"Assigned {species.name} to all wells.")
 
     def assign_species_to_columns(
         self,
@@ -287,6 +291,10 @@ class Plate(sdRDM.DataModel):
                     for well in self.wells
                     if well.y_position == row_id and well.x_position == column_id - 1
                 ]
+
+        print(
+            f"Assigned {species.name} with concentrations of {init_concs} {conc_unit} to columns {column_ids}."
+        )
 
     def assign_species_to_rows(
         self,
@@ -327,6 +335,10 @@ class Plate(sdRDM.DataModel):
                     if well.x_position == column_id
                     and well.y_position == ord(row_id) - 65
                 ]
+
+        print(
+            f"Assigned {species.name} with concentrations of {init_concs} {conc_unit} to rows {row_ids}."
+        )
 
     def get_wells(
         self,
@@ -576,6 +588,53 @@ class Plate(sdRDM.DataModel):
             condition.was_blanked = True
 
         print(f"Blanked {len(blanked_wells)} wells containing {species.name}.")
+
+    def visualize(self, zoom: bool = False):
+        wells = self.get_wells(wavelength=self.measured_wavelengths[0])
+
+        if zoom:
+            shared_yaxes = False
+        else:
+            shared_yaxes = True
+
+        fig = make_subplots(
+            rows=self.n_rows,
+            cols=self.n_columns,
+            subplot_titles=([well.id for well in wells]),
+            shared_xaxes=True,
+            shared_yaxes=shared_yaxes,
+        )
+        colors = px.colors.qualitative.Plotly
+
+        for wavelength, color in zip(self.measured_wavelengths, colors):
+            wells = self.get_wells(wavelength=wavelength)
+
+            for well in wells:
+                fig.add_trace(
+                    go.Scatter(
+                        x=well.time,
+                        y=well.absorption,
+                        name=f"{well.wavelength} nm",
+                        showlegend=False,
+                        line=dict(color=color),
+                    ),
+                    row=well.y_position + 1,
+                    col=well.x_position + 1,
+                )
+        fig.update_xaxes(showticklabels=False)
+        fig.update_yaxes(showticklabels=False)
+        fig.update_traces(hovertemplate="%{y:.2f}")
+
+        fig.update_layout(
+            plot_bgcolor="white",
+            hovermode="x",
+            title=dict(
+                text=f"pH {self.ph}, {self.temperature} °{self.temperature_unit}",
+            ),
+            margin=dict(l=20, r=20, t=100, b=20),
+        )
+
+        fig.show()
 
     def get_species(self, _id: str) -> AbstractSpecies:
         for species in self.species:
