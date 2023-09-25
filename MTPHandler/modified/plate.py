@@ -477,12 +477,12 @@ class Plate(sdRDM.DataModel):
                 conc_unit=conc_unit,
             )
 
-    def get_well(self, _id: str) -> Well:
+    def get_well(self, _id: str, wavelength: float) -> Well:
         for well in self.wells:
-            if well.id == _id:
+            if well.id == _id and well.wavelength == wavelength:
                 return well
 
-        raise ValueError(f"No well found with id {_id}")
+        raise ValueError(f"No well found with id {_id} and wavelength {wavelength}")
 
     def calibrate(
         self,
@@ -501,6 +501,7 @@ class Plate(sdRDM.DataModel):
         self,
         name: str,
         detected_reactant: Reactant,
+        mapping_reactant: Reactant = None,
         reactant_standard: Standard = None,
         wavelength: int = None,
         path: str = None,
@@ -509,6 +510,7 @@ class Plate(sdRDM.DataModel):
             name=name,
             plate=self,
             detected_reactant=detected_reactant,
+            mapping_reactant=mapping_reactant,
             reactant_standard=reactant_standard,
             wavelength=wavelength,
             path=path,

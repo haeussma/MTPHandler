@@ -24,6 +24,7 @@ def create_enzymeml(
     plate: "Plate",
     detected_reactant: Reactant,
     reactant_standard: Standard,
+    mapping_reactant: Reactant,
     wavelength: int = None,
     path: str = None,
 ) -> EnzymeML.EnzymeMLDocument:
@@ -66,6 +67,7 @@ def create_enzymeml(
         plate=plate,
         wavelength=wavelength,
         detected_reactant=detected_reactant,
+        mapping_reactant=mapping_reactant,
         reactant_standard=reactant_standard,
         proteins=proteins,
     )
@@ -115,6 +117,7 @@ def create_measurements(
     plate: "Plate",
     wavelength: int,
     detected_reactant: Reactant,
+    mapping_reactant: Reactant,
     reactant_standard: Standard,
     proteins: List[Protein],
 ) -> List[EnzymeML.Measurement]:
@@ -166,9 +169,11 @@ def create_measurements(
     conc_unit = reaction_wells[0]._get_species_condition(detected_reactant.id).conc_unit
 
     # Get mapping of replicates
+    if not mapping_reactant:
+        mapping_reactant = detected_reactant
     replicates_mapping = get_replicates_mapping(
         wells=reaction_wells,
-        detected_reactant=detected_reactant,
+        mapping_reactant=mapping_reactant,
     )
 
     # Create measurements
@@ -183,7 +188,7 @@ def create_measurements(
             temperature_unit=plate.temperature_unit,
         )
 
-        replicate_wells = [plate.get_well(well_id) for well_id in well_ids]
+        replicate_wells = [plate.get_well(well_id, wavelength) for well_id in well_ids]
         measurement.species = get_measurement_species(
             measurement=measurement,
             wells=replicate_wells,
@@ -291,7 +296,7 @@ def get_replicates(
 
 
 def get_replicates_mapping(
-    wells: List[Well], detected_reactant: Reactant
+    wells: List[Well], mapping_reactant: Reactant
 ) -> Dict[float, List[str]]:
     """
     Creates a mapping of initial concentrations to well ids.
@@ -308,7 +313,7 @@ def get_replicates_mapping(
 
     replicates_mapping = defaultdict(list)
     for well in wells:
-        condition = well._get_species_condition(detected_reactant.id)
+        condition = well._get_species_condition(mapping_reactant.id)
         replicates_mapping[condition.init_conc].append(well.id)
 
     return replicates_mapping
@@ -339,9 +344,6 @@ def get_catalyzed_wells(
     catalyzed_wells = []
     for well in plate.get_wells(wavelength=wavelength):
         if not any([well._contains_species(protein.id) for protein in proteins]):
-            continue
-
-        if not well._contains_species(detected_reactant.id):
             continue
 
         if not well._is_blanked_for(detected_reactant.id):
