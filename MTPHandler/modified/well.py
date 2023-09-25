@@ -99,31 +99,38 @@ class Well(sdRDM.DataModel):
 
         new_condition = InitCondition(**params)
 
-        if any([condition.species_id == new_condition.species_id for condition in self.init_conditions]):
-            self.init_conditions = [new_condition if condition.species_id ==
-                                    new_condition.species_id else condition for condition in self.init_conditions]
+        if any(
+            [
+                condition.species_id == new_condition.species_id
+                for condition in self.init_conditions
+            ]
+        ):
+            self.init_conditions = [
+                new_condition
+                if condition.species_id == new_condition.species_id
+                else condition
+                for condition in self.init_conditions
+            ]
 
         else:
             self.init_conditions.append(new_condition)
 
     def _contains_species(self, species_id: str) -> bool:
-
         for condition in self.init_conditions:
-            if condition.species_id == species_id and condition.init_conc != 0:
+            if condition.species_id == species_id:
                 return True
 
         return False
 
     def _is_blanked_for(self, species_id: str) -> bool:
-
         # Check is species is present in well
         if not self._contains_species(species_id):
-            raise ValueError(
-                f"Well {self.id} does not contain species {species_id}")
+            raise ValueError(f"Well {self.id} does not contain species {species_id}")
 
         # ignore species with zero concentration
         init_conditions = [
-            condition for condition in self.init_conditions if condition.init_conc != 0]
+            condition for condition in self.init_conditions if condition.init_conc != 0
+        ]
 
         # if species has zero concentration, check if all other species were blanked
         if self._get_species_condition(species_id).init_conc == 0:
@@ -136,14 +143,16 @@ class Well(sdRDM.DataModel):
         # and all other species were blanked
         if not self._get_species_condition(species_id).was_blanked:
             others = [
-                condition for condition in init_conditions if condition.species_id != species_id]
+                condition
+                for condition in init_conditions
+                if condition.species_id != species_id
+            ]
             if all([condition.was_blanked for condition in others]):
                 return True
 
         return False
 
     def _get_species_condition(self, species_id: str) -> InitCondition:
-
         for condition in self.init_conditions:
             if condition.species_id == species_id:
                 return condition
@@ -151,17 +160,19 @@ class Well(sdRDM.DataModel):
         raise ValueError(f"Species {species_id} not found in well {self.id}")
 
     def to_concentration(self, standard: Standard, **kwargs) -> list[float]:
-
         if not standard.model_result.was_fitted:
             raise ValueError(
-                f"Standard {standard.id} was not fitted for species {standard.species_id}")
+                f"Standard {standard.id} was not fitted for species {standard.species_id}"
+            )
 
         if not self._is_blanked_for(standard.species_id):
             raise ValueError(
-                f"Well {self.id} was not blanked for species {standard.species_id}")
+                f"Well {self.id} was not blanked for species {standard.species_id}"
+            )
 
         if not self.wavelength == standard.wavelength:
             raise ValueError(
-                f"Standard at {standard.wavelength} nm not applicable for well {self.id} measured at {self.wavelength}")
+                f"Standard at {standard.wavelength} nm not applicable for well {self.id} measured at {self.wavelength}"
+            )
 
         return standard.model_result.calculate(self.absorption, **kwargs)

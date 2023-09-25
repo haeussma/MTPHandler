@@ -20,12 +20,13 @@ DataTypes = EnzymeML.enums.DataTypes
 
 
 def create_enzymeml(
-        name: str,
-        plate: "Plate",
-        detected_reactant: Reactant,
-        reactant_standard: Standard,
-        wavelength: int = None,
-        path: str = None,
+    name: str,
+    plate: "Plate",
+    detected_reactant: Reactant,
+    reactant_standard: Standard,
+    mapping_reactant: Reactant,
+    wavelength: int = None,
+    path: str = None,
 ) -> EnzymeML.EnzymeMLDocument:
     """
     Creates an EnzymeML document based on the information of a `Plate`.
@@ -36,7 +37,7 @@ def create_enzymeml(
         plate (Plate): Plate with defined and blanked species
         reactant (Reactant): Reactant which was observed during experiment
         protein (Protein): Protein catalyst
-        wavelength (int, optional): Detection wavelength of the experiment. 
+        wavelength (int, optional): Detection wavelength of the experiment.
         Defaults to None.
 
     Raises:
@@ -57,19 +58,18 @@ def create_enzymeml(
             )
 
     # Get defined reactants and proteins
-    reactants = [
-        species for species in plate.species if isinstance(species, Reactant)]
+    reactants = [species for species in plate.species if isinstance(species, Reactant)]
 
-    proteins = [species for species in plate.species if isinstance(
-        species, Protein)]
+    proteins = [species for species in plate.species if isinstance(species, Protein)]
 
     # Create measurements
     measurements = create_measurements(
         plate=plate,
         wavelength=wavelength,
         detected_reactant=detected_reactant,
+        mapping_reactant=mapping_reactant,
         reactant_standard=reactant_standard,
-        proteins=proteins
+        proteins=proteins,
     )
 
     # Create EnzymeMLDocument
@@ -79,7 +79,7 @@ def create_enzymeml(
         vessels=[plate._define_dummy_vessel()],
         reactants=reactants,
         proteins=proteins,
-        measurements=measurements
+        measurements=measurements,
     )
 
     if path:
@@ -88,10 +88,7 @@ def create_enzymeml(
     return enzymeMLDocument
 
 
-def write_doument(
-        enzymeMLDocument: EnzymeML.EnzymeMLDocument,
-        path: str
-):
+def write_doument(enzymeMLDocument: EnzymeML.EnzymeMLDocument, path: str):
     """Writes file to specified path.
     Supported formats are `json` and `yaml`.
 
@@ -117,11 +114,12 @@ def write_doument(
 
 
 def create_measurements(
-        plate: "Plate",
-        wavelength: int,
-        detected_reactant: Reactant,
-        reactant_standard: Standard,
-        proteins: List[Protein]
+    plate: "Plate",
+    wavelength: int,
+    detected_reactant: Reactant,
+    mapping_reactant: Reactant,
+    reactant_standard: Standard,
+    proteins: List[Protein],
 ) -> List[EnzymeML.Measurement]:
     """
     Creates a list of measurements based on the information of a `Plate`.
@@ -148,11 +146,13 @@ def create_measurements(
         plate=plate,
         wavelength=wavelength,
         detected_reactant=detected_reactant,
-        proteins=proteins
+        proteins=proteins,
     )
 
     # Check consistency of time arrays and time units
-    if not all([well.time_unit == reaction_wells[0].time_unit for well in reaction_wells]):
+    if not all(
+        [well.time_unit == reaction_wells[0].time_unit for well in reaction_wells]
+    ):
         raise ValueError("Time units of wells are not equal.")
     time_unit = reaction_wells[0].time_unit
 
@@ -160,15 +160,20 @@ def create_measurements(
         raise ValueError("Time values of wells are not equal.")
     time = reaction_wells[0].time
 
-    if not all(well._get_species_condition(detected_reactant.id).conc_unit == reaction_wells[0]._get_species_condition(detected_reactant.id).conc_unit for well in reaction_wells):
+    if not all(
+        well._get_species_condition(detected_reactant.id).conc_unit
+        == reaction_wells[0]._get_species_condition(detected_reactant.id).conc_unit
+        for well in reaction_wells
+    ):
         raise ValueError("Concentration units of wells are not equal.")
-    conc_unit = reaction_wells[0]._get_species_condition(
-        detected_reactant.id).conc_unit
+    conc_unit = reaction_wells[0]._get_species_condition(detected_reactant.id).conc_unit
 
     # Get mapping of replicates
+    if not mapping_reactant:
+        mapping_reactant = detected_reactant
     replicates_mapping = get_replicates_mapping(
         wells=reaction_wells,
-        detected_reactant=detected_reactant,
+        mapping_reactant=mapping_reactant,
     )
 
     # Create measurements
@@ -183,7 +188,7 @@ def create_measurements(
             temperature_unit=plate.temperature_unit,
         )
 
-        replicate_wells = [plate.get_well(well_id) for well_id in well_ids]
+        replicate_wells = [plate.get_well(well_id, wavelength) for well_id in well_ids]
         measurement.species = get_measurement_species(
             measurement=measurement,
             wells=replicate_wells,
@@ -199,10 +204,10 @@ def create_measurements(
 
 
 def get_measurement_species(
-        measurement: EnzymeML.Measurement,
-        wells: List[Well],
-        detected_reactant: Reactant,
-        reactant_standard: Standard
+    measurement: EnzymeML.Measurement,
+    wells: List[Well],
+    detected_reactant: Reactant,
+    reactant_standard: Standard,
 ) -> List[EnzymeML.MeasurementData]:
     """
     Creates a list of `MeasurementData` objects for a `Measurement` object.
@@ -231,7 +236,7 @@ def get_measurement_species(
             measurement_data.replicates = get_replicates(
                 measurement_data=measurement_data,
                 wells=wells,
-                standard=reactant_standard
+                standard=reactant_standard,
             )
 
         measurement_datas.append(measurement_data)
@@ -240,9 +245,7 @@ def get_measurement_species(
 
 
 def get_replicates(
-        measurement_data: EnzymeML.MeasurementData,
-        wells: List[Well],
-        standard: Standard
+    measurement_data: EnzymeML.MeasurementData, wells: List[Well], standard: Standard
 ) -> List[EnzymeML.Replicate]:
     """
     Creates a list of `Replicate` objects for a `MeasurementData` object.
@@ -257,11 +260,9 @@ def get_replicates(
 
     replicates = []
     if standard:
-
         units = [sample.conc_unit for sample in standard.samples]
         if not all([u == units[0] for u in units]):
-            raise ValueError(
-                "Concentration units of standard samples are not equal.")
+            raise ValueError("Concentration units of standard samples are not equal.")
         unit = str(units[0])
 
         for well in wells:
@@ -295,8 +296,7 @@ def get_replicates(
 
 
 def get_replicates_mapping(
-        wells: List[Well],
-        detected_reactant: Reactant
+    wells: List[Well], mapping_reactant: Reactant
 ) -> Dict[float, List[str]]:
     """
     Creates a mapping of initial concentrations to well ids.
@@ -313,20 +313,20 @@ def get_replicates_mapping(
 
     replicates_mapping = defaultdict(list)
     for well in wells:
-        condition = well._get_species_condition(detected_reactant.id)
+        condition = well._get_species_condition(mapping_reactant.id)
         replicates_mapping[condition.init_conc].append(well.id)
 
     return replicates_mapping
 
 
 def get_catalyzed_wells(
-        plate: "Plate",
-        wavelength: int,
-        detected_reactant: Reactant,
-        proteins: List[Protein]
+    plate: "Plate",
+    wavelength: int,
+    detected_reactant: Reactant,
+    proteins: List[Protein],
 ) -> List[Well]:
     """
-    Returns a list of wells, that contain the specified species, 
+    Returns a list of wells, that contain the specified species,
     contain a catalyst, and are blanked.
 
     Args:
@@ -343,11 +343,7 @@ def get_catalyzed_wells(
 
     catalyzed_wells = []
     for well in plate.get_wells(wavelength=wavelength):
-
         if not any([well._contains_species(protein.id) for protein in proteins]):
-            continue
-
-        if not well._contains_species(detected_reactant.id):
             continue
 
         if not well._is_blanked_for(detected_reactant.id):
