@@ -16,6 +16,7 @@
 - temperature
     - Type: float
     - Description: Thermostat temperature
+    - Multiple: True
 - temperature_unit
     - Type: str
     - Description: Unit of the temperature
