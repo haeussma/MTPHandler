@@ -1,5 +1,5 @@
 from collections import defaultdict
-import copy
+import itertools as it
 import re
 from types import NoneType
 import sdRDM
@@ -602,8 +602,8 @@ class Plate(sdRDM.DataModel):
         fig = make_subplots(
             rows=self.n_rows,
             cols=self.n_columns,
-            subplot_titles=([well.id for well in wells]),
             shared_xaxes=True,
+            subplot_titles=self._generate_possible_well_ids(),
             shared_yaxes=shared_yaxes,
         )
         colors = px.colors.qualitative.Plotly
@@ -620,8 +620,8 @@ class Plate(sdRDM.DataModel):
                         showlegend=False,
                         line=dict(color=color),
                     ),
-                    row=well.y_position + 1,
-                    col=well.x_position + 1,
+                    row=well.x_position + 1,
+                    col=well.y_position + 1,
                 )
         fig.update_xaxes(showticklabels=False)
         fig.update_yaxes(showticklabels=False)
@@ -644,6 +644,18 @@ class Plate(sdRDM.DataModel):
                 return species
 
         raise ValueError(f"No species found with id {_id}")
+
+    @staticmethod
+    def _generate_possible_well_ids():
+        characters = "ABCDEFGH"
+        integers = range(1, 13)  # 1 to 12
+
+        # Generate combinations of characters and integers
+        combinations = [
+            "".join(item) for item in it.product(characters, map(str, integers))
+        ]
+
+        return combinations
 
     @staticmethod
     def _get_blanks(wells: List[Well], species: AbstractSpecies) -> List[Well]:

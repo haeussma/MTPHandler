@@ -166,3 +166,7 @@ def _get_wavelengths(row: pd.Series):
 
 def _coordinates_to_id(x: int, y: int) -> str:
     return f"{chr(y + 65)}{x+1}"
+
+
+def id_to_xy(well_id: str):
+    return ord(well_id[0].upper()) - 65, int(well_id[1:]) - 1
