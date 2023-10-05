@@ -5,9 +5,9 @@ import numpy as np
 
 from CaliPytion import Calibrator, Standard
 from CaliPytion.modified.sample import Sample
-from MTPHandler.modified.abstractspecies import AbstractSpecies
-from MTPHandler.modified.well import Well
-from MTPHandler.modified.protein import Protein
+from MTPHandler.core.abstractspecies import AbstractSpecies
+from MTPHandler.core.well import Well
+from MTPHandler.core.protein import Protein
 
 
 def _get_standard_wells(

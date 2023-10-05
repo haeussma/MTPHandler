@@ -44,7 +44,7 @@ class InitCondition(sdRDM.DataModel):
     )
 
     @validator("species_id")
-    def get_species_id_reference(cls, value):
+    def get_species_reference(cls, value):
         """Extracts the ID from a given object to create a reference"""
 
         from .abstractspecies import AbstractSpecies

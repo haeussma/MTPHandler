@@ -1,15 +1,16 @@
+from re import A
 import sdRDM
 
 from typing import Optional
 from pydantic import Field
 from sdRDM.base.utils import forge_signature, IDGenerator
 
-
+from .abstractspecies import AbstractSpecies
 from .sboterm import SBOTerm
 
 
 @forge_signature
-class Reactant(sdRDM.DataModel):
+class Reactant(AbstractSpecies):
 
     """This objects describes the reactants that were used or produced in the course of the experiment."""
 
