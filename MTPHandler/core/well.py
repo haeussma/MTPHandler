@@ -2,13 +2,15 @@ import sdRDM
 
 from typing import List, Optional
 from pydantic import Field
+from pydantic import Field
+from pydantic import Field
 from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
 from CaliPytion import Standard
-from .abstractspecies import AbstractSpecies
-from .initcondition import InitCondition
 from .blankstate import BlankState
 from .photometricmeasurement import PhotometricMeasurement
+from .initcondition import InitCondition
+from .abstractspecies import AbstractSpecies
 
 
 @forge_signature
@@ -103,36 +105,6 @@ class Well(sdRDM.DataModel):
 
         return False
 
-    def _is_blanked_for(self, species_id: str) -> bool:
-        # Check is species is present in well
-        if not self._contains_species(species_id):
-            raise ValueError(f"Well {self.id} does not contain species {species_id}")
-
-        # ignore species with zero concentration
-        init_conditions = [
-            condition for condition in self.init_conditions if condition.init_conc != 0
-        ]
-
-        # if species has zero concentration, check if all other species were blanked
-        if self._get_species_condition(species_id).init_conc == 0:
-            if all([condition.was_blanked for condition in init_conditions]):
-                return True
-            else:
-                return False
-
-        # if species has non-zero concentration, check if it was not blanked
-        # and all other species were blanked
-        if not self._get_species_condition(species_id).was_blanked:
-            others = [
-                condition
-                for condition in init_conditions
-                if condition.species_id != species_id
-            ]
-            if all([condition.was_blanked for condition in others]):
-                return True
-
-        return False
-
     def _get_species_condition(self, species_id: str) -> InitCondition:
         for condition in self.init_conditions:
             if condition.species_id == species_id:
@@ -159,3 +131,10 @@ class Well(sdRDM.DataModel):
             )
 
         return standard.model_result.calculate(self.absorption, **kwargs)
+
+    def _get_measurement(self, wavelength: float) -> PhotometricMeasurement:
+        for measurement in self.measurements:
+            if measurement.wavelength == wavelength:
+                return measurement
+
+        raise ValueError(f"No measurement at {wavelength} nm found for well {self.id}")

@@ -128,8 +128,6 @@ def extract_data(df: pd.DataFrame) -> Dict[int, List[List[float]]]:
     for wavelength, data in wavelength_data_dict.items():
         wavelength_data_dict[wavelength] = np.array(data).swapaxes(0, 2).swapaxes(0, 1)
 
-    print(f"shape: {next(iter(wavelength_data_dict.values())).shape}")
-
     return wavelength_data_dict
 
 

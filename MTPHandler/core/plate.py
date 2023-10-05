@@ -7,6 +7,8 @@ import plotly.graph_objects as go
 import plotly.express as px
 from typing import Optional, Union, List, Callable, Dict, Literal
 from pydantic import Field, StrictBool
+from pydantic import StrictBool, Field
+from pydantic import Field, StrictBool
 from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
 from datetime import datetime as Datetime
@@ -15,10 +17,10 @@ from types import NoneType
 from plotly.subplots import make_subplots
 from CaliPytion import Calibrator, Standard
 from MTPHandler.ioutils import initialize_calibrator, create_enzymeml
-from .abstractspecies import AbstractSpecies
-from .initcondition import InitCondition
 from .well import Well
 from .photometricmeasurement import PhotometricMeasurement
+from .initcondition import InitCondition
+from .abstractspecies import AbstractSpecies
 from .vessel import Vessel
 from .protein import Protein
 from .reactant import Reactant
@@ -356,8 +358,6 @@ class Plate(sdRDM.DataModel):
             **kwargs,
         }
 
-        print(params)
-
         return self._add_species(Reactant(**params))
 
     def _define_dummy_vessel(self):
@@ -426,6 +426,18 @@ class Plate(sdRDM.DataModel):
                 init_conc=init_conc[0],
                 conc_unit=conc_unit,
             )
+
+            if init_conc[0] == 0:
+                contributes_to_signal = False
+            else:
+                contributes_to_signal = True
+
+            for measurement in well.measurements:
+                measurement.add_to_blank_states(
+                    species_id=species.id,
+                    contributes_to_signal=contributes_to_signal,
+                )
+
         print(f"Assigned {species.name} to all wells.")
 
     def assign_species_to_columns(
@@ -456,15 +468,26 @@ class Plate(sdRDM.DataModel):
 
         for column_id in column_ids:
             for row_id, init_conc in zip(range(self.n_rows), init_concs):
-                [
+                for well in self.wells:
+                    if not well.x_position == column_id - 1:
+                        continue
+                    if not well.y_position == row_id:
+                        continue
+
                     well.add_to_init_conditions(
-                        species_id=species.id,
-                        init_conc=init_conc,
-                        conc_unit=conc_unit,
+                        species_id=species.id, init_conc=init_conc, conc_unit=conc_unit
                     )
-                    for well in self.wells
-                    if well.y_position == row_id and well.x_position == column_id - 1
-                ]
+
+                    if init_conc == 0:
+                        contributes_to_signal = False
+                    else:
+                        contributes_to_signal = True
+
+                    for measurement in well.measurements:
+                        measurement.add_to_blank_states(
+                            species_id=species.id,
+                            contributes_to_signal=contributes_to_signal,
+                        )
 
         print(
             f"Assigned {species.name} with concentrations of"
@@ -500,21 +523,43 @@ class Plate(sdRDM.DataModel):
         # Add concentration array to wells in rows
         for row_id in row_ids:
             for column_id, init_conc in zip(range(self.n_columns), init_concs):
-                [
+                for well in self.wells:
+                    if not well.x_position == column_id:
+                        continue
+                    if not well.y_position == ord(row_id) - 65:
+                        continue
+
                     well.add_to_init_conditions(
                         species_id=species.id,
                         init_conc=init_conc,
                         conc_unit=conc_unit,
                     )
-                    for well in self.wells
-                    if well.x_position == column_id
-                    and well.y_position == ord(row_id) - 65
-                ]
+
+                    if init_conc == 0:
+                        contributes_to_signal = False
+                    else:
+                        contributes_to_signal = True
+
+                    for measurement in well.measurements:
+                        measurement.add_to_blank_states(
+                            species_id=species.id,
+                            contributes_to_signal=contributes_to_signal,
+                        )
 
         print(
             f"Assigned {species.name} with concentrations of"
             f" {init_concs} {conc_unit} to rows {row_ids}."
         )
+
+    def _handle_wavelength(self) -> float:
+        if len(self.measured_wavelengths) == 1:
+            return self.measured_wavelengths[0]
+
+        else:
+            raise AttributeError(
+                "Argument 'wavelength' must be provided. Measured wavelengths are:"
+                f" {self.measured_wavelengths}"
+            )
 
     def get_wells(
         self,
@@ -523,75 +568,74 @@ class Plate(sdRDM.DataModel):
         columns: List[int] = None,
         wavelength: int = None,
     ) -> List[Well]:
-        """
-        Returns wells of a given wavelength, rows, columns, or individual ids
-        of a plate.
-
-        Args:
-            ids (List[str], optional): Well ID (e.g. 'B10'). Defaults to None.
-            rows (List[str], optional): ID of the rows (e.g. ['A', 'B']). Defaults to None.
-            columns (List[int], optional): Column number. Starts at 1. Defaults to None.
-            wavelength (int, optional): If plate was measured at different wavelengts,
-            specify wavelength. Defaults to None.
-
-        Raises:
-            AttributeError: If multiple wavelengths were measured and no wavelength is specified.
-
-        Returns:
-            List[Well]: Wells matching to specified selection criteria.
-        """
-
-        # handel wavelength
         if not wavelength:
-            if len(self.measured_wavelengths) == 1:
-                wavelength = self.measured_wavelengths[0]
-            else:
-                raise AttributeError(
-                    "Argument 'wavelength' must be provided. Measured wavelengths are:"
-                    f" {self.measured_wavelengths}"
-                )
+            wavelength = self._handle_wavelength()
 
-        # return wells, if ids are provided
-        if ids and not any([rows, columns]):
-            if not isinstance(ids, list):
-                ids = [ids]
-
-            return [self._get_well_by_id(id, wavelength) for id in ids]
-
-        # return wells, if row_ids are provided
-        elif rows and not any([ids, columns]):
-            if not isinstance(rows, list):
-                rows = [rows]
-
-            well_rows = [
-                self._get_wells_by_row_id(row_id, wavelength) for row_id in rows
-            ]
-
-            return [well for row in well_rows for well in row]
-
-        # return wells, if column_ids are provided
-        elif columns and not any([ids, rows]):
-            if not isinstance(columns, list):
-                columns = [columns]
-
-            well_columns = [
-                self._get_wells_by_column_id(column_id, wavelength)
-                for column_id in columns
-            ]
-
-            return [well for column in well_columns for well in column]
-
-        # return all wells of a given wavelength
-        else:
-            return [well for well in self.wells if well.wavelength == wavelength]
-
-    def _get_well_by_id(self, id: str, wavelength: int) -> Well:
+    def _get_well_by_id(self, _id: str) -> List[Well]:
         for well in self.wells:
-            if well.id == id and well.wavelength == wavelength:
+            if well.id == _id:
                 return well
 
-        raise ValueError(f"No well found with id {id}")
+        raise ValueError(f"No well found with id {_id}")
 
+    # def get_wells(
+    #     self,
+    #     ids: List[str] = None,
+    #     rows: List[str] = None,
+    #     columns: List[int] = None,
+    #     wavelength: int = None,
+    # ) -> List[Well]:
+    #     """
+    #     Returns wells of a given wavelength, rows, columns, or individual ids
+    #     of a plate.
+
+    #     Args:
+    #         ids (List[str], optional): Well ID (e.g. 'B10'). Defaults to None.
+    #         rows (List[str], optional): ID of the rows (e.g. ['A', 'B']). Defaults to None.
+    #         columns (List[int], optional): Column number. Starts at 1. Defaults to None.
+    #         wavelength (int, optional): If plate was measured at different wavelengts,
+    #         specify wavelength. Defaults to None.
+
+    #     Raises:
+    #         AttributeError: If multiple wavelengths were measured and no wavelength is specified.
+
+    #     Returns:
+    #         List[Well]: Wells matching to specified selection criteria.
+    #     """
+
+    #     # return wells, if ids are provided
+    #     if ids and not any([rows, columns]):
+    #         if not isinstance(ids, list):
+    #             ids = [ids]
+
+    #         return [self._get_well_by_id(id, wavelength) for id in ids]
+
+    #     # return wells, if row_ids are provided
+    #     elif rows and not any([ids, columns]):
+    #         if not isinstance(rows, list):
+    #             rows = [rows]
+
+    #         well_rows = [
+    #             self._get_wells_by_row_id(row_id, wavelength) for row_id in rows
+    #         ]
+
+    #         return [well for row in well_rows for well in row]
+
+    #     # return wells, if column_ids are provided
+    #     elif columns and not any([ids, rows]):
+    #         if not isinstance(columns, list):
+    #             columns = [columns]
+
+    #         well_columns = [
+    #             self._get_wells_by_column_id(column_id, wavelength)
+    #             for column_id in columns
+    #         ]
+
+    #         return [well for column in well_columns for well in column]
+
+    #     # return all wells of a given wavelength
+    #     else:
+    #         return [well for well in self.wells if well.wavelength == wavelength]
     def _get_wells_by_column_id(self, column_id: int, wavelength: int) -> Well:
         x_position = column_id - 1
         y_positions = [
@@ -693,80 +737,70 @@ class Plate(sdRDM.DataModel):
             path=path,
         )
 
-    def _already_blanked(self, wells: List[Well], species: AbstractSpecies) -> bool:
-        wells = [well for well in wells if well._contains_species(species.id)]
-
-        wells = [
-            well
-            for well in wells
-            if well._get_species_condition(species.id).init_conc != 0
-        ]
-
-        if all([well._get_species_condition(species.id).was_blanked for well in wells]):
-            return True
-        else:
-            return False
-
     def blank_species(
         self,
         species: AbstractSpecies,
         wavelength: int,
     ):
-        # get wells with specified wavelength:
-        if not wavelength in self.measured_wavelengths:
-            raise AttributeError(
-                f"Plate does not contain measurements with wavelength {wavelength} nm."
-            )
-        wells = self.get_wells(wavelength=wavelength)
+        wells = []
+        blanking_wells = []
+        for well in self.wells:
+            if not well._contains_species(species.id):
+                continue
 
-        if self._already_blanked(wells=wells, species=species):
-            print(f"{species.name} was already blanked.")
+            if not wavelength in [
+                measurement.wavelength for measurement in well.measurements
+            ]:
+                continue
+
+            measurement = well._get_measurement(wavelength)
+
+            if measurement.species_contibutes(species.id):
+                wells.append(well)
+
+            if measurement.is_blanked_for(species.id):
+                blanking_wells.append(well)
+
+        if len(wells) == 0:
+            print(f"{species.name} at {wavelength} nm does not contribute to signal.")
             return
 
-        # get wells for blanking
-        blank_wells = self._get_blanks(wells=wells, species=species)
+        if len(blanking_wells) == 0:
+            raise ValueError(
+                f"No wells found to calculate absorption contribution of {species.name} at {wavelength} nm."
+            )
 
         # get mapping of concentration to blank wells
-        blank_well_mapping = self._get_blank_conc_mapping(
-            wells=blank_wells, species=species
+        conc_blank_mapping = self._get_conc_blank_mapping(
+            wells=blanking_wells, species=species, wavelength=wavelength
         )
-
-        conc_mean_blank_mapping = {}
-        for conc, blanking_wells in blank_well_mapping.items():
-            mean_absorption = np.nanmean([well.absorption for well in blanking_wells])
-            conc_mean_blank_mapping[conc] = mean_absorption
 
         # apply to wells where species is present in respective concentration
         blanked_wells = []
         for well in wells:
-            if species.id not in [
-                condition.species_id for condition in well.init_conditions
-            ]:
-                continue
+            init_conc = well._get_species_condition(species.id).init_conc
+            measurement = well._get_measurement(wavelength)
+            blank_state = measurement.get_blank_state(species.id)
+            print(blank_state)
 
-            condition = well._get_species_condition(species.id)
-
-            if condition.was_blanked:
-                continue
-
-            if condition.init_conc not in conc_mean_blank_mapping.keys():
+            if init_conc not in conc_blank_mapping.keys():
                 print(
                     f"Well {well.id} was not blanked for initial"
                     f" {species.name} concentration"
-                    f" {condition.init_conc} ({condition.conc_unit})."
+                    f" {init_conc}"
                 )
                 continue
 
-            prior = well.absorption[3]
+            if not blank_state.contributes_to_signal:
+                continue
 
-            well.absorption = [
-                absorption - conc_mean_blank_mapping[condition.init_conc]
-                for absorption in well.absorption
+            measurement.absorptions = [
+                absorption - conc_blank_mapping[init_conc]
+                for absorption in measurement.absorptions
             ]
 
-            blanked_wells.append(well.id)
-
-            condition.was_blanked = True
+            blank_state.contributes_to_signal = False
+            blanked_wells.append(well)
 
         print(f"Blanked {len(blanked_wells)} wells containing {species.name}.")
 
@@ -835,51 +869,26 @@ class Plate(sdRDM.DataModel):
 
         return combinations
 
-    @staticmethod
-    def _get_blanks(wells: List[Well], species: AbstractSpecies) -> List[Well]:
-        blank_wells = []
-        for well in wells:
-            # ignore virtual species with concentration of 0
-            conditions = [
-                condition
-                for condition in well.init_conditions
-                if condition.init_conc != 0
-            ]
-
-            # ignore species that were already blanked
-            conditions = [
-                condition for condition in conditions if condition.was_blanked == False
-            ]
-
-            # if not exactly one species was not blanked, continue
-            if not len(conditions) == 1:
-                continue
-
-            # if the species is not the one to be blanked, continue
-            if not conditions[0].species_id == species.id:
-                continue
-
-            blank_wells.append(well)
-
-        if len(blank_wells) == 0:
-            raise AttributeError(
-                "No wells for calculating the blank found for"
-                f" {species.name} ({species.id}). You might need to blank another"
-                " species first."
-            )
-
-        return blank_wells
-
-    def _get_blank_conc_mapping(
-        self, wells: List[Well], species: AbstractSpecies
+    def _get_conc_blank_mapping(
+        self, wells: List[Well], species: AbstractSpecies, wavelength: float
     ) -> Dict[float, List[Well]]:
-        blank_conc_mapping = defaultdict(list)
+        blank_measurement_mapping = defaultdict(list)
         for well in wells:
             condition = well._get_species_condition(species.id)
 
-            blank_conc_mapping[condition.init_conc].append(well)
+            blank_measurement_mapping[condition.init_conc].append(
+                well._get_measurement(wavelength).absorptions
+            )
 
-        return blank_conc_mapping
+        conc_mean_blank_mapping = {}
+        for conc, absorptions in blank_measurement_mapping.items():
+            mean_absorption = np.nanmean(absorptions)
+            print(
+                f"Mean absorption of {species.name} at {conc} {condition.conc_unit}: {mean_absorption}"
+            )
+            conc_mean_blank_mapping[conc] = mean_absorption
+
+        return conc_mean_blank_mapping
 
     @staticmethod
     def _validate_well_id(well_ids) -> bool:

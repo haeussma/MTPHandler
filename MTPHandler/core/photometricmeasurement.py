@@ -6,8 +6,8 @@ from pydantic import Field
 from pydantic import Field
 from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
-from .abstractspecies import AbstractSpecies
 from .blankstate import BlankState
+from .abstractspecies import AbstractSpecies
 
 
 @forge_signature
@@ -40,7 +40,7 @@ class PhotometricMeasurement(sdRDM.DataModel):
     def add_to_blank_states(
         self,
         species_id: AbstractSpecies,
-        was_blanked: bool = False,
+        contributes_to_signal: bool = True,
         id: Optional[str] = None,
     ) -> None:
         """
@@ -49,10 +49,52 @@ class PhotometricMeasurement(sdRDM.DataModel):
         Args:
             id (str): Unique identifier of the 'BlankState' object. Defaults to 'None'.
             species_id (): Reference to species.
-            was_blanked (): Whether the species' absorption contribution was subtracted from the absorption signal. Defaults to False
+            contributes_to_signal (): Whether the species' absorption contributes to the absorption signal. Defaults to True
         """
-        params = {"species_id": species_id, "was_blanked": was_blanked}
+        params = {
+            "species_id": species_id,
+            "contributes_to_signal": contributes_to_signal,
+        }
         if id is not None:
             params["id"] = id
         self.blank_states.append(BlankState(**params))
         return self.blank_states[-1]
+
+    def is_blanked_for(self, species_id: str) -> bool:
+        """Checks if the measurement is blanked for a given species."""
+
+        if species_id not in [state.species_id for state in self.blank_states]:
+            raise ValueError(f"Species {species_id} is not present in this well.")
+
+        target_contributes = [
+            state.contributes_to_signal
+            for state in self.blank_states
+            if state.species_id == species_id
+        ][0]
+
+        others_contribute = [
+            state.contributes_to_signal
+            for state in self.blank_states
+            if state.species_id != species_id
+        ]
+
+        if target_contributes and not any(others_contribute):
+            return True
+
+        return False
+
+    def species_contibutes(self, species_id: str) -> bool:
+        species_contributes = [
+            state.contributes_to_signal
+            for state in self.blank_states
+            if state.species_id == species_id
+        ][0]
+
+        return species_contributes
+
+    def get_blank_state(self, species_id: str) -> BlankState:
+        for state in self.blank_states:
+            if state.species_id == species_id:
+                return state
+
+        raise ValueError(f"Species {species_id} is not present in this well.")

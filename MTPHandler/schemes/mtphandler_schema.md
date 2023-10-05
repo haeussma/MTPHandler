@@ -79,7 +79,7 @@ classDiagram
     
     class BlankState {
         +AbstractSpecies species_id*
-        +bool was_blanked*
+        +bool contributes_to_signal*
     }
     
     class Vessel {
@@ -148,7 +148,7 @@ classDiagram
     
     class https://github.com/EnzymeML/enzymeml-specifications.git {
         << External Object >>
-        +Repository <sdRDM.markdown.markdownparser.MarkdownParser object at 0x128d79690>
+        +Repository <sdRDM.markdown.markdownparser.MarkdownParser object at 0x130ace910>
     }
     
 ```

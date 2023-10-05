@@ -109,7 +109,7 @@
 - __species_id__
     - Type: @AbstractSpecies.id
     - Description: Reference to species
-- __was_blanked__
+- __contributes_to_signal__
     - Type: bool
-    - Description: Whether the species' absorption contribution was subtracted from the absorption signal
-    - Default: False
+    - Description: Whether the species' absorption contributes to the absorption signal
+    - Default: True
