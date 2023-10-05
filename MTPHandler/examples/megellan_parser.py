@@ -61,7 +61,7 @@ def parse_magellan(
         n_rows=n_rows,
         n_columns=n_columns,
         measured_wavelengths=wavelengths,
-        temp_unit=temp_unit,
+        temperature_unit=temp_unit,
     )
 
     for well_id, abso_list in data.items():
@@ -79,4 +79,4 @@ def parse_magellan(
 
 
 def id_to_xy(well_id: str):
-    return ord(well_id[0].upper()) - 65, int(well_id[1:]) - 1
+    return int(well_id[1:]) - 1, ord(well_id[0].upper()) - 65
