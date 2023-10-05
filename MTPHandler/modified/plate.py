@@ -620,8 +620,8 @@ class Plate(sdRDM.DataModel):
                         showlegend=False,
                         line=dict(color=color),
                     ),
-                    row=well.x_position + 1,
-                    col=well.y_position + 1,
+                    col=well.x_position + 1,
+                    row=well.y_position + 1,
                 )
         fig.update_xaxes(showticklabels=False)
         fig.update_yaxes(showticklabels=False)
@@ -645,14 +645,16 @@ class Plate(sdRDM.DataModel):
 
         raise ValueError(f"No species found with id {_id}")
 
-    @staticmethod
-    def _generate_possible_well_ids():
+    def _generate_possible_well_ids(self):
         characters = "ABCDEFGH"
         integers = range(1, 13)  # 1 to 12
 
+        sub_char = characters[: self.n_rows]
+        sub_int = integers[: self.n_columns]
+
         # Generate combinations of characters and integers
         combinations = [
-            "".join(item) for item in it.product(characters, map(str, integers))
+            "".join(item) for item in it.product(sub_char, map(str, sub_int))
         ]
 
         return combinations
