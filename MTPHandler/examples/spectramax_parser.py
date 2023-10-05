@@ -17,6 +17,8 @@ def parse_spectramax(
     ph: float = None,
     temperature: float = None,
     temperature_unit: str = None,
+    volume: float = None,
+    volume_unit: str = None,
 ) -> "Plate":
     # Get date of measurement
     created = datetime.fromtimestamp(os.path.getctime(path)).strftime(
@@ -59,27 +61,52 @@ def parse_spectramax(
 
     # Create plate
     plate = cls(
-        temperature=temperature,
+        temperatures=[temperature],
         temperature_unit=temperature_unit,
         ph=ph,
-        created=created,
+        times=time,
+        time_unit=time_unit,
+        date_measured=created,
         n_rows=n_rows,
         n_columns=n_columns,
         measured_wavelengths=list(data_dict.keys()),
     )
 
-    for wavelength, measurments in data_dict.items():
-        for row in range(n_rows):
-            for column in range(n_columns):
-                plate.add_to_wells(
-                    id=_coordinates_to_id(column, row),
-                    absorption=measurments[row, column, :].tolist(),
-                    time_unit=time_unit,
-                    x_position=column,
-                    y_position=row,
+    # Add wells to plate
+    for wavelength, data in data_dict.items():
+        for row_id, row in enumerate(data):
+            for column_id, column in enumerate(row):
+                id = _coordinates_to_id(column_id, row_id)
+                if id not in [well.id for well in plate.wells]:
+                    plate.add_to_wells(
+                        id=id,
+                        x_position=column_id,
+                        y_position=row_id,
+                    )
+
+                well = [well for well in plate.wells if well.id == id][0]
+                well.add_to_measurements(
                     wavelength=wavelength,
-                    time=time.tolist(),
+                    wavelength_unit="nm",
+                    absorptions=column.tolist(),
                 )
+
+    # for wavelength, measurments in data_dict.items():
+    #     for row in range(n_rows):
+    #         for column in range(n_columns):
+
+    #             well = plate.add_to_wells(
+    #                 id=_coordinates_to_id(column, row),
+    #                 time_unit=time_unit,
+    #                 x_position=column,
+    #                 y_position=row,
+    #                 wavelength=wavelength,
+    #                 time=time.tolist(),
+    #             )
+
+    #             well.add_to_measurements(
+    #                 wa
+    #             )
 
     return plate
 
@@ -100,6 +127,8 @@ def extract_data(df: pd.DataFrame) -> Dict[int, List[List[float]]]:
     # Convert data to numpy arrays
     for wavelength, data in wavelength_data_dict.items():
         wavelength_data_dict[wavelength] = np.array(data).swapaxes(0, 2).swapaxes(0, 1)
+
+    print(f"shape: {next(iter(wavelength_data_dict.values())).shape}")
 
     return wavelength_data_dict
 

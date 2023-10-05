@@ -4,17 +4,15 @@ from typing import List, Optional
 from pydantic import Field
 from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
-
 from CaliPytion import Standard
-
 from .abstractspecies import AbstractSpecies
 from .initcondition import InitCondition
-from .speciestype import SpeciesType
+from .blankstate import BlankState
+from .photometricmeasurement import PhotometricMeasurement
 
 
 @forge_signature
 class Well(sdRDM.DataModel):
-
     """"""
 
     id: Optional[str] = Field(
@@ -23,70 +21,31 @@ class Well(sdRDM.DataModel):
         xml="@id",
     )
 
-    absorption: List[float] = Field(
-        default_factory=ListPlus,
-        multiple=True,
-        description="Absorption of the species",
-    )
-
-    time: List[float] = Field(
-        default_factory=ListPlus,
-        multiple=True,
-        description="Time of the measurement",
-    )
-
-    temperature: Optional[float] = Field(
-        default=None,
-        description="Thermostat temperature",
-    )
-
-    temperature_unit: Optional[str] = Field(
-        default=None,
-        description="Unit of the temperature",
-    )
-
-    time_unit: Optional[str] = Field(
-        default=None,
-        description="Unit of the time",
-    )
-
-    reaction_volume: Optional[float] = Field(
-        default=None,
-        description="Volume of the reaction",
-    )
-
-    volume_unit: Optional[str] = Field(
-        default=None,
-        description="Unit of the volume",
-    )
-
     init_conditions: List[InitCondition] = Field(
         default_factory=ListPlus,
         multiple=True,
         description="List of initial conditions of different species",
     )
 
-    x_position: Optional[int] = Field(
-        default=None,
-        description="X position of the well on the plate",
+    measurements: List[PhotometricMeasurement] = Field(
+        default_factory=ListPlus,
+        multiple=True,
+        description="List of photometric measurements",
     )
 
-    y_position: Optional[int] = Field(
-        default=None,
-        description="Y position of the well on the plate",
-    )
+    volume: Optional[float] = Field(default=None, description="Volume of the reaction")
 
-    wavelength: Optional[int] = Field(
-        default=None,
-        description="Wavelength of the measurement",
-    )
+    volume_unit: Optional[str] = Field(default=None, description="Unit of the volume")
+
+    x_position: int = Field(..., description="X position of the well on the plate")
+
+    y_position: int = Field(..., description="Y position of the well on the plate")
 
     def add_to_init_conditions(
         self,
-        species: Optional[AbstractSpecies] = None,
-        init_conc: Optional[float] = None,
-        conc_unit: Optional[str] = None,
-        was_blanked: bool = False,
+        species_id: AbstractSpecies,
+        init_conc: float,
+        conc_unit: str,
         id: Optional[str] = None,
     ) -> None:
         """
@@ -94,36 +53,48 @@ class Well(sdRDM.DataModel):
 
         Args:
             id (str): Unique identifier of the 'InitCondition' object. Defaults to 'None'.
-            species (): Reference to species. Defaults to None
-            init_conc (): Initial concentration of the species. Defaults to None
-            conc_unit (): Concentration unit. Defaults to None
-            was_blanked (): Whether the species' absorption contribution was subtracted from the absorption signal. Defaults to False
+            species_id (): Reference to species.
+            init_conc (): Initial concentration of the species.
+            conc_unit (): Concentration unit.
         """
-
         params = {
-            "species_id": species.id,
+            "species_id": species_id,
             "init_conc": init_conc,
             "conc_unit": conc_unit,
-            "was_blanked": was_blanked,
         }
+        if id is not None:
+            params["id"] = id
+        self.init_conditions.append(InitCondition(**params))
+        return self.init_conditions[-1]
 
-        new_condition = InitCondition(**params)
+    def add_to_measurements(
+        self,
+        wavelength: float,
+        wavelength_unit: str,
+        absorptions: List[float] = ListPlus(),
+        blank_states: List[BlankState] = ListPlus(),
+        id: Optional[str] = None,
+    ) -> None:
+        """
+        This method adds an object of type 'PhotometricMeasurement' to attribute measurements
 
-        if any(
-            [
-                condition.species_id == new_condition.species_id
-                for condition in self.init_conditions
-            ]
-        ):
-            self.init_conditions = [
-                new_condition
-                if condition.species_id == new_condition.species_id
-                else condition
-                for condition in self.init_conditions
-            ]
-
-        else:
-            self.init_conditions.append(new_condition)
+        Args:
+            id (str): Unique identifier of the 'PhotometricMeasurement' object. Defaults to 'None'.
+            wavelength (): Wavelength of the measurement.
+            wavelength_unit (): Unit of the wavelength.
+            absorptions (): Absorption of the species. Defaults to ListPlus()
+            blank_states (): List of blank states, referring to the blank state of the species of the well. Defaults to ListPlus()
+        """
+        params = {
+            "wavelength": wavelength,
+            "wavelength_unit": wavelength_unit,
+            "absorptions": absorptions,
+            "blank_states": blank_states,
+        }
+        if id is not None:
+            params["id"] = id
+        self.measurements.append(PhotometricMeasurement(**params))
+        return self.measurements[-1]
 
     def _contains_species(self, species_id: str) -> bool:
         for condition in self.init_conditions:
@@ -172,7 +143,8 @@ class Well(sdRDM.DataModel):
     def to_concentration(self, standard: Standard, **kwargs) -> list[float]:
         if not standard.model_result.was_fitted:
             raise ValueError(
-                f"Standard {standard.id} was not fitted for species {standard.species_id}"
+                f"Standard {standard.id} was not fitted for species"
+                f" {standard.species_id}"
             )
 
         if not self._is_blanked_for(standard.species_id):
@@ -182,7 +154,8 @@ class Well(sdRDM.DataModel):
 
         if not self.wavelength == standard.wavelength:
             raise ValueError(
-                f"Standard at {standard.wavelength} nm not applicable for well {self.id} measured at {self.wavelength}"
+                f"Standard at {standard.wavelength} nm not applicable for well"
+                f" {self.id} measured at {self.wavelength}"
             )
 
         return standard.model_result.calculate(self.absorption, **kwargs)

@@ -1,7 +1,8 @@
-from re import A
 import sdRDM
 
 from typing import Optional
+from pydantic import Field
+from pydantic import Field
 from pydantic import Field
 from sdRDM.base.utils import forge_signature, IDGenerator
 
@@ -11,7 +12,6 @@ from .sboterm import SBOTerm
 
 @forge_signature
 class Reactant(AbstractSpecies):
-
     """This objects describes the reactants that were used or produced in the course of the experiment."""
 
     id: Optional[str] = Field(
@@ -45,7 +45,4 @@ class Reactant(AbstractSpecies):
         ),
     )
 
-    ontology: SBOTerm = Field(
-        description="None",
-        default=SBOTerm.SMALL_MOLECULE,
-    )
+    ontology: SBOTerm = Field(description="None", default=SBOTerm.SMALL_MOLECULE)

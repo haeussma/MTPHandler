@@ -3,8 +3,6 @@ classDiagram
     AbstractSpecies <-- Protein
     AbstractSpecies <-- Complex
     AbstractSpecies <-- Reactant
-    AbstractSpecies <-- Protein
-    AbstractSpecies <-- Reactant
     EnzymeMLDocument *-- Creator
     EnzymeMLDocument *-- Vessel
     EnzymeMLDocument *-- Protein
@@ -33,42 +31,54 @@ classDiagram
     Replicate *-- AbstractSpecies
     Plate *-- Well
     Plate *-- AbstractSpecies
-    Plate *-- Protein
-    Plate *-- Reactant
+    Well *-- PhotometricMeasurement
     Well *-- InitCondition
+    PhotometricMeasurement *-- BlankState
     InitCondition *-- AbstractSpecies
+    BlankState *-- AbstractSpecies
     AbstractSpecies *-- Vessel
-    Protein *-- SBOTerm
-    Reactant *-- SBOTerm
     
     class Plate {
-        +integer n_rows
-        +integer n_columns
-        +datetime created
-        +float temperature
-        +str temperature_unit
-        +float ph
+        +integer n_rows*
+        +integer n_columns*
+        +datetime date_measured
+        +float[0..*] times
+        +str time_unit
+        +float[0..*] temperatures*
+        +str temperature_unit*
+        +float max_volume
+        +str max_volume_unit
+        +float ph*
         +Well[0..*] wells
-        +int[0..*] measured_wavelengths
-        +AbstractSpecies, Protein, Reactant species
+        +float[0..*] measured_wavelengths
+        +str wavelength_unit
+        +AbstractSpecies[0..*] species
     }
     
     class Well {
-        +float[0..*] absorption
-        +float[0..*] time
-        +str time_unit
-        +float reaction_volume
-        +string volume_unit
         +InitCondition[0..*] init_conditions
-        +integer x_position
-        +integer y_position
-        +int wavelength
+        +PhotometricMeasurement[0..*] measurements
+        +float volume
+        +string volume_unit
+        +integer x_position*
+        +integer y_position*
+    }
+    
+    class PhotometricMeasurement {
+        +float wavelength*
+        +str wavelength_unit*
+        +float[0..*] absorptions*
+        +BlankState[0..*] blank_states
     }
     
     class InitCondition {
-        +AbstractSpecies species_id
-        +float init_conc
-        +str conc_unit
+        +AbstractSpecies species_id*
+        +float init_conc*
+        +str conc_unit*
+    }
+    
+    class BlankState {
+        +AbstractSpecies species_id*
         +bool was_blanked*
     }
     
@@ -89,31 +99,6 @@ classDiagram
         +string unit
         +string uri
         +string creator_id
-    }
-    
-    class Protein {
-        +string sequence*
-        +string ecnumber
-        +string organism
-        +string organism_tax_id
-        +string uniprotid
-        +SBOTerm ontology*
-    }
-    
-    class Reactant {
-        +string smiles
-        +string inchi
-        +string chebi_id
-        +SBOTerm ontology*
-    }
-    
-    class SpeciesType {
-        << Enumeration >>
-        +BUFFER
-        +ENZYME
-        +SUBSTRATE
-        +PRODUCT
-        +INHIBITOR
     }
     
     class SBOTerm {
@@ -163,7 +148,7 @@ classDiagram
     
     class https://github.com/EnzymeML/enzymeml-specifications.git {
         << External Object >>
-        +Repository <sdRDM.markdown.markdownparser.MarkdownParser object at 0x14d08ed10>
+        +Repository <sdRDM.markdown.markdownparser.MarkdownParser object at 0x128d79690>
     }
     
 ```

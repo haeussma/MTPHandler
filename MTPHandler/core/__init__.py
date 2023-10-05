@@ -1,15 +1,22 @@
 from .plate import Plate
-from .protein import Protein
-from .reactant import Reactant
 from .well import Well
+from .photometricmeasurement import PhotometricMeasurement
 from .initcondition import InitCondition
+from .blankstate import BlankState
+from .vessel import Vessel
+from .abstractspecies import AbstractSpecies
+from .sboterm import SBOTerm
+from .datatypes import DataTypes
 
 __doc__ = ""
-
 __all__ = [
     "Plate",
     "Well",
-    "Species",
+    "PhotometricMeasurement",
     "InitCondition",
-    "SpeciesType",
+    "BlankState",
+    "Vessel",
+    "AbstractSpecies",
+    "SBOTerm",
+    "DataTypes",
 ]

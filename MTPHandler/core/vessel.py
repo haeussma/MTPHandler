@@ -1,16 +1,14 @@
 import sdRDM
 
 from typing import Optional
-from pydantic import Field
+from pydantic import Field, PositiveFloat, StrictBool
+from pydantic import StrictBool, Field, PositiveFloat
+from pydantic import PositiveFloat, Field, StrictBool
 from sdRDM.base.utils import forge_signature, IDGenerator
-
-from pydantic import PositiveFloat
-from pydantic import StrictBool
 
 
 @forge_signature
 class Vessel(sdRDM.DataModel):
-
     """This object describes vessels in which the experiment has been carried out. These can include any type of vessel used in biocatalytic experiments."""
 
     id: Optional[str] = Field(
@@ -20,9 +18,7 @@ class Vessel(sdRDM.DataModel):
     )
 
     name: str = Field(
-        ...,
-        description="Name of the used vessel.",
-        template_alias="Name",
+        ..., description="Name of the used vessel.", template_alias="Name"
     )
 
     volume: PositiveFloat = Field(
@@ -32,22 +28,15 @@ class Vessel(sdRDM.DataModel):
     )
 
     unit: str = Field(
-        ...,
-        description="Volumetric unit of the vessel.",
-        template_alias="Volume unit",
+        ..., description="Volumetric unit of the vessel.", template_alias="Volume unit"
     )
 
     constant: StrictBool = Field(
-        description="Whether the volume of the vessel is constant or not.",
-        default=True,
+        description="Whether the volume of the vessel is constant or not.", default=True
     )
 
-    uri: Optional[str] = Field(
-        default=None,
-        description="URI of the vessel.",
-    )
+    uri: Optional[str] = Field(default=None, description="URI of the vessel.")
 
     creator_id: Optional[str] = Field(
-        default=None,
-        description="Unique identifier of the author.",
+        default=None, description="Unique identifier of the author."
     )
