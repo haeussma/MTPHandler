@@ -35,6 +35,16 @@ class Well(sdRDM.DataModel):
         description="Time of the measurement",
     )
 
+    temperature: Optional[float] = Field(
+        default=None,
+        description="Thermostat temperature",
+    )
+
+    temperature_unit: Optional[str] = Field(
+        default=None,
+        description="Unit of the temperature",
+    )
+
     time_unit: Optional[str] = Field(
         default=None,
         description="Unit of the time",

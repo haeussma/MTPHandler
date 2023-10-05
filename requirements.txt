@@ -5,4 +5,3 @@ pydantic==1.8.2
 sdRDM @ git+https://github.com/JR-1991/software-driven-rdm@linking-refactor
 setuptools==67.8.0
 ipykernel
-jupyter

@@ -29,7 +29,7 @@ def parse_spectramax(
         temperature = re.findall(TEMP_PATTERN, path)[0]
         temperature = re.split("(\d+)", temperature)[1]
         if not temperature:
-            raise ValueError("Could not find pH in path. Please specify pH.")
+            raise ValueError("Could not find pH in path. Please specify 'ph'.")
 
     if not temperature_unit:
         temperature_unit = "C"
@@ -68,11 +68,9 @@ def parse_spectramax(
         measured_wavelengths=list(data_dict.keys()),
     )
 
-    # Check time data consistency
-
     for wavelength, measurments in data_dict.items():
-        for row in range(plate.n_rows):
-            for column in range(plate.n_columns):
+        for row in range(n_rows):
+            for column in range(n_columns):
                 plate.add_to_wells(
                     id=_coordinates_to_id(column, row),
                     absorption=measurments[row, column, :].tolist(),
@@ -166,3 +164,7 @@ def _get_wavelengths(row: pd.Series):
 
 def _coordinates_to_id(x: int, y: int) -> str:
     return f"{chr(y + 65)}{x+1}"
+
+
+def id_to_xy(well_id: str):
+    return ord(well_id[0].upper()) - 65, int(well_id[1:]) - 1
