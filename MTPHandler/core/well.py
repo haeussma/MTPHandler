@@ -6,7 +6,6 @@ from pydantic import Field
 from pydantic import Field
 from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
-from CaliPytion import Standard
 from .blankstate import BlankState
 from .photometricmeasurement import PhotometricMeasurement
 from .initcondition import InitCondition
@@ -112,27 +111,7 @@ class Well(sdRDM.DataModel):
 
         raise ValueError(f"Species {species_id} not found in well {self.id}")
 
-    def to_concentration(self, standard: Standard, **kwargs) -> list[float]:
-        if not standard.model_result.was_fitted:
-            raise ValueError(
-                f"Standard {standard.id} was not fitted for species"
-                f" {standard.species_id}"
-            )
-
-        if not self._is_blanked_for(standard.species_id):
-            raise ValueError(
-                f"Well {self.id} was not blanked for species {standard.species_id}"
-            )
-
-        if not self.wavelength == standard.wavelength:
-            raise ValueError(
-                f"Standard at {standard.wavelength} nm not applicable for well"
-                f" {self.id} measured at {self.wavelength}"
-            )
-
-        return standard.model_result.calculate(self.absorption, **kwargs)
-
-    def _get_measurement(self, wavelength: float) -> PhotometricMeasurement:
+    def get_measurement(self, wavelength: float) -> PhotometricMeasurement:
         for measurement in self.measurements:
             if measurement.wavelength == wavelength:
                 return measurement

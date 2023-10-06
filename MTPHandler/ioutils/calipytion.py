@@ -22,22 +22,20 @@ def _get_standard_wells(
                 f"Argument 'wavelength' must be provided. Measured wavelengths are: {plate.measured_wavelengths}"
             )
 
-    wells = plate.get_wells(wavelength=wavelength)
-
     # Subset of wells, that contain specified species, do not contain a protein, and are blanked
     protein_ids = [
         species.id for species in plate.species if isinstance(species, Protein)
     ]
 
     standard_wells = []
-    for well in wells:
+    for well in plate.wells:
         if not well._contains_species(species.id):
             continue
 
         if any([well._contains_species(catalyst_id) for catalyst_id in protein_ids]):
             continue
 
-        if well._is_blanked_for(species.id):
+        if well._get_measurement(wavelength).is_blanked_for(species.id):
             standard_wells.append(well)
 
     return standard_wells
@@ -58,12 +56,13 @@ def map_to_standard(
     samples = []
     for well in standard_wells:
         condition = well._get_species_condition(species.id)
+        measurement = well.get_measurement(wavelength)
         samples.append(
             Sample(
                 id=well.id,
                 concentration=condition.init_conc,
                 conc_unit=condition.conc_unit,
-                signal=np.mean(well.absorption),
+                signal=np.nanmean(measurement.absorptions),
             )
         )
 
@@ -74,9 +73,9 @@ def map_to_standard(
         wavelength=wavelength,
         samples=samples,
         ph=plate.ph,
-        temperature=plate.temperature,
+        temperature=plate.temperatures[0],
         temperature_unit=plate.temperature_unit,
-        created=plate.created,
+        created=plate.date_measured,
     )
 
 

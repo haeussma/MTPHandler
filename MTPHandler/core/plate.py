@@ -731,7 +731,6 @@ class Plate(sdRDM.DataModel):
             name=name,
             plate=self,
             detected_reactant=detected_reactant,
-            mapping_reactant=mapping_reactant,
             reactant_standard=reactant_standard,
             wavelength=wavelength,
             path=path,
@@ -753,7 +752,7 @@ class Plate(sdRDM.DataModel):
             ]:
                 continue
 
-            measurement = well._get_measurement(wavelength)
+            measurement = well.get_measurement(wavelength)
 
             if measurement.species_contibutes(species.id):
                 wells.append(well)
@@ -876,7 +875,7 @@ class Plate(sdRDM.DataModel):
             condition = well._get_species_condition(species.id)
 
             blank_measurement_mapping[condition.init_conc].append(
-                well._get_measurement(wavelength).absorptions
+                well.get_measurement(wavelength).absorptions
             )
 
         conc_mean_blank_mapping = {}

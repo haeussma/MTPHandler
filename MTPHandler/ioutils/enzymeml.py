@@ -1,4 +1,5 @@
-from typing import Dict, List
+import time
+from typing import Dict, List, FrozenSet
 from sdRDM import DataModel
 from collections import defaultdict
 from datetime import datetime
@@ -24,7 +25,6 @@ def create_enzymeml(
     plate: "Plate",
     detected_reactant: Reactant,
     reactant_standard: Standard,
-    mapping_reactant: Reactant,
     wavelength: int = None,
     path: str = None,
 ) -> EnzymeML.EnzymeMLDocument:
@@ -63,63 +63,39 @@ def create_enzymeml(
     proteins = [species for species in plate.species if isinstance(species, Protein)]
 
     # Create measurements
-    measurements = create_measurements(
+    measurements = assamble_measurements(
         plate=plate,
         wavelength=wavelength,
         detected_reactant=detected_reactant,
-        mapping_reactant=mapping_reactant,
         reactant_standard=reactant_standard,
         proteins=proteins,
+        time_unit=plate.time_unit,
+        time=plate.times,
     )
 
-    # Create EnzymeMLDocument
-    enzymeMLDocument = EnzymeML.EnzymeMLDocument(
+    enzymeml = EnzymeML.EnzymeMLDocument(
         name=name,
-        created=plate.created,
+        created=datetime.now(),
         vessels=[plate._define_dummy_vessel()],
+        measurements=measurements,
         reactants=reactants,
         proteins=proteins,
-        measurements=measurements,
     )
 
     if path:
-        write_doument(enzymeMLDocument, path)
+        write_doument(enzymeml, path)
 
-    return enzymeMLDocument
-
-
-def write_doument(enzymeMLDocument: EnzymeML.EnzymeMLDocument, path: str):
-    """Writes file to specified path.
-    Supported formats are `json` and `yaml`.
-
-    Args:
-        enzymeMLDocument (EnzymeML.EnzymeMLDocument): `EnzymeMLDocument` object
-        path (str): Path to file
-
-    Raises:
-        ValueError: If path is not ending with `json` or `yaml`
-    """
-
-    format = path.split(".")[-1]
-
-    if format == "json":
-        outfile = enzymeMLDocument.json()
-    elif format == "yaml":
-        outfile = enzymeMLDocument.yaml()
-    else:
-        raise ValueError(f"Format {format} is not supported.")
-
-    with open(path, "w") as f:
-        f.write(outfile)
+    return enzymeml
 
 
-def create_measurements(
+def assamble_measurements(
     plate: "Plate",
-    wavelength: int,
+    wavelength: float,
     detected_reactant: Reactant,
-    mapping_reactant: Reactant,
     reactant_standard: Standard,
     proteins: List[Protein],
+    time_unit: str,
+    time: List[float],
 ) -> List[EnzymeML.Measurement]:
     """
     Creates a list of measurements based on the information of a `Plate`.
@@ -149,51 +125,29 @@ def create_measurements(
         proteins=proteins,
     )
 
-    # Check consistency of time arrays and time units
-    if not all(
-        [well.time_unit == reaction_wells[0].time_unit for well in reaction_wells]
-    ):
-        raise ValueError("Time units of wells are not equal.")
-    time_unit = reaction_wells[0].time_unit
-
-    if not all([well.time == reaction_wells[0].time for well in reaction_wells]):
-        raise ValueError("Time values of wells are not equal.")
-    time = reaction_wells[0].time
-
-    if not all(
-        well._get_species_condition(detected_reactant.id).conc_unit
-        == reaction_wells[0]._get_species_condition(detected_reactant.id).conc_unit
-        for well in reaction_wells
-    ):
-        raise ValueError("Concentration units of wells are not equal.")
-    conc_unit = reaction_wells[0]._get_species_condition(detected_reactant.id).conc_unit
-
-    # Get mapping of replicates
-    if not mapping_reactant:
-        mapping_reactant = detected_reactant
-    replicates_mapping = get_replicates_mapping(
-        wells=reaction_wells,
-        mapping_reactant=mapping_reactant,
-    )
+    # Group wells by their initial conditions
+    well_groups = group_wells_by_init_conditions(wells=reaction_wells)
 
     # Create measurements
     measurements = []
-    for init_conc, well_ids in replicates_mapping.items():
+    for well_group in well_groups:
         measurement = EnzymeML.Measurement(
-            name=f"{detected_reactant.name} {init_conc} {conc_unit}",
-            global_time=time,
-            global_time_unit=time_unit,
+            name=f"{detected_reactant.name} measurement",
+            global_time=plate.times,
+            global_time_unit=plate.time_unit,
             ph=plate.ph,
-            temperature=plate.temperature,
+            temperature=plate.temperatures[0],
             temperature_unit=plate.temperature_unit,
         )
 
-        replicate_wells = [plate.get_well(well_id, wavelength) for well_id in well_ids]
         measurement.species = get_measurement_species(
             measurement=measurement,
-            wells=replicate_wells,
+            wells=well_group,
             detected_reactant=detected_reactant,
             reactant_standard=reactant_standard,
+            time_unit=time_unit,
+            time=time,
+            wavelength=wavelength,
         )
 
         measurements.append(measurement)
@@ -203,11 +157,31 @@ def create_measurements(
     return measurements
 
 
+def group_wells_by_init_conditions(wells: List[Well]) -> List[List[Well]]:
+    """Groups wells by their initial conditions."""
+
+    well_mapping = defaultdict(list)
+    for well in wells:
+        condition_set = frozenset(
+            {
+                condition.species_id: condition.init_conc
+                for condition in well.init_conditions
+            }.items()
+        )
+
+        well_mapping[condition_set].append(well)
+
+    return [wells for wells in well_mapping.values()]
+
+
 def get_measurement_species(
     measurement: EnzymeML.Measurement,
     wells: List[Well],
     detected_reactant: Reactant,
     reactant_standard: Standard,
+    time_unit: str,
+    time: List[float],
+    wavelength: float,
 ) -> List[EnzymeML.MeasurementData]:
     """
     Creates a list of `MeasurementData` objects for a `Measurement` object.
@@ -220,8 +194,6 @@ def get_measurement_species(
     Returns:
         List[EnzymeML.MeasurementData]: List of `MeasurementData` objects
     """
-
-    # TODO: Assumes all wells have equal list of `InitCondition` objects. Might not be the case.
 
     measurement_datas = []
     for condition in wells[0].init_conditions:
@@ -237,6 +209,9 @@ def get_measurement_species(
                 measurement_data=measurement_data,
                 wells=wells,
                 standard=reactant_standard,
+                time_unit=time_unit,
+                time=time,
+                wavelength=wavelength,
             )
 
         measurement_datas.append(measurement_data)
@@ -245,7 +220,12 @@ def get_measurement_species(
 
 
 def get_replicates(
-    measurement_data: EnzymeML.MeasurementData, wells: List[Well], standard: Standard
+    measurement_data: EnzymeML.MeasurementData,
+    wells: List[Well],
+    standard: Standard,
+    time_unit: str,
+    time: List[float],
+    wavelength: float,
 ) -> List[EnzymeML.Replicate]:
     """
     Creates a list of `Replicate` objects for a `MeasurementData` object.
@@ -266,15 +246,16 @@ def get_replicates(
         unit = str(units[0])
 
         for well in wells:
+            data = well.get_measurement(wavelength)
             replicate = EnzymeML.Replicate(
                 id=well.id,
                 species_id=measurement_data.species_id,
                 measurement_id=measurement_data.measurement_id,
                 data_type=DataTypes.CONCENTRATION,
                 data_unit=unit,
-                time_unit=well.time_unit,
-                time=well.time,
-                data=well.to_concentration(standard=standard),
+                time_unit=time_unit,
+                time=time,
+                data=data.to_concentration(standard=standard),
             )
             replicates.append(replicate)
 
@@ -286,9 +267,9 @@ def get_replicates(
                 measurement_id=measurement_data.measurement_id,
                 data_type=DataTypes.ABSORPTION,
                 data_unit="dimensionless",
-                time_unit=well.time_unit,
-                time=well.time,
-                data=well.absorption,
+                time_unit=time_unit,
+                time=time,
+                data=data.absorptions,
             )
             replicates.append(replicate)
 
@@ -314,7 +295,7 @@ def get_replicates_mapping(
     replicates_mapping = defaultdict(list)
     for well in wells:
         condition = well._get_species_condition(mapping_reactant.id)
-        replicates_mapping[condition.init_conc].append(well.id)
+        replicates_mapping[condition.init_conc].append(well)
 
     return replicates_mapping
 
@@ -342,11 +323,11 @@ def get_catalyzed_wells(
     # Subset of wells, that contain one or more proteins, and one or more reactants that are `constant=False`
 
     catalyzed_wells = []
-    for well in plate.get_wells(wavelength=wavelength):
+    for well in plate.wells:
         if not any([well._contains_species(protein.id) for protein in proteins]):
             continue
 
-        if not well._is_blanked_for(detected_reactant.id):
+        if not well.get_measurement(wavelength).is_blanked_for(detected_reactant.id):
             continue
 
         catalyzed_wells.append(well)
@@ -354,3 +335,28 @@ def get_catalyzed_wells(
     print(f"Found {len(catalyzed_wells)} catalyzed wells")
 
     return catalyzed_wells
+
+
+def write_doument(enzymeMLDocument: EnzymeML.EnzymeMLDocument, path: str):
+    """Writes file to specified path.
+    Supported formats are `json` and `yaml`.
+
+    Args:
+        enzymeMLDocument (EnzymeML.EnzymeMLDocument): `EnzymeMLDocument` object
+        path (str): Path to file
+
+    Raises:
+        ValueError: If path is not ending with `json` or `yaml`
+    """
+
+    format = path.split(".")[-1]
+
+    if format == "json":
+        outfile = enzymeMLDocument.json()
+    elif format == "yaml":
+        outfile = enzymeMLDocument.yaml()
+    else:
+        raise ValueError(f"Format {format} is not supported.")
+
+    with open(path, "w") as f:
+        f.write(outfile)
