@@ -14,7 +14,7 @@ def parse_magellan(
     cls: "Plate",
     path: str,
     ph: float,
-    wavelengths: List[float],
+    wavelength: float,
 ):
     created = datetime.fromtimestamp(os.path.getctime(path)).strftime(
         "%Y-%m-%d %H:%M:%S"
@@ -57,22 +57,28 @@ def parse_magellan(
 
     plate = cls(
         ph=ph,
-        created=created,
+        date_measured=created,
         n_rows=n_rows,
         n_columns=n_columns,
-        measured_wavelengths=wavelengths,
+        measured_wavelengths=[wavelength],
         temperature_unit=temp_unit,
+        temperatures=temperatures,
+        time_unit=time_unit,
+        times=times,
     )
 
     for well_id, abso_list in data.items():
         x_pos, y_pos = id_to_xy(well_id)
-        plate.add_to_wells(
+        well = plate.add_to_wells(
             id=well_id,
-            absorption=abso_list,
-            time=times,
             x_position=x_pos,
             y_position=y_pos,
-            wavelength=wavelengths[0],
+        )
+        well.add_to_measurements(
+            wavelength=wavelength,
+            wavelength_unit="nm",
+            absorptions=abso_list,
+            blank_states=[],
         )
 
     return plate
