@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "mtphandler"
+version = "0.1.0"
+description = "Tool to work with microtiter plate data."
+authors = ["haeussma <83341109+haeussma@users.noreply.github.com>"]
+license = "MIT License"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.13"
+numpy = "^1.26.1"
+sympy = "^1.12"
+sdrdm = {git = "https://github.com/JR-1991/software-driven-rdm.git", branch = "linking-refactor"}
+plotly = "^5.18.0"
+calipytion = {git = "https://github.com/FAIRChemistry/CaliPytion.git"}
+openpyxl = "^3.1.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
