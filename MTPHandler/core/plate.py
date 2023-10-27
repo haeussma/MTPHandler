@@ -778,7 +778,7 @@ class Plate(sdRDM.DataModel):
         blanked_wells = []
         for well in wells:
             init_conc = well._get_species_condition(species.id).init_conc
-            measurement = well._get_measurement(wavelength)
+            measurement = well.get_measurement(wavelength)
             blank_state = measurement.get_blank_state(species.id)
 
             if init_conc not in conc_blank_mapping.keys():

@@ -35,7 +35,7 @@ def _get_standard_wells(
         if any([well._contains_species(catalyst_id) for catalyst_id in protein_ids]):
             continue
 
-        if well._get_measurement(wavelength).is_blanked_for(species.id):
+        if well.get_measurement(wavelength).is_blanked_for(species.id):
             standard_wells.append(well)
 
     return standard_wells

@@ -1,7 +1,7 @@
 {
   "id": "enzymemldocument0",
   "name": "SLAC kinetic assay",
-  "created": "2023-10-06 10:08:49.357395",
+  "created": "2023-10-27 09:52:00.061689",
   "vessels": [
     {
       "id": "plate0",
@@ -46,30 +46,30 @@
   ],
   "measurements": [
     {
-      "id": "measurement6",
+      "id": "measurement0",
       "name": "ABTS measurement",
       "temperature": 35.0,
       "temperature_unit": "C",
       "ph": 3.5,
       "species": [
         {
-          "id": "measurementdata10",
+          "id": "measurementdata0",
           "init_conc": 100.0,
           "unit": "mmol / l",
-          "measurement_id": "measurement6",
+          "measurement_id": "measurement0",
           "species_id": "s1"
         },
         {
-          "id": "measurementdata11",
+          "id": "measurementdata1",
           "init_conc": 5.0,
           "unit": "umol / l",
-          "measurement_id": "measurement6",
+          "measurement_id": "measurement0",
           "species_id": "s0",
           "replicates": [
             {
               "id": "A2",
               "species_id": "s0",
-              "measurement_id": "measurement6",
+              "measurement_id": "measurement0",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -144,7 +144,7 @@
             {
               "id": "B2",
               "species_id": "s0",
-              "measurement_id": "measurement6",
+              "measurement_id": "measurement0",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -219,7 +219,7 @@
             {
               "id": "C2",
               "species_id": "s0",
-              "measurement_id": "measurement6",
+              "measurement_id": "measurement0",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -294,17 +294,17 @@
           ]
         },
         {
-          "id": "measurementdata12",
+          "id": "measurementdata2",
           "init_conc": 6.55,
           "unit": "umol / l",
-          "measurement_id": "measurement6",
+          "measurement_id": "measurement0",
           "species_id": "p0"
         },
         {
-          "id": "measurementdata13",
+          "id": "measurementdata3",
           "init_conc": 0.0,
           "unit": "umol / l",
-          "measurement_id": "measurement6",
+          "measurement_id": "measurement0",
           "species_id": "s2"
         }
       ],
@@ -344,30 +344,30 @@
       "global_time_unit": "min"
     },
     {
-      "id": "measurement7",
+      "id": "measurement1",
       "name": "ABTS measurement",
       "temperature": 35.0,
       "temperature_unit": "C",
       "ph": 3.5,
       "species": [
         {
-          "id": "measurementdata14",
+          "id": "measurementdata4",
           "init_conc": 100.0,
           "unit": "mmol / l",
-          "measurement_id": "measurement7",
+          "measurement_id": "measurement1",
           "species_id": "s1"
         },
         {
-          "id": "measurementdata15",
+          "id": "measurementdata5",
           "init_conc": 10.0,
           "unit": "umol / l",
-          "measurement_id": "measurement7",
+          "measurement_id": "measurement1",
           "species_id": "s0",
           "replicates": [
             {
               "id": "A3",
               "species_id": "s0",
-              "measurement_id": "measurement7",
+              "measurement_id": "measurement1",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -442,7 +442,7 @@
             {
               "id": "B3",
               "species_id": "s0",
-              "measurement_id": "measurement7",
+              "measurement_id": "measurement1",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -517,7 +517,7 @@
             {
               "id": "C3",
               "species_id": "s0",
-              "measurement_id": "measurement7",
+              "measurement_id": "measurement1",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -592,17 +592,17 @@
           ]
         },
         {
-          "id": "measurementdata16",
+          "id": "measurementdata6",
           "init_conc": 6.55,
           "unit": "umol / l",
-          "measurement_id": "measurement7",
+          "measurement_id": "measurement1",
           "species_id": "p0"
         },
         {
-          "id": "measurementdata17",
+          "id": "measurementdata7",
           "init_conc": 0.0,
           "unit": "umol / l",
-          "measurement_id": "measurement7",
+          "measurement_id": "measurement1",
           "species_id": "s2"
         }
       ],
@@ -642,30 +642,30 @@
       "global_time_unit": "min"
     },
     {
-      "id": "measurement8",
+      "id": "measurement2",
       "name": "ABTS measurement",
       "temperature": 35.0,
       "temperature_unit": "C",
       "ph": 3.5,
       "species": [
         {
-          "id": "measurementdata18",
+          "id": "measurementdata8",
           "init_conc": 100.0,
           "unit": "mmol / l",
-          "measurement_id": "measurement8",
+          "measurement_id": "measurement2",
           "species_id": "s1"
         },
         {
-          "id": "measurementdata19",
+          "id": "measurementdata9",
           "init_conc": 15.0,
           "unit": "umol / l",
-          "measurement_id": "measurement8",
+          "measurement_id": "measurement2",
           "species_id": "s0",
           "replicates": [
             {
               "id": "A4",
               "species_id": "s0",
-              "measurement_id": "measurement8",
+              "measurement_id": "measurement2",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -740,7 +740,7 @@
             {
               "id": "B4",
               "species_id": "s0",
-              "measurement_id": "measurement8",
+              "measurement_id": "measurement2",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -815,7 +815,7 @@
             {
               "id": "C4",
               "species_id": "s0",
-              "measurement_id": "measurement8",
+              "measurement_id": "measurement2",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -890,17 +890,17 @@
           ]
         },
         {
-          "id": "measurementdata20",
+          "id": "measurementdata10",
           "init_conc": 6.55,
           "unit": "umol / l",
-          "measurement_id": "measurement8",
+          "measurement_id": "measurement2",
           "species_id": "p0"
         },
         {
-          "id": "measurementdata21",
+          "id": "measurementdata11",
           "init_conc": 0.0,
           "unit": "umol / l",
-          "measurement_id": "measurement8",
+          "measurement_id": "measurement2",
           "species_id": "s2"
         }
       ],
@@ -940,30 +940,30 @@
       "global_time_unit": "min"
     },
     {
-      "id": "measurement9",
+      "id": "measurement3",
       "name": "ABTS measurement",
       "temperature": 35.0,
       "temperature_unit": "C",
       "ph": 3.5,
       "species": [
         {
-          "id": "measurementdata22",
+          "id": "measurementdata12",
           "init_conc": 100.0,
           "unit": "mmol / l",
-          "measurement_id": "measurement9",
+          "measurement_id": "measurement3",
           "species_id": "s1"
         },
         {
-          "id": "measurementdata23",
+          "id": "measurementdata13",
           "init_conc": 25.0,
           "unit": "umol / l",
-          "measurement_id": "measurement9",
+          "measurement_id": "measurement3",
           "species_id": "s0",
           "replicates": [
             {
               "id": "A5",
               "species_id": "s0",
-              "measurement_id": "measurement9",
+              "measurement_id": "measurement3",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -1038,7 +1038,7 @@
             {
               "id": "B5",
               "species_id": "s0",
-              "measurement_id": "measurement9",
+              "measurement_id": "measurement3",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -1113,7 +1113,7 @@
             {
               "id": "C5",
               "species_id": "s0",
-              "measurement_id": "measurement9",
+              "measurement_id": "measurement3",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -1188,17 +1188,17 @@
           ]
         },
         {
-          "id": "measurementdata24",
+          "id": "measurementdata14",
           "init_conc": 6.55,
           "unit": "umol / l",
-          "measurement_id": "measurement9",
+          "measurement_id": "measurement3",
           "species_id": "p0"
         },
         {
-          "id": "measurementdata25",
+          "id": "measurementdata15",
           "init_conc": 0.0,
           "unit": "umol / l",
-          "measurement_id": "measurement9",
+          "measurement_id": "measurement3",
           "species_id": "s2"
         }
       ],
@@ -1238,30 +1238,30 @@
       "global_time_unit": "min"
     },
     {
-      "id": "measurement10",
+      "id": "measurement4",
       "name": "ABTS measurement",
       "temperature": 35.0,
       "temperature_unit": "C",
       "ph": 3.5,
       "species": [
         {
-          "id": "measurementdata26",
+          "id": "measurementdata16",
           "init_conc": 100.0,
           "unit": "mmol / l",
-          "measurement_id": "measurement10",
+          "measurement_id": "measurement4",
           "species_id": "s1"
         },
         {
-          "id": "measurementdata27",
+          "id": "measurementdata17",
           "init_conc": 50.0,
           "unit": "umol / l",
-          "measurement_id": "measurement10",
+          "measurement_id": "measurement4",
           "species_id": "s0",
           "replicates": [
             {
               "id": "A6",
               "species_id": "s0",
-              "measurement_id": "measurement10",
+              "measurement_id": "measurement4",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -1336,7 +1336,7 @@
             {
               "id": "B6",
               "species_id": "s0",
-              "measurement_id": "measurement10",
+              "measurement_id": "measurement4",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -1411,7 +1411,7 @@
             {
               "id": "C6",
               "species_id": "s0",
-              "measurement_id": "measurement10",
+              "measurement_id": "measurement4",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -1486,17 +1486,17 @@
           ]
         },
         {
-          "id": "measurementdata28",
+          "id": "measurementdata18",
           "init_conc": 6.55,
           "unit": "umol / l",
-          "measurement_id": "measurement10",
+          "measurement_id": "measurement4",
           "species_id": "p0"
         },
         {
-          "id": "measurementdata29",
+          "id": "measurementdata19",
           "init_conc": 0.0,
           "unit": "umol / l",
-          "measurement_id": "measurement10",
+          "measurement_id": "measurement4",
           "species_id": "s2"
         }
       ],
@@ -1536,30 +1536,30 @@
       "global_time_unit": "min"
     },
     {
-      "id": "measurement11",
+      "id": "measurement5",
       "name": "ABTS measurement",
       "temperature": 35.0,
       "temperature_unit": "C",
       "ph": 3.5,
       "species": [
         {
-          "id": "measurementdata30",
+          "id": "measurementdata20",
           "init_conc": 100.0,
           "unit": "mmol / l",
-          "measurement_id": "measurement11",
+          "measurement_id": "measurement5",
           "species_id": "s1"
         },
         {
-          "id": "measurementdata31",
+          "id": "measurementdata21",
           "init_conc": 75.0,
           "unit": "umol / l",
-          "measurement_id": "measurement11",
+          "measurement_id": "measurement5",
           "species_id": "s0",
           "replicates": [
             {
               "id": "A7",
               "species_id": "s0",
-              "measurement_id": "measurement11",
+              "measurement_id": "measurement5",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -1634,7 +1634,7 @@
             {
               "id": "B7",
               "species_id": "s0",
-              "measurement_id": "measurement11",
+              "measurement_id": "measurement5",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -1709,7 +1709,7 @@
             {
               "id": "C7",
               "species_id": "s0",
-              "measurement_id": "measurement11",
+              "measurement_id": "measurement5",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -1784,17 +1784,17 @@
           ]
         },
         {
-          "id": "measurementdata32",
+          "id": "measurementdata22",
           "init_conc": 6.55,
           "unit": "umol / l",
-          "measurement_id": "measurement11",
+          "measurement_id": "measurement5",
           "species_id": "p0"
         },
         {
-          "id": "measurementdata33",
+          "id": "measurementdata23",
           "init_conc": 0.0,
           "unit": "umol / l",
-          "measurement_id": "measurement11",
+          "measurement_id": "measurement5",
           "species_id": "s2"
         }
       ],
@@ -1834,30 +1834,30 @@
       "global_time_unit": "min"
     },
     {
-      "id": "measurement12",
+      "id": "measurement6",
       "name": "ABTS measurement",
       "temperature": 35.0,
       "temperature_unit": "C",
       "ph": 3.5,
       "species": [
         {
-          "id": "measurementdata34",
+          "id": "measurementdata24",
           "init_conc": 100.0,
           "unit": "mmol / l",
-          "measurement_id": "measurement12",
+          "measurement_id": "measurement6",
           "species_id": "s1"
         },
         {
-          "id": "measurementdata35",
+          "id": "measurementdata25",
           "init_conc": 100.0,
           "unit": "umol / l",
-          "measurement_id": "measurement12",
+          "measurement_id": "measurement6",
           "species_id": "s0",
           "replicates": [
             {
               "id": "A8",
               "species_id": "s0",
-              "measurement_id": "measurement12",
+              "measurement_id": "measurement6",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -1932,7 +1932,7 @@
             {
               "id": "B8",
               "species_id": "s0",
-              "measurement_id": "measurement12",
+              "measurement_id": "measurement6",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -2007,7 +2007,7 @@
             {
               "id": "C8",
               "species_id": "s0",
-              "measurement_id": "measurement12",
+              "measurement_id": "measurement6",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -2082,17 +2082,17 @@
           ]
         },
         {
-          "id": "measurementdata36",
+          "id": "measurementdata26",
           "init_conc": 6.55,
           "unit": "umol / l",
-          "measurement_id": "measurement12",
+          "measurement_id": "measurement6",
           "species_id": "p0"
         },
         {
-          "id": "measurementdata37",
+          "id": "measurementdata27",
           "init_conc": 0.0,
           "unit": "umol / l",
-          "measurement_id": "measurement12",
+          "measurement_id": "measurement6",
           "species_id": "s2"
         }
       ],
@@ -2132,30 +2132,30 @@
       "global_time_unit": "min"
     },
     {
-      "id": "measurement13",
+      "id": "measurement7",
       "name": "ABTS measurement",
       "temperature": 35.0,
       "temperature_unit": "C",
       "ph": 3.5,
       "species": [
         {
-          "id": "measurementdata38",
+          "id": "measurementdata28",
           "init_conc": 100.0,
           "unit": "mmol / l",
-          "measurement_id": "measurement13",
+          "measurement_id": "measurement7",
           "species_id": "s1"
         },
         {
-          "id": "measurementdata39",
+          "id": "measurementdata29",
           "init_conc": 150.0,
           "unit": "umol / l",
-          "measurement_id": "measurement13",
+          "measurement_id": "measurement7",
           "species_id": "s0",
           "replicates": [
             {
               "id": "A9",
               "species_id": "s0",
-              "measurement_id": "measurement13",
+              "measurement_id": "measurement7",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -2230,7 +2230,7 @@
             {
               "id": "B9",
               "species_id": "s0",
-              "measurement_id": "measurement13",
+              "measurement_id": "measurement7",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -2305,7 +2305,7 @@
             {
               "id": "C9",
               "species_id": "s0",
-              "measurement_id": "measurement13",
+              "measurement_id": "measurement7",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -2380,17 +2380,17 @@
           ]
         },
         {
-          "id": "measurementdata40",
+          "id": "measurementdata30",
           "init_conc": 6.55,
           "unit": "umol / l",
-          "measurement_id": "measurement13",
+          "measurement_id": "measurement7",
           "species_id": "p0"
         },
         {
-          "id": "measurementdata41",
+          "id": "measurementdata31",
           "init_conc": 0.0,
           "unit": "umol / l",
-          "measurement_id": "measurement13",
+          "measurement_id": "measurement7",
           "species_id": "s2"
         }
       ],
@@ -2430,30 +2430,30 @@
       "global_time_unit": "min"
     },
     {
-      "id": "measurement14",
+      "id": "measurement8",
       "name": "ABTS measurement",
       "temperature": 35.0,
       "temperature_unit": "C",
       "ph": 3.5,
       "species": [
         {
-          "id": "measurementdata42",
+          "id": "measurementdata32",
           "init_conc": 100.0,
           "unit": "mmol / l",
-          "measurement_id": "measurement14",
+          "measurement_id": "measurement8",
           "species_id": "s1"
         },
         {
-          "id": "measurementdata43",
+          "id": "measurementdata33",
           "init_conc": 200.0,
           "unit": "umol / l",
-          "measurement_id": "measurement14",
+          "measurement_id": "measurement8",
           "species_id": "s0",
           "replicates": [
             {
               "id": "A10",
               "species_id": "s0",
-              "measurement_id": "measurement14",
+              "measurement_id": "measurement8",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -2528,7 +2528,7 @@
             {
               "id": "B10",
               "species_id": "s0",
-              "measurement_id": "measurement14",
+              "measurement_id": "measurement8",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -2603,7 +2603,7 @@
             {
               "id": "C10",
               "species_id": "s0",
-              "measurement_id": "measurement14",
+              "measurement_id": "measurement8",
               "data_type": "conc",
               "data_unit": "umol / l",
               "time_unit": "min",
@@ -2678,17 +2678,17 @@
           ]
         },
         {
-          "id": "measurementdata44",
+          "id": "measurementdata34",
           "init_conc": 6.55,
           "unit": "umol / l",
-          "measurement_id": "measurement14",
+          "measurement_id": "measurement8",
           "species_id": "p0"
         },
         {
-          "id": "measurementdata45",
+          "id": "measurementdata35",
           "init_conc": 0.0,
           "unit": "umol / l",
-          "measurement_id": "measurement14",
+          "measurement_id": "measurement8",
           "species_id": "s2"
         }
       ],
