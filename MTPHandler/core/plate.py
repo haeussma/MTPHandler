@@ -812,7 +812,7 @@ class Plate(sdRDM.DataModel):
             rows=self.n_rows,
             cols=self.n_columns,
             shared_xaxes=True,
-            subplot_titles=[well.id for well in self.wells],
+            subplot_titles=self._generate_possible_well_ids(),
             shared_yaxes=shared_yaxes,
         )
         colors = px.colors.qualitative.Plotly
@@ -853,7 +853,7 @@ class Plate(sdRDM.DataModel):
 
         raise ValueError(f"No species found with id {_id}")
 
-    def _generate_possible_well_ids(self):
+    def _generate_possible_well_ids(self) -> List[str]:
         characters = "ABCDEFGH"
         integers = range(1, 13)  # 1 to 12
 
