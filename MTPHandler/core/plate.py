@@ -660,25 +660,21 @@ class Plate(sdRDM.DataModel):
         self,
         name: str,
         detected_reactant: Reactant,
-        mapping_reactant: Reactant = None,
         reactant_standard: Standard = None,
+        ignore_blank_status: bool = False,
         wavelength: int = None,
         path: str = None,
     ) -> "EnzymeML":
         from urllib import request
 
-        try:
-            request.urlopen("http://216.58.192.142", timeout=1)
-            from MTPHandler.ioutils import create_enzymeml
-
-        except request.URLError as err:
-            print("No active internet connection. Cannot access EnzymeML data model.")
+        from MTPHandler.ioutils.enzymeml import create_enzymeml
 
         return create_enzymeml(
             name=name,
             plate=self,
             detected_reactant=detected_reactant,
             reactant_standard=reactant_standard,
+            ignore_blank_status=ignore_blank_status,
             wavelength=wavelength,
             path=path,
         )
