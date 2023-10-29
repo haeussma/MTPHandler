@@ -16,7 +16,7 @@ from collections import defaultdict
 from types import NoneType
 from plotly.subplots import make_subplots
 from CaliPytion import Calibrator, Standard
-from MTPHandler.ioutils import initialize_calibrator, create_enzymeml
+from MTPHandler.ioutils import initialize_calibrator
 from .well import Well
 from .photometricmeasurement import PhotometricMeasurement
 from .initcondition import InitCondition
@@ -515,40 +515,45 @@ class Plate(sdRDM.DataModel):
         if len(init_concs) == 1:
             init_concs = init_concs * self.n_columns
 
-        if not len(init_concs) == self.n_columns:
+        for row_id in row_ids:
+            self._assign_species_to_row(row_id, init_concs, species, conc_unit)
+
+    def _assign_species_to_row(
+        self,
+        row_id: str,
+        init_concs: List[float],
+        species: AbstractSpecies,
+        conc_unit: str,
+    ):
+        wells = self._get_wells_by_row_id(row_id)
+
+        if not len(init_concs) == len(wells):
             raise AttributeError(
-                f"Argument 'init_concs' must be a list of length {self.n_columns}."
+                f"Number of initial concentrations ({len(init_concs)}) does not match"
+                f"number of rows in row {row_id} ({len(wells)})"
             )
 
-        # Add concentration array to wells in rows
-        for row_id in row_ids:
-            for column_id, init_conc in zip(range(self.n_columns), init_concs):
-                for well in self.wells:
-                    if not well.x_position == column_id:
-                        continue
-                    if not well.y_position == ord(row_id) - 65:
-                        continue
+        for well, init_conc in zip(wells, init_concs):
+            well.add_to_init_conditions(
+                species_id=species.id,
+                init_conc=init_conc,
+                conc_unit=conc_unit,
+            )
 
-                    well.add_to_init_conditions(
-                        species_id=species.id,
-                        init_conc=init_conc,
-                        conc_unit=conc_unit,
-                    )
+            if init_conc == 0:
+                contributes_to_signal = False
+            else:
+                contributes_to_signal = True
 
-                    if init_conc == 0:
-                        contributes_to_signal = False
-                    else:
-                        contributes_to_signal = True
-
-                    for measurement in well.measurements:
-                        measurement.add_to_blank_states(
-                            species_id=species.id,
-                            contributes_to_signal=contributes_to_signal,
-                        )
+            for measurement in well.measurements:
+                measurement.add_to_blank_states(
+                    species_id=species.id,
+                    contributes_to_signal=contributes_to_signal,
+                )
 
         print(
             f"Assigned {species.name} with concentrations of"
-            f" {init_concs} {conc_unit} to rows {row_ids}."
+            f" {init_concs} {conc_unit} to row {row_id}."
         )
 
     def _handle_wavelength(self) -> float:
@@ -578,64 +583,6 @@ class Plate(sdRDM.DataModel):
 
         raise ValueError(f"No well found with id {_id}")
 
-    # def get_wells(
-    #     self,
-    #     ids: List[str] = None,
-    #     rows: List[str] = None,
-    #     columns: List[int] = None,
-    #     wavelength: int = None,
-    # ) -> List[Well]:
-    #     """
-    #     Returns wells of a given wavelength, rows, columns, or individual ids
-    #     of a plate.
-
-    #     Args:
-    #         ids (List[str], optional): Well ID (e.g. 'B10'). Defaults to None.
-    #         rows (List[str], optional): ID of the rows (e.g. ['A', 'B']). Defaults to None.
-    #         columns (List[int], optional): Column number. Starts at 1. Defaults to None.
-    #         wavelength (int, optional): If plate was measured at different wavelengts,
-    #         specify wavelength. Defaults to None.
-
-    #     Raises:
-    #         AttributeError: If multiple wavelengths were measured and no wavelength is specified.
-
-    #     Returns:
-    #         List[Well]: Wells matching to specified selection criteria.
-    #     """
-
-    #     # return wells, if ids are provided
-    #     if ids and not any([rows, columns]):
-    #         if not isinstance(ids, list):
-    #             ids = [ids]
-
-    #         return [self._get_well_by_id(id, wavelength) for id in ids]
-
-    #     # return wells, if row_ids are provided
-    #     elif rows and not any([ids, columns]):
-    #         if not isinstance(rows, list):
-    #             rows = [rows]
-
-    #         well_rows = [
-    #             self._get_wells_by_row_id(row_id, wavelength) for row_id in rows
-    #         ]
-
-    #         return [well for row in well_rows for well in row]
-
-    #     # return wells, if column_ids are provided
-    #     elif columns and not any([ids, rows]):
-    #         if not isinstance(columns, list):
-    #             columns = [columns]
-
-    #         well_columns = [
-    #             self._get_wells_by_column_id(column_id, wavelength)
-    #             for column_id in columns
-    #         ]
-
-    #         return [well for column in well_columns for well in column]
-
-    #     # return all wells of a given wavelength
-    #     else:
-    #         return [well for well in self.wells if well.wavelength == wavelength]
     def _get_wells_by_column_id(self, column_id: int, wavelength: int) -> Well:
         x_position = column_id - 1
         y_positions = [
@@ -648,17 +595,8 @@ class Plate(sdRDM.DataModel):
             self._get_well_by_xy(x_position, y_pos, wavelength) for y_pos in y_positions
         ]
 
-    def _get_wells_by_row_id(self, row_id: str, wavelength: int) -> List[Well]:
-        y_position = ord(row_id) - 65
-        x_positions = [
-            well.x_position
-            for well in self.wells
-            if well.y_position == y_position and well.wavelength == wavelength
-        ]
-
-        return [
-            self._get_well_by_xy(x_pos, y_position, wavelength) for x_pos in x_positions
-        ]
+    def _get_wells_by_row_id(self, row_id: str) -> List[Well]:
+        return [well for well in self.wells if row_id in well.id]
 
     def _get_well_by_xy(
         self, x_position: int, y_position: int, wavelength: int
@@ -727,6 +665,15 @@ class Plate(sdRDM.DataModel):
         wavelength: int = None,
         path: str = None,
     ) -> "EnzymeML":
+        from urllib import request
+
+        try:
+            request.urlopen("http://216.58.192.142", timeout=1)
+            from MTPHandler.ioutils import create_enzymeml
+
+        except request.URLError as err:
+            print("No active internet connection. Cannot access EnzymeML data model.")
+
         return create_enzymeml(
             name=name,
             plate=self,
