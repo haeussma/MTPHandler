@@ -25,6 +25,7 @@ def create_enzymeml(
     plate: "Plate",
     detected_reactant: Reactant,
     reactant_standard: Standard,
+    ignore_blank_status: bool = False,
     wavelength: int = None,
     path: str = None,
 ) -> EnzymeML.EnzymeMLDocument:
@@ -68,6 +69,7 @@ def create_enzymeml(
         wavelength=wavelength,
         detected_reactant=detected_reactant,
         reactant_standard=reactant_standard,
+        ignore_blank_status=ignore_blank_status,
         proteins=proteins,
         time_unit=plate.time_unit,
         time=plate.times,
@@ -94,6 +96,7 @@ def assamble_measurements(
     detected_reactant: Reactant,
     reactant_standard: Standard,
     proteins: List[Protein],
+    ignore_blank_status: bool,
     time_unit: str,
     time: List[float],
 ) -> List[EnzymeML.Measurement]:
@@ -123,6 +126,7 @@ def assamble_measurements(
         wavelength=wavelength,
         detected_reactant=detected_reactant,
         proteins=proteins,
+        ignore_blank_status=ignore_blank_status,
     )
 
     # Group wells by their initial conditions
@@ -269,7 +273,7 @@ def get_replicates(
                 data_unit="dimensionless",
                 time_unit=time_unit,
                 time=time,
-                data=data.absorptions,
+                data=well.get_measurement(wavelength).absorptions,
             )
             replicates.append(replicate)
 
@@ -305,6 +309,7 @@ def get_catalyzed_wells(
     wavelength: int,
     detected_reactant: Reactant,
     proteins: List[Protein],
+    ignore_blank_status: bool,
 ) -> List[Well]:
     """
     Returns a list of wells, that contain the specified species,
@@ -327,8 +332,11 @@ def get_catalyzed_wells(
         if not any([well._contains_species(protein.id) for protein in proteins]):
             continue
 
-        if not well.get_measurement(wavelength).is_blanked_for(detected_reactant.id):
-            continue
+        if not ignore_blank_status:
+            if not well.get_measurement(wavelength).is_blanked_for(
+                detected_reactant.id
+            ):
+                continue
 
         catalyzed_wells.append(well)
 
