@@ -85,7 +85,7 @@ def create_enzymeml(
     )
 
     if path:
-        write_doument(enzymeml, path)
+        write_document(enzymeml, path)
 
     return enzymeml
 
