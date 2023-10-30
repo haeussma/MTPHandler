@@ -345,7 +345,7 @@ def get_catalyzed_wells(
     return catalyzed_wells
 
 
-def write_doument(enzymeMLDocument: EnzymeML.EnzymeMLDocument, path: str):
+def write_document(enzymeMLDocument: EnzymeML.EnzymeMLDocument, path: str):
     """Writes file to specified path.
     Supported formats are `json` and `yaml`.
 
