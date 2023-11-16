@@ -9,7 +9,7 @@ from typing import Dict, Generator, List
 import pandas as pd
 
 
-def parse_spectramax(
+def parse_multiskan(
     cls: "Plate",
     path: str,
     time: float | np.ndarray,
