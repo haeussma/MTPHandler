@@ -1,5 +1,3 @@
-from email.policy import default
-import re
 import os
 from datetime import datetime
 from copy import deepcopy
