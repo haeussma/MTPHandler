@@ -12,6 +12,7 @@ def parse_spectramax(
     cls: "Plate",
     path: str,
     ph: float = None,
+    time_unit: str = "min",
 ):
     df = pd.read_csv(
         path,
@@ -42,7 +43,7 @@ def parse_spectramax(
     block_start_ids = []
     for data in datas:
         if re.match(time_pattern, data[0]):
-            times.append(to_seconds(data[0]))
+            times.append(to_time(data[0], time_unit))
             temperatures.append(float(data[1]))
             block_start_ids.append(datas.index(data))
 
@@ -100,11 +101,11 @@ def parse_spectramax(
 
     # Create plate
     plate = cls(
-        n_rows=8,
-        n_columns=12,
+        n_rows=data.shape[0],
+        n_columns=data.shape[1],
         date_measured=created,
         times=times,
-        time_unit="s",
+        time_unit=time_unit,
         temperatures=temperatures,
         temperature_unit="C",
         ph=ph,
@@ -113,141 +114,23 @@ def parse_spectramax(
 
     return plate
 
-    # # Read raw data, parse metadata
 
-    # df = df.iloc[13:-9].reset_index().drop(columns="index")
-    # initial_substrates = [0, 5, 10, 15, 25, 50, 75, 100, 150, 200]
-    # time = []
-    # array = []
-
-    # # Extract measurement data
-    # for index, row in df.iterrows():
-    #     if index % 6 == 0:
-    #         time.append(row.values[0][0])
-    #         df.loc[index, "##BLOCKS= 2"] = row.values[0][2:]
-
-    #     data = row.values[0]
-    #     array.append([string_to_float(x) for x in data])
-
-    # # Cleaning and restructuring of data
-    # array: np.ndarray = np.array(array)
-    # array = array[~np.isnan(array)]
-    # array = array.reshape(11, 6, 20)
-    # array = array.swapaxes(0, 2)
-
-    # # (wavelength, concentration, control, replicates, data)
-    # array = array.reshape((2, 10, 2, 3, 11))
-
-    # # (wavelength, control, concentration, replicates, data)
-    # array = array.swapaxes(1, 2)
-
-    # substrate = array[0][0]
-    # substrate_control = array[0][1]
-    # product = array[1][0]
-    # product_control = array[1][1]
-
-    # measurements_product_control = []
-    # for data, init_substrate in zip(product_control, initial_substrates):
-    #     measurement = {}
-    #     measurement["initial_substrate"] = 0
-    #     reps = []
-    #     for replicate in data:
-    #         rep_dict = {}
-    #         rep_dict["replicate"] = replicate.tolist()
-    #         reps.append(rep_dict)
-    #     measurement["data"] = reps
-
-    #     measurements_product_control.append(measurement)
-
-    # measurements_substrate_control = []
-    # for data, init_substrate in zip(substrate_control, initial_substrates):
-    #     measurement = {}
-    #     measurement["initial_substrate"] = init_substrate
-    #     reps = []
-    #     for replicate in data:
-    #         rep_dict = {}
-    #         rep_dict["replicate"] = replicate.tolist()
-    #         reps.append(rep_dict)
-    #     measurement["data"] = reps
-
-    #     measurements_substrate_control.append(measurement)
-
-    # measurements_substrate = []
-    # for data, init_substrate in zip(substrate, initial_substrates):
-    #     measurement = {}
-    #     measurement["initial_substrate"] = init_substrate
-    #     reps = []
-    #     for replicate in data:
-    #         rep_dict = {}
-    #         rep_dict["replicate"] = replicate.tolist()
-    #         reps.append(rep_dict)
-    #     measurement["data"] = reps
-
-    #     measurements_substrate.append(measurement)
-
-    # measurements_product = []
-    # for data in product:
-    #     measurement = {}
-    #     measurement["initial_substrate"] = 0
-    #     reps = []
-    #     for replicate in data:
-    #         rep_dict = {}
-    #         rep_dict["replicate"] = replicate.tolist()
-    #         reps.append(rep_dict)
-    #     measurement["data"] = reps
-
-    #     measurements_product.append(measurement)
-
-    # data_dict = {
-    #     "pH": pH,
-    #     "name": f"ABTS oxidation pH {pH} and {temperature}°C",
-    #     "date": str(
-    #         datetime(
-    #             *[int(x) for x in date.split("-")],
-    #         )
-    #     ),
-    #     "time": [to_seconds(x) for x in time],
-    #     "temperature": temperature,
-    #     "s0": measurements_substrate,
-    #     "s1": measurements_product,
-    #     "s2": measurements_substrate_control,
-    #     "s3": measurements_product_control,
-    # }
-    # return data_dict
-
-
-def blockshaped(arr: np.ndarray, nrows: int, ncols: int):
-    """
-    Return an array of shape (n, nrows, ncols) where
-    n * nrows * ncols = arr.size
-    If arr is a 2D array, the returned array should look like n subblocks with
-    each subblock preserving the "physical" layout of arr.
-    """
-    h, w = arr.shape
-    assert h % nrows == 0, f"{h} rows is not evenly divisible by {nrows}"
-    assert w % ncols == 0, f"{w} cols is not evenly divisible by {ncols}"
-    return (
-        arr.reshape(h // nrows, nrows, -1, ncols)
-        .swapaxes(1, 2)
-        .reshape(-1, nrows, ncols)
-    )
-
-
-def read_photometer(path) -> pd.DataFrame:
-    return pd.read_csv(path, sep="delimiter", encoding="utf-16", engine="python")
-
-
-def string_to_float(string: str) -> float:
-    number = re.sub(r"[^0-9.]", "", string)
-    if len(number) == 0:
-        return float("nan")
-    else:
-        return float(number)
-
-
-def to_seconds(string: str) -> List[int]:
+def to_time(string: str, unit: str) -> List[int]:
     time = datetime.strptime(string, "%H:%M:%S").time()
-    return time.hour * 3600 + time.minute * 60 + time.second
+
+    if unit == "s":
+        return time.hour * 3600 + time.minute * 60 + time.second
+
+    elif unit == "min":
+        return time.hour * 60 + time.minute + time.second / 60
+
+    elif unit == "h":
+        return time.hour + time.minute / 60 + time.second / 3600
+
+    else:
+        raise ValueError(
+            f"Unit '{unit}' not supported. Supported units are 's', 'min', and 'h'"
+        )
 
 
 def _coordinates_to_id(x: int, y: int) -> str:
