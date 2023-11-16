@@ -1,6 +1,5 @@
 from os import name
 from typing import List
-from collections import defaultdict
 import numpy as np
 
 from CaliPytion import Calibrator, Standard
@@ -30,12 +29,23 @@ def _get_standard_wells(
     standard_wells = []
     for well in plate.wells:
         if not well._contains_species(species.id):
+            print(well.id)
             continue
 
         if any([well._contains_species(catalyst_id) for catalyst_id in protein_ids]):
             continue
 
-        if well.get_measurement(wavelength).is_blanked_for(species.id):
+        measurement = well.get_measurement(wavelength)
+        if measurement.is_blanked_for(species.id):
+            standard_wells.append(well)
+
+        # Add wells with zero concentration to standard wells
+        if all(
+            [
+                blank_state.contributes_to_signal == False
+                for blank_state in measurement.blank_states
+            ]
+        ):
             standard_wells.append(well)
 
     return standard_wells
