@@ -91,23 +91,6 @@ def parse_multiskan(
                     absorptions=column.tolist(),
                 )
 
-    # for wavelength, measurments in data_dict.items():
-    #     for row in range(n_rows):
-    #         for column in range(n_columns):
-
-    #             well = plate.add_to_wells(
-    #                 id=_coordinates_to_id(column, row),
-    #                 time_unit=time_unit,
-    #                 x_position=column,
-    #                 y_position=row,
-    #                 wavelength=wavelength,
-    #                 time=time.tolist(),
-    #             )
-
-    #             well.add_to_measurements(
-    #                 wa
-    #             )
-
     return plate
 
 
