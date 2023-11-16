@@ -512,10 +512,10 @@ class Plate(sdRDM.DataModel):
             row_ids = [_id.upper() for _id in row_ids]
 
         # Handle init_concs
-        if len(init_concs) == 1:
-            init_concs = init_concs * self.n_columns
 
         for row_id in row_ids:
+            if len(init_concs) == 1:
+                init_concs = init_concs * len(self._get_wells_by_row_id(row_id))
             self._assign_species_to_row(row_id, init_concs, species, conc_unit)
 
     def _assign_species_to_row(
@@ -596,7 +596,7 @@ class Plate(sdRDM.DataModel):
         ]
 
     def _get_wells_by_row_id(self, row_id: str) -> List[Well]:
-        return [well for well in self.wells if row_id in well.id]
+        return [well for well in self.wells if row_id in well.id and well.measurements]
 
     def _get_well_by_xy(
         self, x_position: int, y_position: int, wavelength: int
@@ -745,11 +745,14 @@ class Plate(sdRDM.DataModel):
 
         print(f"Blanked {len(blanked_wells)} wells containing {species.name}.")
 
-    def visualize(self, zoom: bool = False):
+    def visualize(self, zoom: bool = False, wavelengths: float = None):
         if zoom:
             shared_yaxes = False
         else:
             shared_yaxes = True
+
+        if not isinstance(wavelengths, list):
+            wavelengths = [wavelengths]
 
         fig = make_subplots(
             rows=self.n_rows,
@@ -762,13 +765,18 @@ class Plate(sdRDM.DataModel):
 
         for well in self.wells:
             for measurement, color in zip(well.measurements, colors):
+                if measurement.wavelength not in wavelengths:
+                    continue
+
                 fig.add_trace(
                     go.Scatter(
                         x=self.times,
                         y=measurement.absorptions,
                         name=f"{measurement.wavelength} nm",
+                        mode="lines",
                         showlegend=False,
                         line=dict(color=color),
+                        hovertemplate="%{y:.2f}<br>",
                     ),
                     col=well.x_position + 1,
                     row=well.y_position + 1,
@@ -776,7 +784,6 @@ class Plate(sdRDM.DataModel):
 
         fig.update_xaxes(showticklabels=False)
         fig.update_yaxes(showticklabels=False)
-        fig.update_traces(hovertemplate="%{y:.2f}")
 
         fig.update_layout(
             plot_bgcolor="white",
