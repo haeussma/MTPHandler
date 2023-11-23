@@ -2,6 +2,7 @@ import sdRDM
 
 import itertools as it
 import re
+import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
@@ -636,12 +637,35 @@ class Plate(sdRDM.DataModel):
                 conc_unit=conc_unit,
             )
 
-    def get_well(self, _id: str, wavelength: float) -> Well:
+    def assign_species_from_spreadsheet(
+        self,
+        species: AbstractSpecies,
+        conc_unit: str,
+        path: str,
+        sheet_name: str,
+        header: int = 1,
+        index_col: int = 0,
+    ):
+        df = pd.read_excel(
+            path, sheet_name=sheet_name, header=header, index_col=index_col
+        )
+
         for well in self.wells:
-            if well.id == _id and well.wavelength == wavelength:
+            row = well.id[0]
+            column = int(well.id[1:])
+
+            well.add_to_init_conditions(
+                species_id=species.id,
+                init_conc=df.loc[row, column],
+                conc_unit=conc_unit,
+            )
+
+    def get_well(self, _id: str) -> Well:
+        for well in self.wells:
+            if well.id == _id:
                 return well
 
-        raise ValueError(f"No well found with id {_id} and wavelength {wavelength}")
+        raise ValueError(f"Well {_id} does not exist.")
 
     def calibrate(
         self,
