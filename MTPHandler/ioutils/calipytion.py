@@ -29,7 +29,6 @@ def _get_standard_wells(
     standard_wells = []
     for well in plate.wells:
         if not well._contains_species(species.id):
-            print(well.id)
             continue
 
         if any([well._contains_species(catalyst_id) for catalyst_id in protein_ids]):

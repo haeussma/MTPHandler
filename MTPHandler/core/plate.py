@@ -376,6 +376,7 @@ class Plate(sdRDM.DataModel):
         conc_unit: str,
         to: Literal["all", "rows", "columns", "except"],
         ids: Union[str, List[str], int, List[int]] = None,
+        contributes_to_signal: Optional[bool] = None,
     ):
         cases = ["rows", "columns", "all", "except"]
         if not to in cases:
@@ -388,7 +389,12 @@ class Plate(sdRDM.DataModel):
             ids = [ids]
 
         if to == "all":
-            self.assign_species_to_all(species, init_conc, conc_unit)
+            self.assign_species_to_all(
+                species=species,
+                init_conc=init_conc,
+                conc_unit=conc_unit,
+                contributes_to_signal=contributes_to_signal,
+            )
 
         elif to == "columns":
             self.assign_species_to_columns(
@@ -396,16 +402,25 @@ class Plate(sdRDM.DataModel):
                 species=species,
                 init_concs=init_conc,
                 conc_unit=conc_unit,
+                contributes_to_signal=contributes_to_signal,
             )
 
         elif to == "rows":
             self.assign_species_to_rows(
-                row_ids=ids, species=species, init_concs=init_conc, conc_unit=conc_unit
+                row_ids=ids,
+                species=species,
+                init_concs=init_conc,
+                conc_unit=conc_unit,
+                contributes_to_signal=contributes_to_signal,
             )
 
         else:
             self.assign_species_to_all_except(
-                well_ids=ids, species=species, init_conc=init_conc, conc_unit=conc_unit
+                well_ids=ids,
+                species=species,
+                init_conc=init_conc,
+                conc_unit=conc_unit,
+                contributes_to_signal=contributes_to_signal,
             )
 
         return
@@ -415,6 +430,7 @@ class Plate(sdRDM.DataModel):
         species: AbstractSpecies,
         init_conc: float,
         conc_unit: str,
+        contributes_to_signal: Optional[bool] = None,
     ):
         if not len(init_conc) == 1:
             raise AttributeError(
@@ -428,15 +444,18 @@ class Plate(sdRDM.DataModel):
                 conc_unit=conc_unit,
             )
 
-            if init_conc[0] == 0:
-                contributes_to_signal = False
+            if contributes_to_signal is not None:
+                contributes = contributes_to_signal
             else:
-                contributes_to_signal = True
+                if init_conc == 0:
+                    contributes = False
+                else:
+                    contributes = True
 
             for measurement in well.measurements:
                 measurement.add_to_blank_states(
                     species_id=species.id,
-                    contributes_to_signal=contributes_to_signal,
+                    contributes_to_signal=contributes,
                 )
 
         print(f"Assigned {species.name} to all wells.")
@@ -447,6 +466,7 @@ class Plate(sdRDM.DataModel):
         species: AbstractSpecies,
         init_concs: List[float],
         conc_unit: str,
+        contributes_to_signal: Optional[bool] = None,
     ):
         # Handle column_ids
         if not all([isinstance(column_id, int) for column_id in column_ids]):
@@ -479,15 +499,18 @@ class Plate(sdRDM.DataModel):
                         species_id=species.id, init_conc=init_conc, conc_unit=conc_unit
                     )
 
-                    if init_conc == 0:
-                        contributes_to_signal = False
+                    if contributes_to_signal is not None:
+                        contributes = contributes_to_signal
                     else:
-                        contributes_to_signal = True
+                        if init_conc == 0:
+                            contributes = False
+                        else:
+                            contributes = True
 
                     for measurement in well.measurements:
                         measurement.add_to_blank_states(
                             species_id=species.id,
-                            contributes_to_signal=contributes_to_signal,
+                            contributes_to_signal=contributes,
                         )
 
         print(
@@ -501,6 +524,7 @@ class Plate(sdRDM.DataModel):
         species: AbstractSpecies,
         init_concs: List[float],
         conc_unit: str,
+        contributes_to_signal: Optional[bool] = None,
     ):
         # Handle row_ids
         if not row_ids:
@@ -517,7 +541,14 @@ class Plate(sdRDM.DataModel):
         for row_id in row_ids:
             if len(init_concs) == 1:
                 init_concs = init_concs * len(self._get_wells_by_row_id(row_id))
-            self._assign_species_to_row(row_id, init_concs, species, conc_unit)
+
+            self._assign_species_to_row(
+                row_id=row_id,
+                init_concs=init_concs,
+                species=species,
+                conc_unit=conc_unit,
+                contributes_to_signal=contributes_to_signal,
+            )
 
     def _assign_species_to_row(
         self,
@@ -525,6 +556,7 @@ class Plate(sdRDM.DataModel):
         init_concs: List[float],
         species: AbstractSpecies,
         conc_unit: str,
+        contributes_to_signal: Optional[bool],
     ):
         wells = self._get_wells_by_row_id(row_id)
 
@@ -541,15 +573,18 @@ class Plate(sdRDM.DataModel):
                 conc_unit=conc_unit,
             )
 
-            if init_conc == 0:
-                contributes_to_signal = False
+            if contributes_to_signal is not None:
+                contributes = contributes_to_signal
             else:
-                contributes_to_signal = True
+                if init_conc == 0:
+                    contributes = False
+                else:
+                    contributes = True
 
             for measurement in well.measurements:
                 measurement.add_to_blank_states(
                     species_id=species.id,
-                    contributes_to_signal=contributes_to_signal,
+                    contributes_to_signal=contributes,
                 )
 
         print(
@@ -620,6 +655,7 @@ class Plate(sdRDM.DataModel):
         species: AbstractSpecies,
         init_conc: float,
         conc_unit: str,
+        contributes_to_signal: Optional[bool] = None,
     ):
         if not len(init_conc) == 1:
             raise AttributeError(
@@ -637,6 +673,20 @@ class Plate(sdRDM.DataModel):
                 conc_unit=conc_unit,
             )
 
+            if contributes_to_signal is not None:
+                contributes = contributes_to_signal
+            else:
+                if init_conc == 0:
+                    contributes = False
+                else:
+                    contributes = True
+
+            for measurement in well.measurements:
+                measurement.add_to_blank_states(
+                    species_id=species.id,
+                    contributes_to_signal=contributes,
+                )
+
     def assign_species_from_spreadsheet(
         self,
         species: AbstractSpecies,
@@ -653,12 +703,27 @@ class Plate(sdRDM.DataModel):
         for well in self.wells:
             row = well.id[0]
             column = int(well.id[1:])
+            init_conc = df.loc[row, column]
+
+            if np.isnan(init_conc):
+                continue
 
             well.add_to_init_conditions(
                 species_id=species.id,
-                init_conc=df.loc[row, column],
+                init_conc=init_conc,
                 conc_unit=conc_unit,
             )
+
+            if init_conc == 0:
+                contributes_to_signal = False
+            else:
+                contributes_to_signal = True
+
+            for measurement in well.measurements:
+                measurement.add_to_blank_states(
+                    species_id=species.id,
+                    contributes_to_signal=contributes_to_signal,
+                )
 
     def get_well(self, _id: str) -> Well:
         for well in self.wells:

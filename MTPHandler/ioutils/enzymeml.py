@@ -152,6 +152,7 @@ def assamble_measurements(
             time_unit=time_unit,
             time=time,
             wavelength=wavelength,
+            ignore_blank_status=ignore_blank_status,
         )
 
         measurements.append(measurement)
@@ -186,6 +187,7 @@ def get_measurement_species(
     time_unit: str,
     time: List[float],
     wavelength: float,
+    ignore_blank_status: bool,
 ) -> List[EnzymeML.MeasurementData]:
     """
     Creates a list of `MeasurementData` objects for a `Measurement` object.
@@ -216,6 +218,7 @@ def get_measurement_species(
                 time_unit=time_unit,
                 time=time,
                 wavelength=wavelength,
+                ignore_blank_status=ignore_blank_status,
             )
 
         measurement_datas.append(measurement_data)
@@ -230,6 +233,7 @@ def get_replicates(
     time_unit: str,
     time: List[float],
     wavelength: float,
+    ignore_blank_status: bool,
 ) -> List[EnzymeML.Replicate]:
     """
     Creates a list of `Replicate` objects for a `MeasurementData` object.
@@ -259,7 +263,9 @@ def get_replicates(
                 data_unit=unit,
                 time_unit=time_unit,
                 time=time,
-                data=data.to_concentration(standard=standard),
+                data=data.to_concentration(
+                    standard=standard, ignore_blank_status=ignore_blank_status
+                ),
             )
             replicates.append(replicate)
 
@@ -337,7 +343,6 @@ def get_catalyzed_wells(
                 detected_reactant.id
             ):
                 continue
-
         catalyzed_wells.append(well)
 
     print(f"Found {len(catalyzed_wells)} catalyzed wells")
