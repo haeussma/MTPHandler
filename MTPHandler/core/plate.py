@@ -18,6 +18,7 @@ from types import NoneType
 from plotly.subplots import make_subplots
 from CaliPytion import Calibrator, Standard
 from MTPHandler.ioutils import initialize_calibrator
+from MTPHandler.ioutils.enzymeml import sort_measurements
 from .well import Well
 from .photometricmeasurement import PhotometricMeasurement
 from .initcondition import InitCondition
@@ -750,12 +751,11 @@ class Plate(sdRDM.DataModel):
         name: str,
         detected_reactant: Reactant,
         reactant_standard: Standard = None,
+        sort_measurements_by: AbstractSpecies = None,
         ignore_blank_status: bool = False,
         wavelength: int = None,
         path: str = None,
     ) -> "EnzymeML":
-        from urllib import request
-
         from MTPHandler.ioutils.enzymeml import create_enzymeml
 
         return create_enzymeml(
@@ -763,6 +763,7 @@ class Plate(sdRDM.DataModel):
             plate=self,
             detected_reactant=detected_reactant,
             reactant_standard=reactant_standard,
+            sort_measurements_by=sort_measurements_by,
             ignore_blank_status=ignore_blank_status,
             wavelength=wavelength,
             path=path,

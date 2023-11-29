@@ -5,6 +5,7 @@ from collections import defaultdict
 from datetime import datetime
 
 from CaliPytion import Standard
+from MTPHandler.core.abstractspecies import AbstractSpecies
 
 from MTPHandler.core.initcondition import InitCondition
 from MTPHandler.core.reactant import Reactant
@@ -25,6 +26,7 @@ def create_enzymeml(
     plate: "Plate",
     detected_reactant: Reactant,
     reactant_standard: Standard,
+    sort_measurements_by: AbstractSpecies = None,
     ignore_blank_status: bool = False,
     wavelength: int = None,
     path: str = None,
@@ -83,6 +85,9 @@ def create_enzymeml(
         reactants=reactants,
         proteins=proteins,
     )
+
+    if sort_measurements_by:
+        enzymeml = sort_measurements(enzymeml, sort_measurements_by)
 
     if path:
         write_document(enzymeml, path)
@@ -348,6 +353,25 @@ def get_catalyzed_wells(
     print(f"Found {len(catalyzed_wells)} catalyzed wells")
 
     return catalyzed_wells
+
+
+def sort_measurements(
+    enzymeMLDocument: EnzymeML.EnzymeMLDocument,
+    sort_species: AbstractSpecies,
+) -> EnzymeML.EnzymeMLDocument:
+    measurements_dict = {}
+    for measurement in enzymeMLDocument.measurements:
+        for species in measurement.species:
+            if species.species_id == sort_species.id:
+                measurements_dict[species.init_conc] = measurement
+                print(measurements_dict)
+
+    sorted_keys = list(sorted(measurements_dict.keys()))
+    sorted_measurements = [measurements_dict[key] for key in sorted_keys]
+
+    enzymeMLDocument.measurements = sorted_measurements
+
+    return enzymeMLDocument
 
 
 def write_document(enzymeMLDocument: EnzymeML.EnzymeMLDocument, path: str):
