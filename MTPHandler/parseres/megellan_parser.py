@@ -39,7 +39,7 @@ def parse_magellan(
             time, time_unit = time_str[1:-1].split(" ")
 
             times.append(time)
-            time_unit = time_unit
+            time_unit = time_unit.replace("sec", "s")
             dates.append(datetime.strptime(date_str.strip(), date_format))
 
     df = df.dropna(how="all")
