@@ -2,8 +2,7 @@ from os import name
 from typing import List
 import numpy as np
 
-from CaliPytion.core import Calibrator, Standard
-from CaliPytion.modified.sample import Sample
+from CaliPytion.core import Calibrator, Standard, Sample
 from MTPHandler.core.abstractspecies import AbstractSpecies
 from MTPHandler.core.well import Well
 from MTPHandler.core.protein import Protein
