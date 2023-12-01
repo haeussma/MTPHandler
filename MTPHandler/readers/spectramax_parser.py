@@ -8,7 +8,7 @@ import pandas as pd
 from MTPHandler.core import Well, PhotometricMeasurement
 
 
-def parse_spectramax(
+def read_spectramax(
     cls: "Plate",
     path: str,
     ph: float = None,

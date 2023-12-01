@@ -8,7 +8,7 @@ from collections import defaultdict
 import pandas as pd
 
 
-def parse_magellan(
+def read_magellan(
     cls: "Plate",
     path: str,
     ph: float,
