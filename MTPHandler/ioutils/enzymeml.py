@@ -364,7 +364,6 @@ def sort_measurements(
         for species in measurement.species:
             if species.species_id == sort_species.id:
                 measurements_dict[species.init_conc] = measurement
-                print(measurements_dict)
 
     sorted_keys = list(sorted(measurements_dict.keys()))
     sorted_measurements = [measurements_dict[key] for key in sorted_keys]

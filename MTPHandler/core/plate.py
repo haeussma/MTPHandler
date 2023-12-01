@@ -16,7 +16,7 @@ from datetime import datetime as Datetime
 from collections import defaultdict
 from types import NoneType
 from plotly.subplots import make_subplots
-from CaliPytion import Calibrator, Standard
+from CaliPytion.core import Calibrator, Standard
 from MTPHandler.ioutils import initialize_calibrator
 from MTPHandler.ioutils.enzymeml import sort_measurements
 from .well import Well
