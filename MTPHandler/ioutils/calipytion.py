@@ -2,7 +2,7 @@ from os import name
 from typing import List
 import numpy as np
 
-from CaliPytion import Calibrator, Standard
+from CaliPytion.core import Calibrator, Standard
 from CaliPytion.modified.sample import Sample
 from MTPHandler.core.abstractspecies import AbstractSpecies
 from MTPHandler.core.well import Well

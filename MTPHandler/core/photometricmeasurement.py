@@ -2,9 +2,7 @@ import sdRDM
 
 from typing import List, Optional
 from pydantic import Field
-from pydantic import Field
-from pydantic import Field
-from CaliPytion import Standard
+from CaliPytion.core import Standard
 from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
 from .blankstate import BlankState

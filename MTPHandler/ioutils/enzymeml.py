@@ -4,10 +4,9 @@ from sdRDM import DataModel
 from collections import defaultdict
 from datetime import datetime
 
-from CaliPytion import Standard
+from CaliPytion.core import Standard
 from MTPHandler.core.abstractspecies import AbstractSpecies
 
-from MTPHandler.core.initcondition import InitCondition
 from MTPHandler.core.reactant import Reactant
 from MTPHandler.core.protein import Protein
 from MTPHandler.core.well import Well
