@@ -70,7 +70,7 @@ def map_to_standard(
                 id=well.id,
                 concentration=condition.init_conc,
                 conc_unit=condition.conc_unit,
-                signal=np.nanmean(measurement.absorptions),
+                signal=float(np.nanmean(measurement.absorptions)),
             )
         )
 
