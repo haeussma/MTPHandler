@@ -2,14 +2,16 @@ from os import name
 from typing import List
 import numpy as np
 
-from CaliPytion.core import Calibrator, Standard, Sample
+from CaliPytion.core import Calibrator, Standard, Sample, SignalType
 from MTPHandler.core.abstractspecies import AbstractSpecies
 from MTPHandler.core.well import Well
 from MTPHandler.core.protein import Protein
 
 
 def _get_standard_wells(
-    plate: "Plate", species: AbstractSpecies, wavelength: int
+    plate: "Plate",
+    species: AbstractSpecies,
+    wavelength: int,
 ) -> List[Well]:
     # handel wavelength
     if not wavelength:
@@ -53,6 +55,7 @@ def map_to_standard(
     plate: "Plate",
     species: AbstractSpecies,
     wavelength: int = None,
+    signal_type: SignalType = SignalType.ABSORBANCE,
 ) -> Standard:
     standard_wells = _get_standard_wells(
         plate=plate,
@@ -79,6 +82,7 @@ def map_to_standard(
         species_id=species.id,
         name=species.name,
         wavelength=wavelength,
+        signal_type=signal_type,
         samples=samples,
         ph=plate.ph,
         temperature=plate.temperatures[0],
@@ -91,12 +95,14 @@ def initialize_calibrator(
     plate: "Plate",
     species: AbstractSpecies,
     wavelength: int = None,
+    signal_type: SignalType = SignalType.ABSORBANCE,
     cutoff: float = None,
 ) -> Calibrator:
     standard = map_to_standard(
         plate=plate,
         species=species,
         wavelength=wavelength,
+        signal_type=signal_type,
     )
 
     return Calibrator.from_standard(standard, cutoff=cutoff)
