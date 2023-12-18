@@ -138,8 +138,9 @@ def assamble_measurements(
 
     # Create measurements
     measurements = []
-    for well_group in well_groups:
+    for meas_id, well_group in enumerate(well_groups):
         measurement = EnzymeML.Measurement(
+            id=f"m{meas_id}",
             name=f"{detected_reactant.name} measurement",
             global_time=plate.times,
             global_time_unit=plate.time_unit,
