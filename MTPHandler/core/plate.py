@@ -364,7 +364,7 @@ class Plate(sdRDM.DataModel):
 
     def _define_dummy_vessel(self):
         return Vessel(
-            id="plate0",
+            id="v0",
             name="MTP 96 well",
             volume=200,
             unit="ul",
