@@ -1,4 +1,4 @@
-# Datamodel to handel microtiter plate photometry data
+# Data model for microtiter plate photometry
 
 ## Modules
 
@@ -33,9 +33,6 @@
 - max_volume_unit
     - Type: str
     - Description: Unit of the maximum volume
-- __ph__
-    - Type: float
-    - Description: pH of the reaction
 - wells
     - Type: Well
     - Description: List of wells on the plate
@@ -54,6 +51,15 @@
 
 ### Well
 
+- __ph__
+    - Type: float
+    - Description: pH of the reaction
+- __x_position__
+    - Type: integer
+    - Description: X position of the well on the plate
+- __y_position__
+    - Type: integer
+    - Description: Y position of the well on the plate
 - init_conditions
     - Type: InitCondition
     - Multiple: True
@@ -68,12 +74,6 @@
 - volume_unit
     - Type: string
     - Description: Unit of the volume
-- __x_position__
-    - Type: integer
-    - Description: X position of the well on the plate
-- __y_position__
-    - Type: integer
-    - Description: Y position of the well on the plate
 
 ### PhotometricMeasurement
 

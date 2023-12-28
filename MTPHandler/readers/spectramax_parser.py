@@ -88,6 +88,7 @@ def read_spectramax(
         for column_id, column in enumerate(row):
             well = Well(
                 id=_coordinates_to_id(column_id, row_id),
+                ph=ph,
                 x_position=column_id,
                 y_position=row_id,
             )
@@ -108,7 +109,6 @@ def read_spectramax(
         time_unit=time_unit,
         temperatures=temperatures,
         temperature_unit="C",
-        ph=ph,
         wells=wells,
     )
 

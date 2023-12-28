@@ -1,7 +1,0 @@
-CaliPytion @ git+https://github.com/FAIRChemistry/CaliPytion
-numpy==1.24.3
-pandas==2.0.2
-pydantic==1.8.2
-sdRDM @ git+https://github.com/JR-1991/software-driven-rdm@linking-refactor
-setuptools==67.8.0
-ipykernel
