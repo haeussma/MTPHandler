@@ -50,4 +50,4 @@ class Protein(AbstractSpecies):
         template_alias="UniProt ID",
     )
 
-    ontology: SBOTerm = Field(description="None", default=SBOTerm.CATALYST)
+    ontology: SBOTerm = Field(description="None", default=SBOTerm.PROTEIN)

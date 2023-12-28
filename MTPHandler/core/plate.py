@@ -214,7 +214,7 @@ class Plate(sdRDM.DataModel):
         organism: Optional[str] = None,
         organism_tax_id: Optional[str] = None,
         uniprotid: Optional[str] = None,
-        ontology: SBOTerm = SBOTerm.CATALYST,
+        ontology: SBOTerm = SBOTerm.PROTEIN,
         init_conc: Optional[float] = None,
         unit: Optional[str] = None,
         uri: Optional[str] = None,
@@ -234,7 +234,7 @@ class Plate(sdRDM.DataModel):
             organism (): Organism the protein was expressed in.. Defaults to None
             organism_tax_id (): Taxonomy identifier of the expression host.. Defaults to None
             uniprotid (): Unique identifier referencing a protein entry at UniProt. Use this identifier to initialize the object from the UniProt database.. Defaults to None
-            ontology (): None. Defaults to SBOTerm.CATALYST
+            ontology (): None. Defaults to SBOTerm.PROTEIN
             init_conc (): None. Defaults to None
             unit (): None. Defaults to None
             uri (): None. Defaults to None
