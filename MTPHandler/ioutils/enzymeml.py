@@ -13,7 +13,7 @@ from MTPHandler.core.well import Well
 
 # Specify EnzymeML version
 URL = "https://github.com/EnzymeML/enzymeml-specifications.git"
-COMMIT = "72c3d8be4a094983667a7aa62fb599fbc9f7351c"
+COMMIT = "5e5f05b9dc76134305b8f9cef65271e35563ac76"
 
 EnzymeML = DataModel.from_git(URL, COMMIT)
 SBOTerm = EnzymeML.enums.SBOTerm
