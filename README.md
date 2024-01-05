@@ -13,8 +13,6 @@ Key Features of MTPHandler:
 - __Versatile Experimental Applications__: Separately treats wells with and without protein species, facilitating both calibration (for creating standard curves) and reaction analysis.
 - __EnzymeML Integration__: Maps well data to the EnzymeML data model using the specified conditions of the `Well` objects.
 
-MTPHandler is designed to streamline the handling and analysis of microtiter plate data, making it a valuable tool for researchers working in fields that require precise biochemical measurements and data analysis.
-
 ## ⚡️ Quick Start
 
 Get started with CaliPytion by cloning this repository:
