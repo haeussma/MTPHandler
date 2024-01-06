@@ -2,15 +2,16 @@ import sdRDM
 
 from typing import Optional
 from pydantic import Field
+from pydantic import Field
+from pydantic import Field
 from sdRDM.base.utils import forge_signature, IDGenerator
 
-
+from .abstractspecies import AbstractSpecies
 from .sboterm import SBOTerm
 
 
 @forge_signature
-class Protein(sdRDM.DataModel):
-
+class Protein(AbstractSpecies):
     """This objects describes the proteins that were used or produced in the course of the experiment."""
 
     id: Optional[str] = Field(
@@ -20,15 +21,13 @@ class Protein(sdRDM.DataModel):
     )
 
     sequence: str = Field(
-        ...,
-        description="Amino acid sequence of the protein",
-        template_alias="Sequence",
+        ..., description="Amino acid sequence of the protein", template_alias="Sequence"
     )
 
     ecnumber: Optional[str] = Field(
         default=None,
         description="EC number of the protein.",
-        regex="(\d+.)(\d+.)(\d+.)(\d+)",
+        regex="(\\d+.)(\\d+.)(\\d+.)(\\d+)",
         template_alias="EC Number",
     )
 
@@ -39,8 +38,7 @@ class Protein(sdRDM.DataModel):
     )
 
     organism_tax_id: Optional[str] = Field(
-        default=None,
-        description="Taxonomy identifier of the expression host.",
+        default=None, description="Taxonomy identifier of the expression host."
     )
 
     uniprotid: Optional[str] = Field(
@@ -52,7 +50,4 @@ class Protein(sdRDM.DataModel):
         template_alias="UniProt ID",
     )
 
-    ontology: SBOTerm = Field(
-        description="None",
-        default=SBOTerm.CATALYST,
-    )
+    ontology: SBOTerm = Field(description="None", default=SBOTerm.PROTEIN)

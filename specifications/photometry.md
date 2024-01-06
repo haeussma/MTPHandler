@@ -1,13 +1,13 @@
-# Datamodel to handel microtiter plate photometry data
+# Data model for microtiter plate photometry
 
 ## Modules
 
 ### Plate
 
-- n_rows
+- __n_rows__
     - Type: integer
     - Description: Number of rows on the plate
-- n_columns
+- __n_columns__
     - Type: integer
     - Description: Number of columns on the plate
 - date_measured
@@ -20,11 +20,11 @@
 - time_unit
     - Type: str
     - Description: Unit of the time
-- temperatures
+- __temperatures__
     - Type: float
     - Description: Thermostat temperature
     - Multiple: True
-- temperature_unit
+- __temperature_unit__
     - Type: str
     - Description: Unit of the temperature
 - max_volume
@@ -33,9 +33,6 @@
 - max_volume_unit
     - Type: str
     - Description: Unit of the maximum volume
-- ph
-    - Type: float
-    - Description: pH of the reaction
 - wells
     - Type: Well
     - Description: List of wells on the plate
@@ -48,11 +45,21 @@
     - Type: str
     - Description: Unit of the wavelength
 - species
-    - Type: https://github.com/EnzymeML/enzymeml-specifications.git@AbstractSpecies, https://github.com/EnzymeML/enzymeml-specifications.git@Protein, https://github.com/EnzymeML/enzymeml-specifications.git@Reactant
+    - Type: https://github.com/EnzymeML/enzymeml-specifications.git@AbstractSpecies
     - Description: List of species present in wells of the plate
+    - Multiple: True
 
 ### Well
 
+- __ph__
+    - Type: float
+    - Description: pH of the reaction
+- __x_position__
+    - Type: integer
+    - Description: X position of the well on the plate
+- __y_position__
+    - Type: integer
+    - Description: Y position of the well on the plate
 - init_conditions
     - Type: InitCondition
     - Multiple: True
@@ -67,47 +74,42 @@
 - volume_unit
     - Type: string
     - Description: Unit of the volume
-- x_position
-    - Type: integer
-    - Description: X position of the well on the plate
-- y_position
-    - Type: integer
-    - Description: Y position of the well on the plate
-- wavelength
-    - Type: int
-    - Description: Wavelength of the measurement
 
 ### PhotometricMeasurement
 
-- wavelength
+- __wavelength__
     - Type: float
     - Description: Wavelength of the measurement
-- wavelength_unit
+- __wavelength_unit__
     - Type: str
     - Description: Unit of the wavelength
-- time
-    - Type: float
-    - Description: Time of the measurement
-- time_unit
-    - Type: str
-    - Description: Unit of the time
-- absorptions
+- __absorptions__
     - Type: float
     - Description: Absorption of the species
+    - Multiple: True
+- blank_states
+    - Type: BlankState
+    - Description: List of blank states, referring to the blank state of the species of the well
     - Multiple: True
 
 ### InitCondition
 
-- species_id
+- __species_id__
     - Type: @AbstractSpecies.id
     - Description: Reference to species
-- init_conc
+- __init_conc__
     - Type: float
     - Description: Initial concentration of the species
-- conc_unit
+- __conc_unit__
     - Type: str
     - Description: Concentration unit
-- __was_blanked__
+
+### BlankState
+
+- __species_id__
+    - Type: @AbstractSpecies.id
+    - Description: Reference to species
+- __contributes_to_signal__
     - Type: bool
-    - Description: Whether the species' absorption contribution was subtracted from the absorption signal
-    - Default: False
+    - Description: Whether the species' absorption contributes to the absorption signal
+    - Default: True

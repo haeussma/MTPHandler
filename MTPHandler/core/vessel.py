@@ -1,16 +1,12 @@
 import sdRDM
 
 from typing import Optional
-from pydantic import Field
+from pydantic import Field, PositiveFloat
 from sdRDM.base.utils import forge_signature, IDGenerator
-
-from pydantic import PositiveFloat
-from pydantic import StrictBool
 
 
 @forge_signature
 class Vessel(sdRDM.DataModel):
-
     """This object describes vessels in which the experiment has been carried out. These can include any type of vessel used in biocatalytic experiments."""
 
     id: Optional[str] = Field(
@@ -37,7 +33,7 @@ class Vessel(sdRDM.DataModel):
         template_alias="Volume unit",
     )
 
-    constant: StrictBool = Field(
+    constant: bool = Field(
         description="Whether the volume of the vessel is constant or not.",
         default=True,
     )
