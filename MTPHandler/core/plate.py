@@ -8,8 +8,6 @@ import plotly.graph_objects as go
 import plotly.express as px
 from typing import Optional, Union, List, Callable, Dict, Literal
 from pydantic import Field, StrictBool
-from pydantic import StrictBool, Field
-from pydantic import Field, StrictBool
 from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
 from datetime import datetime as Datetime
@@ -18,11 +16,10 @@ from types import NoneType
 from plotly.subplots import make_subplots
 from CaliPytion.core import Calibrator, Standard, SignalType
 from MTPHandler.ioutils import initialize_calibrator
-from MTPHandler.ioutils.enzymeml import sort_measurements
-from .well import Well
-from .photometricmeasurement import PhotometricMeasurement
-from .initcondition import InitCondition
 from .abstractspecies import AbstractSpecies
+from .well import Well
+from .initcondition import InitCondition
+from .photometricmeasurement import PhotometricMeasurement
 from .vessel import Vessel
 from .protein import Protein
 from .reactant import Reactant
@@ -39,12 +36,19 @@ class Plate(sdRDM.DataModel):
         xml="@id",
     )
 
-    n_rows: int = Field(..., description="Number of rows on the plate")
+    n_rows: int = Field(
+        ...,
+        description="Number of rows on the plate",
+    )
 
-    n_columns: int = Field(..., description="Number of columns on the plate")
+    n_columns: int = Field(
+        ...,
+        description="Number of columns on the plate",
+    )
 
     date_measured: Optional[Datetime] = Field(
-        default=None, description="Date and time when the plate was measured"
+        default=None,
+        description="Date and time when the plate was measured",
     )
 
     times: List[float] = Field(
@@ -55,23 +59,31 @@ class Plate(sdRDM.DataModel):
         multiple=True,
     )
 
-    time_unit: Optional[str] = Field(default=None, description="Unit of the time")
-
-    temperatures: List[float] = Field(
-        description="Thermostat temperature", multiple=True, default_factory=ListPlus
+    time_unit: Optional[str] = Field(
+        default=None,
+        description="Unit of the time",
     )
 
-    temperature_unit: str = Field(..., description="Unit of the temperature")
+    temperatures: List[float] = Field(
+        description="Thermostat temperature",
+        multiple=True,
+        default_factory=ListPlus,
+    )
+
+    temperature_unit: str = Field(
+        ...,
+        description="Unit of the temperature",
+    )
 
     max_volume: Optional[float] = Field(
-        default=None, description="Maximum volume of the wells"
+        default=None,
+        description="Maximum volume of the wells",
     )
 
     max_volume_unit: Optional[str] = Field(
-        default=None, description="Unit of the maximum volume"
+        default=None,
+        description="Unit of the maximum volume",
     )
-
-    ph: float = Field(..., description="pH of the reaction")
 
     wells: List[Well] = Field(
         description="List of wells on the plate",
@@ -80,11 +92,14 @@ class Plate(sdRDM.DataModel):
     )
 
     measured_wavelengths: List[float] = Field(
-        description="Measured wavelengths", default_factory=ListPlus, multiple=True
+        description="Measured wavelengths",
+        default_factory=ListPlus,
+        multiple=True,
     )
 
     wavelength_unit: Optional[str] = Field(
-        default=None, description="Unit of the wavelength"
+        default=None,
+        description="Unit of the wavelength",
     )
 
     species: List[AbstractSpecies] = Field(
@@ -95,6 +110,7 @@ class Plate(sdRDM.DataModel):
 
     def add_to_wells(
         self,
+        ph: float,
         x_position: int,
         y_position: int,
         init_conditions: List[InitCondition] = ListPlus(),
@@ -108,6 +124,7 @@ class Plate(sdRDM.DataModel):
 
         Args:
             id (str): Unique identifier of the 'Well' object. Defaults to 'None'.
+            ph (): pH of the reaction.
             x_position (): X position of the well on the plate.
             y_position (): Y position of the well on the plate.
             init_conditions (): List of initial conditions of different species. Defaults to ListPlus()
@@ -116,6 +133,7 @@ class Plate(sdRDM.DataModel):
             volume_unit (): Unit of the volume. Defaults to None
         """
         params = {
+            "ph": ph,
             "x_position": x_position,
             "y_position": y_position,
             "init_conditions": init_conditions,
@@ -132,7 +150,7 @@ class Plate(sdRDM.DataModel):
         self,
         name: str,
         vessel_id: Vessel,
-        constant: StrictBool,
+        constant: bool,
         init_conc: Optional[float] = None,
         unit: Optional[str] = None,
         uri: Optional[str] = None,
@@ -801,7 +819,8 @@ class Plate(sdRDM.DataModel):
 
         if len(blanking_wells) == 0:
             raise ValueError(
-                f"No wells found to calculate absorption contribution of {species.name} at {wavelength} nm."
+                "No wells found to calculate absorption contribution of"
+                f" {species.name} at {wavelength} nm."
             )
 
         # get mapping of concentration to blank wells
@@ -881,7 +900,7 @@ class Plate(sdRDM.DataModel):
             plot_bgcolor="white",
             hovermode="x",
             title=dict(
-                text=f"pH {self.ph}, {self.temperatures[0]} °{self.temperature_unit}",
+                text=f"{self.temperatures[0]} °{self.temperature_unit}",
             ),
             margin=dict(l=20, r=20, t=100, b=20),
         )
@@ -924,7 +943,8 @@ class Plate(sdRDM.DataModel):
         for conc, absorptions in blank_measurement_mapping.items():
             mean_absorption = np.nanmean(absorptions)
             print(
-                f"Mean absorption of {species.name} at {conc} {condition.conc_unit}: {mean_absorption}"
+                f"Mean absorption of {species.name} at {conc} {condition.conc_unit}:"
+                f" {mean_absorption}"
             )
             conc_mean_blank_mapping[conc] = mean_absorption
 

@@ -65,6 +65,7 @@ def map_to_standard(
 
     # Map wells to samples of a standard
     samples = []
+    phs = []
     for well in standard_wells:
         condition = well._get_species_condition(species.id)
         measurement = well.get_measurement(wavelength)
@@ -76,6 +77,14 @@ def map_to_standard(
                 signal=float(np.nanmean(measurement.absorptions)),
             )
         )
+        phs.append(well.ph)
+
+    # Check if all samples have the same pH
+    if not all([ph == phs[0] for ph in phs]):
+        raise ValueError(
+            f"Samples of standard {species.name} have different pH values: {phs}"
+        )
+    ph = phs[0]
 
     # Create standard
     return Standard(
@@ -84,7 +93,7 @@ def map_to_standard(
         wavelength=wavelength,
         signal_type=signal_type,
         samples=samples,
-        ph=plate.ph,
+        ph=ph,
         temperature=plate.temperatures[0],
         temperature_unit=plate.temperature_unit,
         created=plate.date_measured,

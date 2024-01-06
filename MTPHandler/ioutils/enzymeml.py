@@ -144,7 +144,7 @@ def assamble_measurements(
             name=f"{detected_reactant.name} measurement",
             global_time=plate.times,
             global_time_unit=plate.time_unit,
-            ph=plate.ph,
+            ph=well_group[0].ph,
             temperature=plate.temperatures[0],
             temperature_unit=plate.temperature_unit,
         )

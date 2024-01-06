@@ -2,11 +2,11 @@ import sdRDM
 
 from typing import List, Optional
 from pydantic import Field
-from CaliPytion.core import Standard
 from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
-from .blankstate import BlankState
+from CaliPytion.core import Standard
 from .abstractspecies import AbstractSpecies
+from .blankstate import BlankState
 
 
 @forge_signature
@@ -19,12 +19,20 @@ class PhotometricMeasurement(sdRDM.DataModel):
         xml="@id",
     )
 
-    wavelength: float = Field(..., description="Wavelength of the measurement")
+    wavelength: float = Field(
+        ...,
+        description="Wavelength of the measurement",
+    )
 
-    wavelength_unit: str = Field(..., description="Unit of the wavelength")
+    wavelength_unit: str = Field(
+        ...,
+        description="Unit of the wavelength",
+    )
 
     absorptions: List[float] = Field(
-        description="Absorption of the species", multiple=True, default_factory=ListPlus
+        description="Absorption of the species",
+        multiple=True,
+        default_factory=ListPlus,
     )
 
     blank_states: List[BlankState] = Field(

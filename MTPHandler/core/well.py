@@ -4,10 +4,10 @@ from typing import List, Optional
 from pydantic import Field
 from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
-from .blankstate import BlankState
-from .photometricmeasurement import PhotometricMeasurement
-from .initcondition import InitCondition
 from .abstractspecies import AbstractSpecies
+from .blankstate import BlankState
+from .initcondition import InitCondition
+from .photometricmeasurement import PhotometricMeasurement
 
 
 @forge_signature
@@ -18,6 +18,21 @@ class Well(sdRDM.DataModel):
         description="Unique identifier of the given object.",
         default_factory=IDGenerator("wellINDEX"),
         xml="@id",
+    )
+
+    ph: float = Field(
+        ...,
+        description="pH of the reaction",
+    )
+
+    x_position: int = Field(
+        ...,
+        description="X position of the well on the plate",
+    )
+
+    y_position: int = Field(
+        ...,
+        description="Y position of the well on the plate",
     )
 
     init_conditions: List[InitCondition] = Field(
@@ -32,13 +47,15 @@ class Well(sdRDM.DataModel):
         description="List of photometric measurements",
     )
 
-    volume: Optional[float] = Field(default=None, description="Volume of the reaction")
+    volume: Optional[float] = Field(
+        default=None,
+        description="Volume of the reaction",
+    )
 
-    volume_unit: Optional[str] = Field(default=None, description="Unit of the volume")
-
-    x_position: int = Field(..., description="X position of the well on the plate")
-
-    y_position: int = Field(..., description="Y position of the well on the plate")
+    volume_unit: Optional[str] = Field(
+        default=None,
+        description="Unit of the volume",
+    )
 
     def add_to_init_conditions(
         self,
