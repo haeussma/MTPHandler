@@ -16,9 +16,9 @@ from types import NoneType
 from plotly.subplots import make_subplots
 from CaliPytion.core import Calibrator, Standard, SignalType
 from MTPHandler.ioutils import initialize_calibrator
-from .abstractspecies import AbstractSpecies
 from .well import Well
 from .initcondition import InitCondition
+from .abstractspecies import AbstractSpecies
 from .photometricmeasurement import PhotometricMeasurement
 from .vessel import Vessel
 from .protein import Protein
@@ -51,28 +51,19 @@ class Plate(sdRDM.DataModel):
         description="Date and time when the plate was measured",
     )
 
-    times: List[float] = Field(
-        description=(
-            "Time points of the measurement, corresponding to temperature measurements"
-        ),
-        default_factory=ListPlus,
-        multiple=True,
-    )
-
-    time_unit: Optional[str] = Field(
-        default=None,
-        description="Unit of the time",
-    )
-
-    temperatures: List[float] = Field(
+    temperature: float = Field(
+        ...,
         description="Thermostat temperature",
-        multiple=True,
-        default_factory=ListPlus,
     )
 
     temperature_unit: str = Field(
         ...,
         description="Unit of the temperature",
+    )
+
+    time_unit: str = Field(
+        ...,
+        description="Unit of the time",
     )
 
     max_volume: Optional[float] = Field(
@@ -501,10 +492,10 @@ class Plate(sdRDM.DataModel):
         if len(init_concs) == 1:
             init_concs = init_concs * self.n_rows
 
-        if not len(init_concs) == self.n_rows:
-            raise AttributeError(
-                f"Argument 'init_concs' must be a list of length {self.n_rows}."
-            )
+        # if not len(init_concs) == self.n_rows:
+        #     raise AttributeError(
+        #         f"Argument 'init_concs' must be a list of length {self.n_rows}."
+        #     )
 
         for column_id in column_ids:
             for row_id, init_conc in zip(range(self.n_rows), init_concs):
@@ -881,7 +872,7 @@ class Plate(sdRDM.DataModel):
 
                 fig.add_trace(
                     go.Scatter(
-                        x=self.times,
+                        x=measurement.times,
                         y=measurement.absorptions,
                         name=f"{measurement.wavelength} nm",
                         mode="lines",
@@ -900,7 +891,7 @@ class Plate(sdRDM.DataModel):
             plot_bgcolor="white",
             hovermode="x",
             title=dict(
-                text=f"{self.temperatures[0]} °{self.temperature_unit}",
+                text=f"{self.temperature} °{self.temperature_unit}",
             ),
             margin=dict(l=20, r=20, t=100, b=20),
         )

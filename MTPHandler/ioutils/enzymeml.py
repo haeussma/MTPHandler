@@ -73,7 +73,6 @@ def create_enzymeml(
         ignore_blank_status=ignore_blank_status,
         proteins=proteins,
         time_unit=plate.time_unit,
-        time=plate.times,
     )
 
     enzymeml = EnzymeML.EnzymeMLDocument(
@@ -102,7 +101,6 @@ def assamble_measurements(
     proteins: List[Protein],
     ignore_blank_status: bool,
     time_unit: str,
-    time: List[float],
 ) -> List[EnzymeML.Measurement]:
     """
     Creates a list of measurements based on the information of a `Plate`.
@@ -142,10 +140,10 @@ def assamble_measurements(
         measurement = EnzymeML.Measurement(
             id=f"m{meas_id}",
             name=f"{detected_reactant.name} measurement",
-            global_time=plate.times,
+            # global_time=plate.times,
             global_time_unit=plate.time_unit,
             ph=well_group[0].ph,
-            temperature=plate.temperatures[0],
+            temperature=plate.temperature,
             temperature_unit=plate.temperature_unit,
         )
 
@@ -155,7 +153,6 @@ def assamble_measurements(
             detected_reactant=detected_reactant,
             reactant_standard=reactant_standard,
             time_unit=time_unit,
-            time=time,
             wavelength=wavelength,
             ignore_blank_status=ignore_blank_status,
         )
@@ -190,7 +187,6 @@ def get_measurement_species(
     detected_reactant: Reactant,
     reactant_standard: Standard,
     time_unit: str,
-    time: List[float],
     wavelength: float,
     ignore_blank_status: bool,
 ) -> List[EnzymeML.MeasurementData]:
@@ -221,7 +217,6 @@ def get_measurement_species(
                 wells=wells,
                 standard=reactant_standard,
                 time_unit=time_unit,
-                time=time,
                 wavelength=wavelength,
                 ignore_blank_status=ignore_blank_status,
             )
@@ -236,7 +231,6 @@ def get_replicates(
     wells: List[Well],
     standard: Standard,
     time_unit: str,
-    time: List[float],
     wavelength: float,
     ignore_blank_status: bool,
 ) -> List[EnzymeML.Replicate]:
@@ -267,7 +261,7 @@ def get_replicates(
                 data_type=DataTypes.CONCENTRATION,
                 data_unit=unit,
                 time_unit=time_unit,
-                time=time,
+                time=data.times,
                 data=data.to_concentration(
                     standard=standard, ignore_blank_status=ignore_blank_status
                 ),
@@ -276,6 +270,7 @@ def get_replicates(
 
     else:
         for well in wells:
+            data = well.get_measurement(wavelength)
             replicate = EnzymeML.Replicate(
                 id=well.id,
                 species_id=measurement_data.species_id,
@@ -283,7 +278,7 @@ def get_replicates(
                 data_type=DataTypes.ABSORPTION,
                 data_unit="dimensionless",
                 time_unit=time_unit,
-                time=time,
+                time=data.times,
                 data=well.get_measurement(wavelength).absorptions,
             )
             replicates.append(replicate)

@@ -13,20 +13,15 @@
 - date_measured
     - Type: datetime
     - Description: Date and time when the plate was measured
-- times
-    - Type: float
-    - Description: Time points of the measurement, corresponding to temperature measurements
-    - Multiple: True
-- time_unit
-    - Type: str
-    - Description: Unit of the time
-- __temperatures__
+- __temperature__
     - Type: float
     - Description: Thermostat temperature
-    - Multiple: True
 - __temperature_unit__
     - Type: str
     - Description: Unit of the temperature
+- __time_unit__
+    - Type: str
+    - Description: Unit of the time
 - max_volume
     - Type: float
     - Description: Maximum volume of the wells
@@ -86,6 +81,14 @@
 - __absorptions__
     - Type: float
     - Description: Absorption of the species
+    - Multiple: True
+- __times__
+    - Type: float
+    - Description: Time points of the measurement
+    - Multiple: True
+- temperatures
+    - Type: float
+    - Description: Temperatures during the measurement
     - Multiple: True
 - blank_states
     - Type: BlankState

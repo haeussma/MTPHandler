@@ -6,8 +6,8 @@ from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
 from .abstractspecies import AbstractSpecies
 from .blankstate import BlankState
-from .initcondition import InitCondition
 from .photometricmeasurement import PhotometricMeasurement
+from .initcondition import InitCondition
 
 
 @forge_signature
@@ -88,6 +88,8 @@ class Well(sdRDM.DataModel):
         wavelength: float,
         wavelength_unit: str,
         absorptions: List[float] = ListPlus(),
+        times: List[float] = ListPlus(),
+        temperatures: List[float] = ListPlus(),
         blank_states: List[BlankState] = ListPlus(),
         id: Optional[str] = None,
     ) -> None:
@@ -99,12 +101,16 @@ class Well(sdRDM.DataModel):
             wavelength (): Wavelength of the measurement.
             wavelength_unit (): Unit of the wavelength.
             absorptions (): Absorption of the species. Defaults to ListPlus()
+            times (): Time points of the measurement. Defaults to ListPlus()
+            temperatures (): Temperatures during the measurement. Defaults to ListPlus()
             blank_states (): List of blank states, referring to the blank state of the species of the well. Defaults to ListPlus()
         """
         params = {
             "wavelength": wavelength,
             "wavelength_unit": wavelength_unit,
             "absorptions": absorptions,
+            "times": times,
+            "temperatures": temperatures,
             "blank_states": blank_states,
         }
         if id is not None:

@@ -42,10 +42,9 @@ classDiagram
         +integer n_rows*
         +integer n_columns*
         +datetime date_measured
-        +float[0..*] times
-        +str time_unit
-        +float[0..*] temperatures*
+        +float temperature*
         +str temperature_unit*
+        +str time_unit*
         +float max_volume
         +str max_volume_unit
         +Well[0..*] wells
@@ -68,6 +67,8 @@ classDiagram
         +float wavelength*
         +str wavelength_unit*
         +float[0..*] absorptions*
+        +float[0..*] times*
+        +float[0..*] temperatures
         +BlankState[0..*] blank_states
     }
     

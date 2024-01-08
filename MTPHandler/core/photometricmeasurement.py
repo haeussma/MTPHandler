@@ -5,8 +5,8 @@ from pydantic import Field
 from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature, IDGenerator
 from CaliPytion.core import Standard
-from .abstractspecies import AbstractSpecies
 from .blankstate import BlankState
+from .abstractspecies import AbstractSpecies
 
 
 @forge_signature
@@ -33,6 +33,18 @@ class PhotometricMeasurement(sdRDM.DataModel):
         description="Absorption of the species",
         multiple=True,
         default_factory=ListPlus,
+    )
+
+    times: List[float] = Field(
+        description="Time points of the measurement",
+        multiple=True,
+        default_factory=ListPlus,
+    )
+
+    temperatures: List[float] = Field(
+        description="Temperatures during the measurement",
+        default_factory=ListPlus,
+        multiple=True,
     )
 
     blank_states: List[BlankState] = Field(
