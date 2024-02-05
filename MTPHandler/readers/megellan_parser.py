@@ -57,7 +57,6 @@ def read_magellan(
     n_columns = 12
 
     plate = cls(
-        ph=ph,
         date_measured=created,
         n_rows=n_rows,
         n_columns=n_columns,
@@ -71,6 +70,7 @@ def read_magellan(
     for well_id, abso_list in data.items():
         x_pos, y_pos = id_to_xy(well_id)
         well = plate.add_to_wells(
+            ph=ph,
             id=well_id,
             x_position=x_pos,
             y_position=y_pos,
