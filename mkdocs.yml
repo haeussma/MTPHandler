@@ -2,7 +2,18 @@ site_name: MTPHandler
 theme:
   name: material
   logo: 'images/MTPHandler_logo.png'
+  features:
+    - content.code.select
   
 nav:
   - Home: index.md
   - About: about.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
