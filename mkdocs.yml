@@ -1,13 +1,38 @@
 site_name: MTPHandler
+repo_url: https://github.com/FAIRChemistry/MTPHandler
+repo_name: FAIRChemistry/MTPHandler
+
 theme:
   name: material
   logo: 'images/MTPHandler_logo.png'
   features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.tabs.links
     - content.code.select
+    - content.code.copy
+    - content.code.annotation
+  palette: 
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
   
 nav:
-  - Home: index.md
-  - About: about.md
+  - Home: home.md
+  - Getting Started: getting_started.md
+  - Examples: examples.md
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -17,3 +42,11 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - tables
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - def_list
+  - pymdownx.tasklist:
+      custom_checkbox: true
