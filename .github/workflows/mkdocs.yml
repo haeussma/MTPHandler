@@ -1,0 +1,23 @@
+name: Deploy MkDocs
+
+on:
+  push:
+    branches:
+      - docs
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install mkdocs
+
+      - name: Build and deploy
+        run: mkdocs gh-deploy --force
