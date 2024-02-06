@@ -1,7 +1,6 @@
 site_name: MTPHandler
-description: A simple tool to manage MTP data
 theme:
-  name: 'material'
+  name: material
   logo: 'images/MTPHandler_logo.png'
   
 nav:
