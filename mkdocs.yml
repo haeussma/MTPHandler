@@ -1,6 +1,12 @@
 site_name: MTPHandler
+site_url: https://fairchemistry.github.io/MTPHandler/
 repo_url: https://github.com/FAIRChemistry/MTPHandler
 repo_name: FAIRChemistry/MTPHandler
+
+nav:
+  - Home: index.md
+  - Getting Started: getting_started.md
+  - Examples: examples.md
 
 theme:
   name: material
@@ -28,11 +34,7 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
-  
-nav:
-  - Home: home.md
-  - Getting Started: getting_started.md
-  - Examples: examples.md
+
 
 markdown_extensions:
   - pymdownx.highlight:
