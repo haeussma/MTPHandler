@@ -10,3 +10,9 @@ Key Features of MTPHandler:
 - __Enhanced Object Definitions__: Utilizes Reactant and Protein objects, akin to those in EnzymeML Documents, complete with Systems Biology Ontology (SBO) annotations.
 - __Versatile Experimental Applications__: Separately treats wells with and without protein species, facilitating both calibration (for creating standard curves) and reaction analysis.
 - __EnzymeML Integration__: Maps well data to the EnzymeML data model using the specified conditions of the `Well` objects.
+
+## 🏁 Currently implemented photometers:
+
+- [x]Spectramax
+- [x] Megellan
+- [x] MultiScan
