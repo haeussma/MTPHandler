@@ -23,6 +23,7 @@ openpyxl = "^3.1.2"
 [tool.poetry.group.dev.dependencies]
 mkdocs-material = "^9.5.7"
 mkautodoc = "^0.2.0"
+pytest = "^8.0.0"
 
 [build-system]
 requires = ["poetry-core"]
