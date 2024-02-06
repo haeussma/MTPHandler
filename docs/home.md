@@ -1,6 +1,6 @@
 # MTPHandler
 
-# 🛣️ What is MTPHandler
+# 🛣️ What is MTPHandler?
 
 MTPHandler is a tool for managing and processing data from microtiter plates. Central to this tool is the `Plate` object, which provides comprehensive methods for manipulating chemical species within microtiter plates. This includes the addition and removal of species, assigning them to individual wells, and setting initial concentrations of reaction components.
 
