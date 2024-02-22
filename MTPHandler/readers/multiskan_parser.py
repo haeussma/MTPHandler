@@ -59,11 +59,12 @@ def read_multiskan(
             f"number of timpoints in provided 'time' array ({len(time)})."
         )
 
+    print(ph)
+
     # Create plate
     plate = cls(
         temperatures=[temperature],
         temperature_unit=temperature_unit,
-        ph=ph,
         times=time,
         time_unit=time_unit,
         date_measured=created,
@@ -79,9 +80,7 @@ def read_multiskan(
                 id = _coordinates_to_id(column_id, row_id)
                 if id not in [well.id for well in plate.wells]:
                     plate.add_to_wells(
-                        id=id,
-                        x_position=column_id,
-                        y_position=row_id,
+                        id=id, x_position=column_id, y_position=row_id, ph=ph
                     )
 
                 well = [well for well in plate.wells if well.id == id][0]
