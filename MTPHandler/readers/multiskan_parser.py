@@ -63,7 +63,6 @@ def read_multiskan(
     plate = cls(
         temperatures=[temperature],
         temperature_unit=temperature_unit,
-        ph=ph,
         times=time,
         time_unit=time_unit,
         date_measured=created,
@@ -82,6 +81,7 @@ def read_multiskan(
                         id=id,
                         x_position=column_id,
                         y_position=row_id,
+                        ph=ph,
                     )
 
                 well = [well for well in plate.wells if well.id == id][0]
