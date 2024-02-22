@@ -1,5 +1,7 @@
 # MTPHandler - Tool for Microtiter Plate Data Handling
 
+[![Tests](https://github.com/FAIRChemistry/MTPHandler/actions/workflows/tests.yml/badge.svg)](https://github.com/FAIRChemistry/MTPHandler/actions/workflows/tests.yml)
+
 ## 🛤 What is MTPHandler?
 
 MTPHandler is a tool for managing and processing data from microtiter plates. Central to this tool is the `Plate` object, which provides comprehensive methods for manipulating chemical species within microtiter plates. This includes the addition and removal of species, assigning them to individual wells, and setting initial concentrations of reaction components.
