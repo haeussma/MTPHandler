@@ -1,8 +1,8 @@
-from os import name
 from typing import List
 import numpy as np
 
-from CaliPytion.core import Calibrator, Standard, Sample, SignalType
+from CaliPytion.core import Standard, Sample, SignalType
+from CaliPytion.tools import Calibrator
 from MTPHandler.core.abstractspecies import AbstractSpecies
 from MTPHandler.core.well import Well
 from MTPHandler.core.protein import Protein

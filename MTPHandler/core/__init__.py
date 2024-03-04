@@ -7,8 +7,6 @@ from .vessel import Vessel
 from .abstractspecies import AbstractSpecies
 from .sboterm import SBOTerm
 from .datatypes import DataTypes
-from .reactant import Reactant
-from .protein import Protein
 
 __doc__ = ""
 __all__ = [

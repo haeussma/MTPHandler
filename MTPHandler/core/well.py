@@ -1,61 +1,87 @@
 import sdRDM
 
-from typing import List, Optional
-from pydantic import Field
+from typing import Dict, List, Optional
+from pydantic import PrivateAttr, model_validator
+from uuid import uuid4
+from pydantic_xml import attr, element
+from lxml.etree import _Element
 from sdRDM.base.listplus import ListPlus
-from sdRDM.base.utils import forge_signature, IDGenerator
-from .abstractspecies import AbstractSpecies
+from sdRDM.base.utils import forge_signature
+from sdRDM.tools.utils import elem2dict
 from .blankstate import BlankState
 from .initcondition import InitCondition
 from .photometricmeasurement import PhotometricMeasurement
+from .abstractspecies import AbstractSpecies
 
 
 @forge_signature
 class Well(sdRDM.DataModel):
     """"""
 
-    id: Optional[str] = Field(
+    id: Optional[str] = attr(
+        name="id",
         description="Unique identifier of the given object.",
-        default_factory=IDGenerator("wellINDEX"),
+        default_factory=lambda: str(uuid4()),
         xml="@id",
     )
 
-    ph: float = Field(
-        ...,
+    ph: float = element(
         description="pH of the reaction",
+        tag="ph",
+        json_schema_extra=dict(),
     )
 
-    x_position: int = Field(
-        ...,
+    x_position: int = element(
         description="X position of the well on the plate",
+        tag="x_position",
+        json_schema_extra=dict(),
     )
 
-    y_position: int = Field(
-        ...,
+    y_position: int = element(
         description="Y position of the well on the plate",
+        tag="y_position",
+        json_schema_extra=dict(),
     )
 
-    init_conditions: List[InitCondition] = Field(
-        default_factory=ListPlus,
-        multiple=True,
+    init_conditions: List[InitCondition] = element(
         description="List of initial conditions of different species",
-    )
-
-    measurements: List[PhotometricMeasurement] = Field(
         default_factory=ListPlus,
-        multiple=True,
+        tag="init_conditions",
+        json_schema_extra=dict(multiple=True),
+    )
+
+    measurements: List[PhotometricMeasurement] = element(
         description="List of photometric measurements",
+        default_factory=ListPlus,
+        tag="measurements",
+        json_schema_extra=dict(multiple=True),
     )
 
-    volume: Optional[float] = Field(
-        default=None,
+    volume: Optional[float] = element(
         description="Volume of the reaction",
+        default=None,
+        tag="volume",
+        json_schema_extra=dict(),
     )
 
-    volume_unit: Optional[str] = Field(
-        default=None,
+    volume_unit: Optional[str] = element(
         description="Unit of the volume",
+        default=None,
+        tag="volume_unit",
+        json_schema_extra=dict(),
     )
+    _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _parse_raw_xml_data(self):
+        for attr, value in self:
+            if isinstance(value, (ListPlus, list)) and all(
+                (isinstance(i, _Element) for i in value)
+            ):
+                self._raw_xml_data[attr] = [elem2dict(i) for i in value]
+            elif isinstance(value, _Element):
+                self._raw_xml_data[attr] = elem2dict(value)
+        return self
 
     def add_to_init_conditions(
         self,
@@ -63,7 +89,7 @@ class Well(sdRDM.DataModel):
         init_conc: float,
         conc_unit: str,
         id: Optional[str] = None,
-    ) -> None:
+    ) -> InitCondition:
         """
         This method adds an object of type 'InitCondition' to attribute init_conditions
 
@@ -90,7 +116,7 @@ class Well(sdRDM.DataModel):
         absorptions: List[float] = ListPlus(),
         blank_states: List[BlankState] = ListPlus(),
         id: Optional[str] = None,
-    ) -> None:
+    ) -> PhotometricMeasurement:
         """
         This method adds an object of type 'PhotometricMeasurement' to attribute measurements
 

@@ -12,14 +12,12 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.12"
-numpy = "1.24.4"
+python = "^3.10"
 sympy = "^1.12"
-sdrdm = {git = "https://github.com/JR-1991/software-driven-rdm.git", branch = "linking-refactor"}
+sdrdm = {git = "https://github.com/JR-1991/software-driven-rdm.git", rev = "cc2d1e21e898399ed55c164f8c02a57341a0fb80"}
 plotly = "^5.18.0"
-calipytion = {git = "https://github.com/FAIRChemistry/CaliPytion.git"}
+calipytion = {git = "https://github.com/FAIRChemistry/CaliPytion.git", rev = "1ad4e23121fc9c2383993c0a7f7c10e6cce24384"}
 openpyxl = "^3.1.2"
-ipython = "^8.21.0"
 
 [tool.poetry.group.dev.dependencies]
 mkdocs-material = "^9.5.7"

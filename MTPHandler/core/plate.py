@@ -6,21 +6,26 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
-from typing import Optional, Union, List, Callable, Dict, Literal
-from pydantic import Field, StrictBool
+from typing import Optional, Union, List, Dict, Callable, Literal
+from pydantic import PrivateAttr, StrictBool, model_validator
+from uuid import uuid4
+from pydantic_xml import attr, element
+from lxml.etree import _Element
 from sdRDM.base.listplus import ListPlus
-from sdRDM.base.utils import forge_signature, IDGenerator
+from sdRDM.base.utils import forge_signature
+from sdRDM.tools.utils import elem2dict
 from datetime import datetime as Datetime
 from collections import defaultdict
 from types import NoneType
 from plotly.subplots import make_subplots
-from CaliPytion.core import Calibrator, Standard, SignalType
+from CaliPytion.core import Standard, SignalType
+from CaliPytion.tools import Calibrator
 from MTPHandler.ioutils import initialize_calibrator
-from .abstractspecies import AbstractSpecies
-from .well import Well
 from .initcondition import InitCondition
-from .photometricmeasurement import PhotometricMeasurement
+from .well import Well
 from .vessel import Vessel
+from .photometricmeasurement import PhotometricMeasurement
+from .abstractspecies import AbstractSpecies
 from .protein import Protein
 from .reactant import Reactant
 from .sboterm import SBOTerm
@@ -30,83 +35,114 @@ from .sboterm import SBOTerm
 class Plate(sdRDM.DataModel):
     """"""
 
-    id: Optional[str] = Field(
+    id: Optional[str] = attr(
+        name="id",
         description="Unique identifier of the given object.",
-        default_factory=IDGenerator("plateINDEX"),
+        default_factory=lambda: str(uuid4()),
         xml="@id",
     )
 
-    n_rows: int = Field(
-        ...,
+    n_rows: int = element(
         description="Number of rows on the plate",
+        tag="n_rows",
+        json_schema_extra=dict(),
     )
 
-    n_columns: int = Field(
-        ...,
+    n_columns: int = element(
         description="Number of columns on the plate",
+        tag="n_columns",
+        json_schema_extra=dict(),
     )
 
-    date_measured: Optional[Datetime] = Field(
-        default=None,
+    date_measured: Optional[Datetime] = element(
         description="Date and time when the plate was measured",
+        default=None,
+        tag="date_measured",
+        json_schema_extra=dict(),
     )
 
-    times: List[float] = Field(
+    times: List[float] = element(
         description=(
             "Time points of the measurement, corresponding to temperature measurements"
         ),
         default_factory=ListPlus,
-        multiple=True,
+        tag="times",
+        json_schema_extra=dict(multiple=True),
     )
 
-    time_unit: Optional[str] = Field(
-        default=None,
+    time_unit: Optional[str] = element(
         description="Unit of the time",
+        default=None,
+        tag="time_unit",
+        json_schema_extra=dict(),
     )
 
-    temperatures: List[float] = Field(
+    temperatures: List[float] = element(
         description="Thermostat temperature",
-        multiple=True,
         default_factory=ListPlus,
+        tag="temperatures",
+        json_schema_extra=dict(multiple=True),
     )
 
-    temperature_unit: str = Field(
-        ...,
+    temperature_unit: str = element(
         description="Unit of the temperature",
+        tag="temperature_unit",
+        json_schema_extra=dict(),
     )
 
-    max_volume: Optional[float] = Field(
-        default=None,
+    max_volume: Optional[float] = element(
         description="Maximum volume of the wells",
-    )
-
-    max_volume_unit: Optional[str] = Field(
         default=None,
-        description="Unit of the maximum volume",
+        tag="max_volume",
+        json_schema_extra=dict(),
     )
 
-    wells: List[Well] = Field(
+    max_volume_unit: Optional[str] = element(
+        description="Unit of the maximum volume",
+        default=None,
+        tag="max_volume_unit",
+        json_schema_extra=dict(),
+    )
+
+    wells: List[Well] = element(
         description="List of wells on the plate",
         default_factory=ListPlus,
-        multiple=True,
+        tag="wells",
+        json_schema_extra=dict(multiple=True),
     )
 
-    measured_wavelengths: List[float] = Field(
+    measured_wavelengths: List[float] = element(
         description="Measured wavelengths",
         default_factory=ListPlus,
-        multiple=True,
+        tag="measured_wavelengths",
+        json_schema_extra=dict(multiple=True),
     )
 
-    wavelength_unit: Optional[str] = Field(
-        default=None,
+    wavelength_unit: Optional[str] = element(
         description="Unit of the wavelength",
+        default=None,
+        tag="wavelength_unit",
+        json_schema_extra=dict(),
     )
 
-    species: List[AbstractSpecies] = Field(
+    species: List[AbstractSpecies] = element(
         description="List of species present in wells of the plate",
         default_factory=ListPlus,
-        multiple=True,
+        tag="species",
+        json_schema_extra=dict(multiple=True),
     )
+    _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _parse_raw_xml_data(self):
+        for attr, value in self:
+            if isinstance(value, (ListPlus, list)) and all(
+                (isinstance(i, _Element) for i in value)
+            ):
+                self._raw_xml_data[attr] = [elem2dict(i) for i in value]
+            elif isinstance(value, _Element):
+                self._raw_xml_data[attr] = elem2dict(value)
+        return self
 
     def add_to_wells(
         self,
@@ -118,7 +154,7 @@ class Plate(sdRDM.DataModel):
         volume: Optional[float] = None,
         volume_unit: Optional[str] = None,
         id: Optional[str] = None,
-    ) -> None:
+    ) -> Well:
         """
         This method adds an object of type 'Well' to attribute wells
 
@@ -156,7 +192,7 @@ class Plate(sdRDM.DataModel):
         uri: Optional[str] = None,
         creator_id: Optional[str] = None,
         id: Optional[str] = None,
-    ) -> None:
+    ) -> AbstractSpecies:
         """
         This method adds an object of type 'AbstractSpecies' to attribute species
 
@@ -398,7 +434,7 @@ class Plate(sdRDM.DataModel):
         contributes_to_signal: Optional[bool] = None,
     ):
         cases = ["rows", "columns", "all", "except"]
-        if not to in cases:
+        if to not in cases:
             raise AttributeError(f"Argument 'to' must be one of {cases}.")
 
         if not isinstance(init_conc, list):
@@ -800,7 +836,7 @@ class Plate(sdRDM.DataModel):
             if not well._contains_species(species.id):
                 continue
 
-            if not wavelength in [
+            if wavelength not in [
                 measurement.wavelength for measurement in well.measurements
             ]:
                 continue

@@ -1,55 +1,76 @@
 import sdRDM
 
-from typing import List, Optional
-from pydantic import Field
+from typing import Dict, List, Optional
+from pydantic import PrivateAttr, model_validator
+from uuid import uuid4
+from pydantic_xml import attr, element
+from lxml.etree import _Element
 from sdRDM.base.listplus import ListPlus
-from sdRDM.base.utils import forge_signature, IDGenerator
+from sdRDM.base.utils import forge_signature
+from sdRDM.tools.utils import elem2dict
 from CaliPytion.core import Standard
-from .abstractspecies import AbstractSpecies
 from .blankstate import BlankState
+from .abstractspecies import AbstractSpecies
 
 
 @forge_signature
 class PhotometricMeasurement(sdRDM.DataModel):
     """"""
 
-    id: Optional[str] = Field(
+    id: Optional[str] = attr(
+        name="id",
         description="Unique identifier of the given object.",
-        default_factory=IDGenerator("photometricmeasurementINDEX"),
+        default_factory=lambda: str(uuid4()),
         xml="@id",
     )
 
-    wavelength: float = Field(
-        ...,
+    wavelength: float = element(
         description="Wavelength of the measurement",
+        tag="wavelength",
+        json_schema_extra=dict(),
     )
 
-    wavelength_unit: str = Field(
-        ...,
+    wavelength_unit: str = element(
         description="Unit of the wavelength",
+        tag="wavelength_unit",
+        json_schema_extra=dict(),
     )
 
-    absorptions: List[float] = Field(
+    absorptions: List[float] = element(
         description="Absorption of the species",
-        multiple=True,
         default_factory=ListPlus,
+        tag="absorptions",
+        json_schema_extra=dict(multiple=True),
     )
 
-    blank_states: List[BlankState] = Field(
+    blank_states: List[BlankState] = element(
         description=(
             "List of blank states, referring to the blank state of the species of the"
             " well"
         ),
         default_factory=ListPlus,
-        multiple=True,
+        tag="blank_states",
+        json_schema_extra=dict(multiple=True),
     )
+    _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _parse_raw_xml_data(self):
+        for attr, value in self:
+            if isinstance(value, (ListPlus, list)) and all(
+                (isinstance(i, _Element) for i in value)
+            ):
+                self._raw_xml_data[attr] = [elem2dict(i) for i in value]
+            elif isinstance(value, _Element):
+                self._raw_xml_data[attr] = elem2dict(value)
+        return self
 
     def add_to_blank_states(
         self,
         species_id: AbstractSpecies,
         contributes_to_signal: bool = True,
         id: Optional[str] = None,
-    ) -> None:
+    ) -> BlankState:
         """
         This method adds an object of type 'BlankState' to attribute blank_states
 
