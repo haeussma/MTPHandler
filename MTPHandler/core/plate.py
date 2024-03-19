@@ -21,11 +21,11 @@ from plotly.subplots import make_subplots
 from CaliPytion.core import Standard, SignalType
 from CaliPytion.tools import Calibrator
 from MTPHandler.ioutils import initialize_calibrator
-from .initcondition import InitCondition
+from .abstractspecies import AbstractSpecies
 from .well import Well
 from .vessel import Vessel
 from .photometricmeasurement import PhotometricMeasurement
-from .abstractspecies import AbstractSpecies
+from .initcondition import InitCondition
 from .protein import Protein
 from .reactant import Reactant
 from .sboterm import SBOTerm
@@ -130,6 +130,12 @@ class Plate(sdRDM.DataModel):
         default_factory=ListPlus,
         tag="species",
         json_schema_extra=dict(multiple=True),
+    )
+    _repo: Optional[str] = PrivateAttr(
+        default="https://github.com/FAIRChemistry/MTPHandler"
+    )
+    _commit: Optional[str] = PrivateAttr(
+        default="fce12c40347b8116f04f3d4da2323906c7bf4c7e"
     )
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
 

@@ -9,8 +9,8 @@ from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature
 from sdRDM.tools.utils import elem2dict
 from CaliPytion.core import Standard
-from .blankstate import BlankState
 from .abstractspecies import AbstractSpecies
+from .blankstate import BlankState
 
 
 @forge_signature
@@ -51,6 +51,12 @@ class PhotometricMeasurement(sdRDM.DataModel):
         default_factory=ListPlus,
         tag="blank_states",
         json_schema_extra=dict(multiple=True),
+    )
+    _repo: Optional[str] = PrivateAttr(
+        default="https://github.com/FAIRChemistry/MTPHandler"
+    )
+    _commit: Optional[str] = PrivateAttr(
+        default="fce12c40347b8116f04f3d4da2323906c7bf4c7e"
     )
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
 

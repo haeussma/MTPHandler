@@ -59,6 +59,12 @@ class Vessel(sdRDM.DataModel):
         tag="creator_id",
         json_schema_extra=dict(),
     )
+    _repo: Optional[str] = PrivateAttr(
+        default="https://github.com/FAIRChemistry/MTPHandler"
+    )
+    _commit: Optional[str] = PrivateAttr(
+        default="fce12c40347b8116f04f3d4da2323906c7bf4c7e"
+    )
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
 
     @model_validator(mode="after")

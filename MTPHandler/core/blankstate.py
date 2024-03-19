@@ -36,6 +36,12 @@ class BlankState(sdRDM.DataModel):
         tag="contributes_to_signal",
         json_schema_extra=dict(),
     )
+    _repo: Optional[str] = PrivateAttr(
+        default="https://github.com/FAIRChemistry/MTPHandler"
+    )
+    _commit: Optional[str] = PrivateAttr(
+        default="fce12c40347b8116f04f3d4da2323906c7bf4c7e"
+    )
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
 
     @model_validator(mode="after")
@@ -48,6 +54,21 @@ class BlankState(sdRDM.DataModel):
             elif isinstance(value, _Element):
                 self._raw_xml_data[attr] = elem2dict(value)
         return self
+
+    @field_validator("species_id")
+    def get_species_id_reference(cls, value):
+        """Extracts the ID from a given object to create a reference"""
+        from .abstractspecies import AbstractSpecies
+
+        if isinstance(value, AbstractSpecies):
+            return value.id
+        elif isinstance(value, str):
+            return value
+        else:
+            raise TypeError(
+                f"Expected types [AbstractSpecies, str] got '{type(value).__name__}'"
+                " instead."
+            )
 
     @field_validator("species_id")
     def get_species_id_reference(cls, value):

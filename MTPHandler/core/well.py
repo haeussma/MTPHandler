@@ -8,10 +8,10 @@ from lxml.etree import _Element
 from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature
 from sdRDM.tools.utils import elem2dict
-from .blankstate import BlankState
-from .initcondition import InitCondition
-from .photometricmeasurement import PhotometricMeasurement
 from .abstractspecies import AbstractSpecies
+from .blankstate import BlankState
+from .photometricmeasurement import PhotometricMeasurement
+from .initcondition import InitCondition
 
 
 @forge_signature
@@ -69,6 +69,12 @@ class Well(sdRDM.DataModel):
         default=None,
         tag="volume_unit",
         json_schema_extra=dict(),
+    )
+    _repo: Optional[str] = PrivateAttr(
+        default="https://github.com/FAIRChemistry/MTPHandler"
+    )
+    _commit: Optional[str] = PrivateAttr(
+        default="fce12c40347b8116f04f3d4da2323906c7bf4c7e"
     )
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
 
