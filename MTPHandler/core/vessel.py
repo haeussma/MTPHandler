@@ -11,7 +11,7 @@ from sdRDM.tools.utils import elem2dict
 
 
 @forge_signature
-class Vessel(sdRDM.DataModel):
+class Vessel(sdRDM.DataModel, search_mode="unordered"):
     """This object describes vessels in which the experiment has been carried out. These can include any type of vessel used in biocatalytic experiments."""
 
     id: Optional[str] = attr(
@@ -63,7 +63,7 @@ class Vessel(sdRDM.DataModel):
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
     _commit: Optional[str] = PrivateAttr(
-        default="fce12c40347b8116f04f3d4da2323906c7bf4c7e"
+        default="e87642023bceb2ac5538980efc1e78fd8e7164b4"
     )
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
 

@@ -1,3 +1,3 @@
 
 __URL__ = "https://github.com/FAIRChemistry/MTPHandler"
-__COMMIT__ = "fce12c40347b8116f04f3d4da2323906c7bf4c7e"
+__COMMIT__ = "e87642023bceb2ac5538980efc1e78fd8e7164b4"

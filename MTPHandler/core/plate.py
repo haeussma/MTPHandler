@@ -23,16 +23,16 @@ from CaliPytion.tools import Calibrator
 from MTPHandler.ioutils import initialize_calibrator
 from .abstractspecies import AbstractSpecies
 from .well import Well
-from .vessel import Vessel
-from .photometricmeasurement import PhotometricMeasurement
 from .initcondition import InitCondition
+from .photometricmeasurement import PhotometricMeasurement
+from .vessel import Vessel
 from .protein import Protein
 from .reactant import Reactant
 from .sboterm import SBOTerm
 
 
 @forge_signature
-class Plate(sdRDM.DataModel):
+class Plate(sdRDM.DataModel, search_mode="unordered"):
     """"""
 
     id: Optional[str] = attr(
@@ -135,7 +135,7 @@ class Plate(sdRDM.DataModel):
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
     _commit: Optional[str] = PrivateAttr(
-        default="fce12c40347b8116f04f3d4da2323906c7bf4c7e"
+        default="e87642023bceb2ac5538980efc1e78fd8e7164b4"
     )
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
 

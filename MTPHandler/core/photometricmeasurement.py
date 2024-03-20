@@ -14,7 +14,7 @@ from .blankstate import BlankState
 
 
 @forge_signature
-class PhotometricMeasurement(sdRDM.DataModel):
+class PhotometricMeasurement(sdRDM.DataModel, search_mode="unordered"):
     """"""
 
     id: Optional[str] = attr(
@@ -56,7 +56,7 @@ class PhotometricMeasurement(sdRDM.DataModel):
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
     _commit: Optional[str] = PrivateAttr(
-        default="fce12c40347b8116f04f3d4da2323906c7bf4c7e"
+        default="e87642023bceb2ac5538980efc1e78fd8e7164b4"
     )
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
 

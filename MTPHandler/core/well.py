@@ -9,13 +9,13 @@ from sdRDM.base.listplus import ListPlus
 from sdRDM.base.utils import forge_signature
 from sdRDM.tools.utils import elem2dict
 from .abstractspecies import AbstractSpecies
+from .initcondition import InitCondition
 from .blankstate import BlankState
 from .photometricmeasurement import PhotometricMeasurement
-from .initcondition import InitCondition
 
 
 @forge_signature
-class Well(sdRDM.DataModel):
+class Well(sdRDM.DataModel, search_mode="unordered"):
     """"""
 
     id: Optional[str] = attr(
@@ -74,7 +74,7 @@ class Well(sdRDM.DataModel):
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
     _commit: Optional[str] = PrivateAttr(
-        default="fce12c40347b8116f04f3d4da2323906c7bf4c7e"
+        default="e87642023bceb2ac5538980efc1e78fd8e7164b4"
     )
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
 
