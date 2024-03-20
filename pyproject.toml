@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mtphandler"
-version = "0.2.0"
+version = "0.2.1"
 description = "Tool to work with microtiter plate data."
 authors = ["haeussma <83341109+haeussma@users.noreply.github.com>"]
 license = "MIT License"
@@ -14,9 +14,9 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.10"
 sympy = "^1.12"
-sdrdm = {git = "https://github.com/JR-1991/software-driven-rdm.git", rev = "cc2d1e21e898399ed55c164f8c02a57341a0fb80"}
+sdrdm = {git = "https://github.com/JR-1991/software-driven-rdm.git"}
 plotly = "^5.18.0"
-calipytion = {git = "https://github.com/FAIRChemistry/CaliPytion.git", rev = "1ad4e23121fc9c2383993c0a7f7c10e6cce24384"}
+calipytion = {git = "https://github.com/FAIRChemistry/CaliPytion.git", branch = "docs-tests" }
 openpyxl = "^3.1.2"
 
 [tool.poetry.group.dev.dependencies]
