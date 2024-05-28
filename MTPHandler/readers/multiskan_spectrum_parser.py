@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import os
 import re
 from collections import defaultdict
-from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List
 
 import numpy as np
@@ -13,20 +11,15 @@ if TYPE_CHECKING:
     from MTPHandler.core.plate import Plate
 
 
-def read_multiskan(
+def read_multiskan_spectrum(
     cls: "Plate",
     path: str,
-    time: float | np.ndarray,
+    time: list[float] | np.ndarray,
     time_unit: str,
     ph: float = None,
     temperature: float = None,
     temperature_unit: str = None,
 ) -> "Plate":
-    # Get date of measurement
-    created = datetime.fromtimestamp(os.path.getctime(path)).strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
-
     # Extract temperature from path
     if not temperature:
         TEMP_PATTERN = r"\d{1,3}deg"
@@ -53,7 +46,9 @@ def read_multiskan(
     n_rows, n_columns, n_timepoints = next(iter(data_dict.values())).shape
 
     if isinstance(time, list):
-        time = np.array([time])
+        time = np.array(time)
+
+    print(time)
 
     if len(time) != n_timepoints:
         raise ValueError(
@@ -67,9 +62,8 @@ def read_multiskan(
         temperature_unit=temperature_unit,
         times=time,
         time_unit=time_unit,
-        date_measured=created,
         n_rows=n_rows,
-        n_columns=n_columns,
+        n_cols=n_columns,
         measured_wavelengths=list(data_dict.keys()),
     )
 
@@ -81,8 +75,8 @@ def read_multiskan(
                 if id not in [well.id for well in plate.wells]:
                     plate.add_to_wells(
                         id=id,
-                        x_position=column_id,
-                        y_position=row_id,
+                        x_pos=column_id,
+                        y_pos=row_id,
                         ph=ph,
                     )
 
@@ -90,7 +84,7 @@ def read_multiskan(
                 well.add_to_measurements(
                     wavelength=wavelength,
                     wavelength_unit="nm",
-                    absorptions=column.tolist(),
+                    absorption=column.tolist(),
                 )
 
     return plate
@@ -180,3 +174,29 @@ def _coordinates_to_id(x: int, y: int) -> str:
 
 def id_to_xy(well_id: str):
     return ord(well_id[0].upper()) - 65, int(well_id[1:]) - 1
+
+
+if __name__ == "__main__":
+    import numpy as np
+
+    from MTPHandler.core.plate import Plate
+
+    path = "tests/data/multiskan_spectrum_1500.txt"
+
+    ph = 7.0
+    wavelength = 450.0
+
+    time = np.arange(0, 15.5, 0.5)
+    print(f"the thime is {time}")
+
+    print(
+        read_multiskan_spectrum(
+            cls=Plate,
+            path=path,
+            ph=ph,
+            time=time,
+            time_unit="min",
+            temperature=37.0,
+            temperature_unit="C",
+        )
+    )

@@ -368,7 +368,7 @@ class Plate(
         species: Species,
         init_conc: Union[float, List[float]],
         conc_unit: str,
-        to: Literal["all", "rows", "columns", "all_except"],
+        to: Literal["all", "rows", "columns", "all except"],
         ids: Union[str, List[str], int, List[int]] = None,
         contributes_to_signal: bool | None = None,
     ):
@@ -379,7 +379,7 @@ class Plate(
             species (Species): The species object to assign to the wells.
             init_conc (Union[float, List[float]]): The initial concentration(s) of the species.
             conc_unit (str): The unit of concentration.
-            to (Literal["all", "rows", "columns", "all_except"]): The target location(s) for assigning the species.
+            to (Literal["all", "rows", "columns", "all except"]): The target location(s) for assigning the species.
                 This can be individual or multiple wells as well as individual or multiple rows or columns.
             ids (Union[str, List[str], int, List[int]], optional): The specific row or column IDs where the species should be assigned.
                 Defaults to None.
@@ -403,7 +403,7 @@ class Plate(
                 """Argument 'species' must reference an `id` of a Species listed in `species`."""
             )
 
-        cases = ["rows", "columns", "all", "except"]
+        cases = ["rows", "columns", "all", "all except"]
         if to not in cases:
             raise AttributeError(f"Argument 'to' must be one of {cases}.")
 
@@ -504,9 +504,7 @@ class Plate(
             init_concs = init_concs * len(columns[0])
 
         for wells in columns:
-            assert len(init_concs) == len(
-                wells
-            ), f"""
+            assert len(init_concs) == len(wells), f"""
             Number of initial concentrations ({len(init_concs)}) does not match number 
             of wells ({len(wells)}) in columns ({column_ids}).
             """
@@ -550,9 +548,7 @@ class Plate(
             rows.append(wells)
 
         for wells in rows:
-            assert len(init_concs) == len(
-                wells
-            ), f"""
+            assert len(init_concs) == len(wells), f"""
             Number of initial concentrations ({len(init_concs)}) does not match number 
             of wells ({len(wells)}) in rows ({row_ids}).
             """
@@ -966,7 +962,6 @@ class Plate(
         temperature: Optional[float] = None,
         temperature_unit: Optional[str] = None,
     ) -> Plate:
-
         return MTPReaderFactory.read(
             cls=cls,
             path=path,

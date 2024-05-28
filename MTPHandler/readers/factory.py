@@ -19,7 +19,7 @@ class MTPReaderFactory:
         temperature_unit: Optional[str] = None,
     ) -> Plate:
         from MTPHandler.readers.megellan_parser import read_magellan
-        from MTPHandler.readers.multiskan_parser import read_multiskan
+        from MTPHandler.readers.multiskan_spectrum_parser import read_multiskan_spectrum
         from MTPHandler.readers.spectramax_parser import read_spectramax
 
         try:
@@ -33,7 +33,7 @@ class MTPReaderFactory:
             pass
 
         try:
-            return read_multiskan(
+            return read_multiskan_spectrum(
                 cls=cls,
                 path=path,
                 time=time,
