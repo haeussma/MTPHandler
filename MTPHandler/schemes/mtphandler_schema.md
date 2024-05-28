@@ -1,7 +1,7 @@
 ```mermaid
 classDiagram
-    Plate *-- Protein
-    Plate *-- Reactant
+    Species <-- Protein
+    Plate *-- Species
     Plate *-- Well
     Well *-- PhotometricMeasurement
     Well *-- InitCondition
@@ -16,22 +16,18 @@ classDiagram
         +float[0..*] temperatures
         +Unit temperature_unit
         +Well[0..*] wells
-        +Reactant, Protein[0..*] species
+        +Species[0..*] species
+    }
+    
+    class Species {
+        +str name
+        +Identifier[0..*] references
     }
     
     class Protein {
-        +str name
         +str sequence
         +str organism
         +Identifier organism_tax_id
-        +Identifier[0..*] references
-    }
-    
-    class Reactant {
-        +str name
-        +str smiles
-        +str inchi
-        +Identifier[0..*] references
     }
     
     class Well {

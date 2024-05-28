@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from uuid import uuid4
 
 import sdRDM
@@ -13,7 +13,7 @@ class Species(
     sdRDM.DataModel,
     search_mode="unordered",
 ):
-    """"""
+    """Description of a species that might be present in the wells of the plate."""
 
     id: Optional[str] = attr(
         name="id",
@@ -27,6 +27,15 @@ class Species(
         default=None,
         tag="name",
         json_schema_extra=dict(),
+    )
+
+    references: List[Identifier] = element(
+        description="List of references to the species",
+        default_factory=ListPlus,
+        tag="references",
+        json_schema_extra=dict(
+            multiple=True,
+        ),
     )
 
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)

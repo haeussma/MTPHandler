@@ -78,13 +78,6 @@ class Well(
         json_schema_extra=dict(),
     )
 
-    _repo: Optional[str] = PrivateAttr(
-        default="https://github.com/FAIRChemistry/MTPHandler"
-    )
-    _commit: Optional[str] = PrivateAttr(
-        default="e334b0b111f8283b76d4ff24a987827a4cff7116"
-    )
-
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
 
     @model_validator(mode="after")

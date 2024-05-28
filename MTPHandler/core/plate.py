@@ -27,6 +27,7 @@ from .initcondition import InitCondition
 from .photometricmeasurement import PhotometricMeasurement
 from .protein import Protein
 from .reactant import Reactant
+from .species import Species
 from .well import Well
 
 
@@ -105,20 +106,13 @@ class Plate(
         ),
     )
 
-    species: List[Union[Reactant, Protein]] = element(
+    species: List[Species] = element(
         description="List of species present in wells of the plate",
         default_factory=ListPlus,
         tag="species",
         json_schema_extra=dict(
             multiple=True,
         ),
-    )
-
-    _repo: Optional[str] = PrivateAttr(
-        default="https://github.com/FAIRChemistry/MTPHandler"
-    )
-    _commit: Optional[str] = PrivateAttr(
-        default="e334b0b111f8283b76d4ff24a987827a4cff7116"
     )
 
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
@@ -179,6 +173,36 @@ class Plate(
         self.wells.append(obj)
 
         return self.wells[-1]
+
+    def add_to_species(
+        self,
+        name: Optional[str] = None,
+        references: List[Identifier] = ListPlus(),
+        id: Optional[str] = None,
+        **kwargs,
+    ) -> Species:
+        """
+        This method adds an object of type 'Species' to attribute species
+
+        Args:
+            id (str): Unique identifier of the 'Species' object. Defaults to 'None'.
+            name (): Name of the species. Defaults to None
+            references (): List of references to the species. Defaults to ListPlus()
+        """
+
+        params = {
+            "name": name,
+            "references": references,
+        }
+
+        if id is not None:
+            params["id"] = id
+
+        obj = Species(**params)
+
+        self.species.append(obj)
+
+        return self.species[-1]
 
     def add_reactant_to_species(
         self,
