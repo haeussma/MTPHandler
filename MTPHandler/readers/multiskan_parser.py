@@ -1,12 +1,16 @@
-import re
-import os
-from datetime import datetime
-from copy import deepcopy
-import numpy as np
-from collections import defaultdict
-from typing import Dict, Generator, List
+from __future__ import annotations
 
+import os
+import re
+from collections import defaultdict
+from datetime import datetime
+from typing import TYPE_CHECKING, Dict, List
+
+import numpy as np
 import pandas as pd
+
+if TYPE_CHECKING:
+    from MTPHandler.core.plate import Plate
 
 
 def read_multiskan(
@@ -17,8 +21,6 @@ def read_multiskan(
     ph: float = None,
     temperature: float = None,
     temperature_unit: str = None,
-    volume: float = None,
-    volume_unit: str = None,
 ) -> "Plate":
     # Get date of measurement
     created = datetime.fromtimestamp(os.path.getctime(path)).strftime(

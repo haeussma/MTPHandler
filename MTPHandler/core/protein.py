@@ -1,53 +1,75 @@
+from typing import Dict, List, Optional
+from uuid import uuid4
+
 import sdRDM
-
-from typing import Optional
-from pydantic import Field
-from pydantic import Field
-from pydantic import Field
-from sdRDM.base.utils import forge_signature, IDGenerator
-
-from .abstractspecies import AbstractSpecies
-from .sboterm import SBOTerm
+from lxml.etree import _Element
+from pydantic import PrivateAttr, model_validator
+from pydantic_xml import attr, element
+from sdRDM.base.datatypes import Identifier
+from sdRDM.base.listplus import ListPlus
+from sdRDM.tools.utils import elem2dict
 
 
-@forge_signature
-class Protein(AbstractSpecies):
-    """This objects describes the proteins that were used or produced in the course of the experiment."""
+class Protein(
+    sdRDM.DataModel,
+    search_mode="unordered",
+):
+    """Description of a protein species that might be present in the wells of the plate."""
 
-    id: Optional[str] = Field(
+    id: Optional[str] = attr(
+        name="id",
+        alias="@id",
         description="Unique identifier of the given object.",
-        default_factory=IDGenerator("proteinINDEX"),
-        xml="@id",
+        default_factory=lambda: str(uuid4()),
     )
 
-    sequence: str = Field(
-        ..., description="Amino acid sequence of the protein", template_alias="Sequence"
-    )
-
-    ecnumber: Optional[str] = Field(
+    name: Optional[str] = element(
+        description="Name of the species",
         default=None,
-        description="EC number of the protein.",
-        regex="(\\d+.)(\\d+.)(\\d+.)(\\d+)",
-        template_alias="EC Number",
+        tag="name",
+        json_schema_extra=dict(),
     )
 
-    organism: Optional[str] = Field(
+    sequence: Optional[str] = element(
+        description="Amino acid sequence of the protein",
         default=None,
-        description="Organism the protein was expressed in.",
-        template_alias="Source organism",
+        tag="sequence",
+        json_schema_extra=dict(),
     )
 
-    organism_tax_id: Optional[str] = Field(
-        default=None, description="Taxonomy identifier of the expression host."
-    )
-
-    uniprotid: Optional[str] = Field(
+    organism: Optional[str] = element(
+        description="Organism the protein originates from",
         default=None,
-        description=(
-            "Unique identifier referencing a protein entry at UniProt. Use this"
-            " identifier to initialize the object from the UniProt database."
+        tag="organism",
+        json_schema_extra=dict(),
+    )
+
+    organism_tax_id: Optional[Identifier] = element(
+        description="NCBI taxonomy ID of the organism",
+        default=None,
+        tag="organism_tax_id",
+        json_schema_extra=dict(),
+    )
+
+    references: List[Identifier] = element(
+        description="List of references to the protein",
+        default_factory=ListPlus,
+        tag="references",
+        json_schema_extra=dict(
+            multiple=True,
         ),
-        template_alias="UniProt ID",
     )
 
-    ontology: SBOTerm = Field(description="None", default=SBOTerm.PROTEIN)
+    _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _parse_raw_xml_data(self):
+        for attr, value in self:
+            if isinstance(value, (ListPlus, list)) and all(
+                isinstance(i, _Element) for i in value
+            ):
+                self._raw_xml_data[attr] = [elem2dict(i) for i in value]
+            elif isinstance(value, _Element):
+                self._raw_xml_data[attr] = elem2dict(value)
+
+        return self

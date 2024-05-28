@@ -1,14 +1,13 @@
-import time
-from typing import Dict, List, FrozenSet
-from sdRDM import DataModel
 from collections import defaultdict
 from datetime import datetime
+from typing import Dict, List
 
-from CaliPytion.core import Standard
-from MTPHandler.core.abstractspecies import AbstractSpecies
+from calipytion.core import Standard
+from sdRDM import DataModel
 
-from MTPHandler.core.reactant import Reactant
+from MTPHandler.core.depr_abstractspecies import AbstractSpecies
 from MTPHandler.core.protein import Protein
+from MTPHandler.core.reactant import Reactant
 from MTPHandler.core.well import Well
 
 # Specify EnzymeML version

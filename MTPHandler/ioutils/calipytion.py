@@ -1,16 +1,20 @@
-from os import name
-from typing import List
-import numpy as np
+from __future__ import annotations
 
-from CaliPytion.core import Calibrator, Standard, Sample, SignalType
-from MTPHandler.core.abstractspecies import AbstractSpecies
+from typing import TYPE_CHECKING, List, Union
+
+import numpy as np
+from calipytion.core import Sample, SignalType, Standard
+from calipytion.tools.calibrator import Calibrator
+
 from MTPHandler.core.well import Well
-from MTPHandler.core.protein import Protein
+
+if TYPE_CHECKING:
+    from MTPHandler.core import Plate, Protein, Reactant
 
 
 def _get_standard_wells(
-    plate: "Plate",
-    species: AbstractSpecies,
+    plate: Plate,
+    species: Union[Protein, Reactant],
     wavelength: int,
 ) -> List[Well]:
     # handel wavelength
@@ -42,7 +46,7 @@ def _get_standard_wells(
         # Add wells with zero concentration to standard wells
         if all(
             [
-                blank_state.contributes_to_signal == False
+                blank_state.contributes_to_signal is False
                 for blank_state in measurement.blank_states
             ]
         ):
@@ -52,10 +56,10 @@ def _get_standard_wells(
 
 
 def map_to_standard(
-    plate: "Plate",
-    species: AbstractSpecies,
+    plate: Plate,
+    species: Union[Protein, Reactant],
     wavelength: int = None,
-    signal_type: SignalType = SignalType.ABSORBANCE,
+    signal_type: str = "abs",
 ) -> Standard:
     standard_wells = _get_standard_wells(
         plate=plate,
@@ -102,7 +106,7 @@ def map_to_standard(
 
 def initialize_calibrator(
     plate: "Plate",
-    species: AbstractSpecies,
+    species: Union[Protein, Reactant],
     wavelength: int = None,
     signal_type: SignalType = SignalType.ABSORBANCE,
     cutoff: float = None,

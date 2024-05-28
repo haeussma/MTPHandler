@@ -1,15 +1,20 @@
+from __future__ import annotations
+
 import re
 from datetime import datetime
-from copy import deepcopy
-import numpy as np
-from typing import List
+from typing import TYPE_CHECKING, List
 
+import numpy as np
 import pandas as pd
-from MTPHandler.core import Well, PhotometricMeasurement
+
+from MTPHandler.core import Well
+
+if TYPE_CHECKING:
+    from MTPHandler.core import Plate
 
 
 def read_spectramax(
-    cls: "Plate",
+    cls: Plate,
     path: str,
     ph: float = None,
     time_unit: str = "min",

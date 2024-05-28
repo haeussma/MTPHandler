@@ -1,69 +1,104 @@
-import sdRDM
+from typing import Dict, List, Optional
+from uuid import uuid4
 
-from typing import List, Optional
-from pydantic import Field
+import sdRDM
+from lxml.etree import _Element
+from pydantic import PrivateAttr, model_validator
+from pydantic_xml import attr, element
+from sdRDM.base.datatypes import Unit
 from sdRDM.base.listplus import ListPlus
-from sdRDM.base.utils import forge_signature, IDGenerator
-from .abstractspecies import AbstractSpecies
+from sdRDM.tools.utils import elem2dict
+
 from .blankstate import BlankState
 from .initcondition import InitCondition
 from .photometricmeasurement import PhotometricMeasurement
 
 
-@forge_signature
-class Well(sdRDM.DataModel):
-    """"""
+class Well(
+    sdRDM.DataModel,
+    search_mode="unordered",
+):
+    """Description of a well on the plate."""
 
-    id: Optional[str] = Field(
+    id: Optional[str] = attr(
+        name="id",
+        alias="@id",
         description="Unique identifier of the given object.",
-        default_factory=IDGenerator("wellINDEX"),
-        xml="@id",
+        default_factory=lambda: str(uuid4()),
     )
 
-    ph: float = Field(
-        ...,
+    ph: float = element(
         description="pH of the reaction",
+        tag="ph",
+        json_schema_extra=dict(),
     )
 
-    x_position: int = Field(
-        ...,
+    x_pos: int = element(
         description="X position of the well on the plate",
+        tag="x_pos",
+        json_schema_extra=dict(),
     )
 
-    y_position: int = Field(
-        ...,
+    y_pos: int = element(
         description="Y position of the well on the plate",
+        tag="y_pos",
+        json_schema_extra=dict(),
     )
 
-    init_conditions: List[InitCondition] = Field(
-        default_factory=ListPlus,
-        multiple=True,
+    init_conditions: List[InitCondition] = element(
         description="List of initial conditions of different species",
-    )
-
-    measurements: List[PhotometricMeasurement] = Field(
         default_factory=ListPlus,
-        multiple=True,
+        tag="init_conditions",
+        json_schema_extra=dict(
+            multiple=True,
+        ),
+    )
+
+    measurements: List[PhotometricMeasurement] = element(
         description="List of photometric measurements",
+        default_factory=ListPlus,
+        tag="measurements",
+        json_schema_extra=dict(
+            multiple=True,
+        ),
     )
 
-    volume: Optional[float] = Field(
-        default=None,
+    volume: Optional[float] = element(
         description="Volume of the reaction",
+        default=None,
+        tag="volume",
+        json_schema_extra=dict(),
     )
 
-    volume_unit: Optional[str] = Field(
-        default=None,
+    volume_unit: Optional[Unit] = element(
         description="Unit of the volume",
+        default=None,
+        tag="volume_unit",
+        json_schema_extra=dict(),
     )
+
+    _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _parse_raw_xml_data(self):
+        for attr, value in self:
+            if isinstance(value, (ListPlus, list)) and all(
+                isinstance(i, _Element) for i in value
+            ):
+                self._raw_xml_data[attr] = [elem2dict(i) for i in value]
+            elif isinstance(value, _Element):
+                self._raw_xml_data[attr] = elem2dict(value)
+
+        return self
 
     def add_to_init_conditions(
         self,
-        species_id: AbstractSpecies,
+        species_id: str,
         init_conc: float,
-        conc_unit: str,
+        conc_unit: Unit,
         id: Optional[str] = None,
-    ) -> None:
+        **kwargs,
+    ) -> InitCondition:
         """
         This method adds an object of type 'InitCondition' to attribute init_conditions
 
@@ -73,24 +108,33 @@ class Well(sdRDM.DataModel):
             init_conc (): Initial concentration of the species.
             conc_unit (): Concentration unit.
         """
+
         params = {
             "species_id": species_id,
             "init_conc": init_conc,
             "conc_unit": conc_unit,
         }
+
         if id is not None:
             params["id"] = id
-        self.init_conditions.append(InitCondition(**params))
+
+        obj = InitCondition(**params)
+
+        self.init_conditions.append(obj)
+
         return self.init_conditions[-1]
 
     def add_to_measurements(
         self,
         wavelength: float,
-        wavelength_unit: str,
-        absorptions: List[float] = ListPlus(),
+        wavelength_unit: Unit,
+        absorption: List[float] = ListPlus(),
+        time: Optional[float] = None,
+        time_unit: Optional[Unit] = None,
         blank_states: List[BlankState] = ListPlus(),
         id: Optional[str] = None,
-    ) -> None:
+        **kwargs,
+    ) -> PhotometricMeasurement:
         """
         This method adds an object of type 'PhotometricMeasurement' to attribute measurements
 
@@ -98,18 +142,28 @@ class Well(sdRDM.DataModel):
             id (str): Unique identifier of the 'PhotometricMeasurement' object. Defaults to 'None'.
             wavelength (): Wavelength of the measurement.
             wavelength_unit (): Unit of the wavelength.
-            absorptions (): Absorption of the species. Defaults to ListPlus()
+            absorption (): Absorption of the species. Defaults to ListPlus()
+            time (): Time of the measurement. Defaults to None
+            time_unit (): Unit of the time. Defaults to None
             blank_states (): List of blank states, referring to the blank state of the species of the well. Defaults to ListPlus()
         """
+
         params = {
             "wavelength": wavelength,
             "wavelength_unit": wavelength_unit,
-            "absorptions": absorptions,
+            "absorption": absorption,
+            "time": time,
+            "time_unit": time_unit,
             "blank_states": blank_states,
         }
+
         if id is not None:
             params["id"] = id
-        self.measurements.append(PhotometricMeasurement(**params))
+
+        obj = PhotometricMeasurement(**params)
+
+        self.measurements.append(obj)
+
         return self.measurements[-1]
 
     def _contains_species(self, species_id: str) -> bool:

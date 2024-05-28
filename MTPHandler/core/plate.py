@@ -1,404 +1,335 @@
-import sdRDM
-
 import itertools as it
 import re
-import pandas as pd
-import numpy as np
-import plotly.graph_objects as go
-import plotly.express as px
-from typing import Optional, Union, List, Callable, Dict, Literal
-from pydantic import Field, StrictBool
-from sdRDM.base.listplus import ListPlus
-from sdRDM.base.utils import forge_signature, IDGenerator
-from datetime import datetime as Datetime
 from collections import defaultdict
+from datetime import datetime as Datetime
 from types import NoneType
+from typing import Callable, Dict, List, Literal, Optional, Union
+from uuid import uuid4
+
+import numpy as np
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import sdRDM
+from calipytion.core import SignalType
+from calipytion.tools.calibrator import Calibrator
+from lxml.etree import _Element
 from plotly.subplots import make_subplots
-from CaliPytion.core import Calibrator, Standard, SignalType
+from pydantic import PrivateAttr, model_validator
+from pydantic_xml import attr, element
+from sdRDM.base.datatypes import Identifier, Unit
+from sdRDM.base.listplus import ListPlus
+from sdRDM.tools.utils import elem2dict
+
 from MTPHandler.ioutils import initialize_calibrator
-from .abstractspecies import AbstractSpecies
-from .well import Well
+
 from .initcondition import InitCondition
 from .photometricmeasurement import PhotometricMeasurement
-from .vessel import Vessel
 from .protein import Protein
 from .reactant import Reactant
-from .sboterm import SBOTerm
+from .well import Well
 
 
-@forge_signature
-class Plate(sdRDM.DataModel):
-    """"""
+class Plate(
+    sdRDM.DataModel,
+    search_mode="unordered",
+):
+    """Description of a microtiter plate consisting of wells."""
 
-    id: Optional[str] = Field(
+    id: Optional[str] = attr(
+        name="id",
+        alias="@id",
         description="Unique identifier of the given object.",
-        default_factory=IDGenerator("plateINDEX"),
-        xml="@id",
+        default_factory=lambda: str(uuid4()),
     )
 
-    n_rows: int = Field(
-        ...,
+    n_rows: int = element(
         description="Number of rows on the plate",
+        tag="n_rows",
+        json_schema_extra=dict(),
     )
 
-    n_columns: int = Field(
-        ...,
+    n_cols: int = element(
         description="Number of columns on the plate",
+        tag="n_cols",
+        json_schema_extra=dict(),
     )
 
-    date_measured: Optional[Datetime] = Field(
-        default=None,
+    date_measured: Optional[Datetime] = element(
         description="Date and time when the plate was measured",
+        default=None,
+        tag="date_measured",
+        json_schema_extra=dict(),
     )
 
-    times: List[float] = Field(
+    times: List[float] = element(
         description=(
             "Time points of the measurement, corresponding to temperature measurements"
         ),
         default_factory=ListPlus,
-        multiple=True,
+        tag="times",
+        json_schema_extra=dict(
+            multiple=True,
+        ),
     )
 
-    time_unit: Optional[str] = Field(
-        default=None,
+    time_unit: Optional[Unit] = element(
         description="Unit of the time",
+        default=None,
+        tag="time_unit",
+        json_schema_extra=dict(),
     )
 
-    temperatures: List[float] = Field(
+    temperatures: List[float] = element(
         description="Thermostat temperature",
-        multiple=True,
         default_factory=ListPlus,
+        tag="temperatures",
+        json_schema_extra=dict(
+            multiple=True,
+        ),
     )
 
-    temperature_unit: str = Field(
-        ...,
+    temperature_unit: Optional[Unit] = element(
         description="Unit of the temperature",
-    )
-
-    max_volume: Optional[float] = Field(
         default=None,
-        description="Maximum volume of the wells",
+        tag="temperature_unit",
+        json_schema_extra=dict(),
     )
 
-    max_volume_unit: Optional[str] = Field(
-        default=None,
-        description="Unit of the maximum volume",
-    )
-
-    wells: List[Well] = Field(
+    wells: List[Well] = element(
         description="List of wells on the plate",
         default_factory=ListPlus,
-        multiple=True,
+        tag="wells",
+        json_schema_extra=dict(
+            multiple=True,
+        ),
     )
 
-    measured_wavelengths: List[float] = Field(
-        description="Measured wavelengths",
-        default_factory=ListPlus,
-        multiple=True,
-    )
-
-    wavelength_unit: Optional[str] = Field(
-        default=None,
-        description="Unit of the wavelength",
-    )
-
-    species: List[AbstractSpecies] = Field(
+    species: List[Union[Reactant, Protein]] = element(
         description="List of species present in wells of the plate",
         default_factory=ListPlus,
-        multiple=True,
+        tag="species",
+        json_schema_extra=dict(
+            multiple=True,
+        ),
     )
+
+    _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _parse_raw_xml_data(self):
+        for attr, value in self:
+            if isinstance(value, (ListPlus, list)) and all(
+                isinstance(i, _Element) for i in value
+            ):
+                self._raw_xml_data[attr] = [elem2dict(i) for i in value]
+            elif isinstance(value, _Element):
+                self._raw_xml_data[attr] = elem2dict(value)
+
+        return self
 
     def add_to_wells(
         self,
         ph: float,
-        x_position: int,
-        y_position: int,
+        x_pos: int,
+        y_pos: int,
         init_conditions: List[InitCondition] = ListPlus(),
         measurements: List[PhotometricMeasurement] = ListPlus(),
         volume: Optional[float] = None,
-        volume_unit: Optional[str] = None,
+        volume_unit: Optional[Unit] = None,
         id: Optional[str] = None,
-    ) -> None:
+        **kwargs,
+    ) -> Well:
         """
         This method adds an object of type 'Well' to attribute wells
 
         Args:
             id (str): Unique identifier of the 'Well' object. Defaults to 'None'.
             ph (): pH of the reaction.
-            x_position (): X position of the well on the plate.
-            y_position (): Y position of the well on the plate.
+            x_pos (): X position of the well on the plate.
+            y_pos (): Y position of the well on the plate.
             init_conditions (): List of initial conditions of different species. Defaults to ListPlus()
             measurements (): List of photometric measurements. Defaults to ListPlus()
             volume (): Volume of the reaction. Defaults to None
             volume_unit (): Unit of the volume. Defaults to None
         """
+
         params = {
             "ph": ph,
-            "x_position": x_position,
-            "y_position": y_position,
+            "x_pos": x_pos,
+            "y_pos": y_pos,
             "init_conditions": init_conditions,
             "measurements": measurements,
             "volume": volume,
             "volume_unit": volume_unit,
         }
+
         if id is not None:
             params["id"] = id
-        self.wells.append(Well(**params))
+
+        obj = Well(**params)
+
+        self.wells.append(obj)
+
         return self.wells[-1]
-
-    def add_to_species(
-        self,
-        name: str,
-        vessel_id: Vessel,
-        constant: bool,
-        init_conc: Optional[float] = None,
-        unit: Optional[str] = None,
-        uri: Optional[str] = None,
-        creator_id: Optional[str] = None,
-        id: Optional[str] = None,
-    ) -> None:
-        """
-        This method adds an object of type 'AbstractSpecies' to attribute species
-
-        Args:
-            id (str): Unique identifier of the 'AbstractSpecies' object. Defaults to 'None'.
-            name (): None.
-            vessel_id (): None.
-            constant (): None.
-            init_conc (): None. Defaults to None
-            unit (): None. Defaults to None
-            uri (): None. Defaults to None
-            creator_id (): None. Defaults to None
-        """
-        params = {
-            "name": name,
-            "vessel_id": vessel_id,
-            "constant": constant,
-            "init_conc": init_conc,
-            "unit": unit,
-            "uri": uri,
-            "creator_id": creator_id,
-        }
-        if id is not None:
-            params["id"] = id
-        self.species.append(AbstractSpecies(**params))
-        return self.species[-1]
-
-    def add_abstract_species_to_species(
-        self,
-        name: str,
-        vessel_id: Vessel,
-        constant: StrictBool,
-        init_conc: Optional[float] = None,
-        unit: Optional[str] = None,
-        uri: Optional[str] = None,
-        creator_id: Optional[str] = None,
-        id: Optional[str] = None,
-    ) -> None:
-        """
-        This method adds an object of type 'AbstractSpecies' to attribute species
-
-        Args:
-            id (str): Unique identifier of the 'AbstractSpecies' object. Defaults to 'None'.
-            name (): None.
-            vessel_id (): None.
-            constant (): None.
-            init_conc (): None. Defaults to None
-            unit (): None. Defaults to None
-            uri (): None. Defaults to None
-            creator_id (): None. Defaults to None
-        """
-        params = {
-            "name": name,
-            "vessel_id": vessel_id,
-            "constant": constant,
-            "init_conc": init_conc,
-            "unit": unit,
-            "uri": uri,
-            "creator_id": creator_id,
-        }
-        if id is not None:
-            params["id"] = id
-        self.species.append(AbstractSpecies(**params))
-        return self.species[-1]
-
-    def add_protein_to_species(
-        self,
-        sequence: str,
-        name: str,
-        vessel_id: Vessel,
-        constant: StrictBool,
-        ecnumber: Optional[str] = None,
-        organism: Optional[str] = None,
-        organism_tax_id: Optional[str] = None,
-        uniprotid: Optional[str] = None,
-        ontology: SBOTerm = SBOTerm.PROTEIN,
-        init_conc: Optional[float] = None,
-        unit: Optional[str] = None,
-        uri: Optional[str] = None,
-        creator_id: Optional[str] = None,
-        id: Optional[str] = None,
-    ) -> None:
-        """
-        This method adds an object of type 'Protein' to attribute species
-
-        Args:
-            id (str): Unique identifier of the 'Protein' object. Defaults to 'None'.
-            sequence (): Amino acid sequence of the protein.
-            name (): None.
-            vessel_id (): None.
-            constant (): None.
-            ecnumber (): EC number of the protein.. Defaults to None
-            organism (): Organism the protein was expressed in.. Defaults to None
-            organism_tax_id (): Taxonomy identifier of the expression host.. Defaults to None
-            uniprotid (): Unique identifier referencing a protein entry at UniProt. Use this identifier to initialize the object from the UniProt database.. Defaults to None
-            ontology (): None. Defaults to SBOTerm.PROTEIN
-            init_conc (): None. Defaults to None
-            unit (): None. Defaults to None
-            uri (): None. Defaults to None
-            creator_id (): None. Defaults to None
-        """
-        params = {
-            "sequence": sequence,
-            "name": name,
-            "vessel_id": vessel_id,
-            "constant": constant,
-            "ecnumber": ecnumber,
-            "organism": organism,
-            "organism_tax_id": organism_tax_id,
-            "uniprotid": uniprotid,
-            "ontology": ontology,
-            "init_conc": init_conc,
-            "unit": unit,
-            "uri": uri,
-            "creator_id": creator_id,
-        }
-        if id is not None:
-            params["id"] = id
-        self.species.append(Protein(**params))
-        return self.species[-1]
 
     def add_reactant_to_species(
         self,
-        name: str,
-        vessel_id: Vessel,
-        constant: StrictBool,
+        name: Optional[str] = None,
         smiles: Optional[str] = None,
         inchi: Optional[str] = None,
-        chebi_id: Optional[str] = None,
-        ontology: SBOTerm = SBOTerm.SMALL_MOLECULE,
-        init_conc: Optional[float] = None,
-        unit: Optional[str] = None,
-        uri: Optional[str] = None,
-        creator_id: Optional[str] = None,
+        references: List[Identifier] = ListPlus(),
         id: Optional[str] = None,
-    ) -> None:
+        **kwargs,
+    ) -> Reactant:
         """
         This method adds an object of type 'Reactant' to attribute species
 
         Args:
             id (str): Unique identifier of the 'Reactant' object. Defaults to 'None'.
-            name (): None.
-            vessel_id (): None.
-            constant (): None.
-            smiles (): Simplified Molecular Input Line Entry System (SMILES) encoding of the reactant.. Defaults to None
-            inchi (): International Chemical Identifier (InChI) encoding of the reactant.. Defaults to None
-            chebi_id (): Unique identifier of the CHEBI database. Use this identifier to initialize the object from the CHEBI database.. Defaults to None
-            ontology (): None. Defaults to SBOTerm.SMALL_MOLECULE
-            init_conc (): None. Defaults to None
-            unit (): None. Defaults to None
-            uri (): None. Defaults to None
-            creator_id (): None. Defaults to None
+            name (): Name of the species. Defaults to None
+            smiles (): SMILES representation of the species. Defaults to None
+            inchi (): InChI representation of the species. Defaults to None
+            references (): List of references to the Reactant. Defaults to ListPlus()
         """
+
         params = {
             "name": name,
-            "vessel_id": vessel_id,
-            "constant": constant,
             "smiles": smiles,
             "inchi": inchi,
-            "chebi_id": chebi_id,
-            "ontology": ontology,
-            "init_conc": init_conc,
-            "unit": unit,
-            "uri": uri,
-            "creator_id": creator_id,
+            "references": references,
         }
+
         if id is not None:
             params["id"] = id
-        self.species.append(Reactant(**params))
+
+        obj = Reactant(**params)
+
+        self.species.append(obj)
+
         return self.species[-1]
 
-    def add_protein(self, id: str, name: str, constant: bool, sequence: str, **kwargs):
-        # define abstract Vessel object
-        vessel = self._define_dummy_vessel()
-
-        params = {
-            "id": id,
-            "name": name,
-            "constant": constant,
-            "sequence": sequence,
-            "vessel_id": vessel.id,
-            **kwargs,
-        }
-
-        return self._add_species(Protein(**params))
-
-    def _add_species(self, new_species: AbstractSpecies) -> AbstractSpecies:
+    def add_protein_to_species(
+        self,
+        name: Optional[str] = None,
+        sequence: Optional[str] = None,
+        organism: Optional[str] = None,
+        organism_tax_id: Optional[Identifier] = None,
+        references: List[Identifier] = ListPlus(),
+        id: Optional[str] = None,
+        **kwargs,
+    ) -> Protein:
         """
-        This method adds an object of type 'Species' to attribute species
+        This method adds an object of type 'Protein' to attribute species
 
         Args:
-            id (str): Unique identifier of the 'Species' object. Defaults to 'None'.
-            type (): Type of the species.
+            id (str): Unique identifier of the 'Protein' object. Defaults to 'None'.
             name (): Name of the species. Defaults to None
+            sequence (): Amino acid sequence of the protein. Defaults to None
+            organism (): Organism the protein originates from. Defaults to None
+            organism_tax_id (): NCBI taxonomy ID of the organism. Defaults to None
+            references (): List of references to the protein. Defaults to ListPlus()
         """
 
-        if any([species.id == new_species.id for species in self.species]):
-            self.species = [
-                new_species if species.id == new_species.id else species
-                for species in self.species
-            ]
+        params = {
+            "name": name,
+            "sequence": sequence,
+            "organism": organism,
+            "organism_tax_id": organism_tax_id,
+            "references": references,
+        }
 
-            return new_species
+        if id is not None:
+            params["id"] = id
 
-        else:
-            self.species.append(new_species)
+        obj = Protein(**params)
 
-            return new_species
+        self.species.append(obj)
 
-    def add_reactant(self, id: str, name: str, constant: bool, **kwargs):
-        # define abstract Vessel object
-        vessel = self._define_dummy_vessel()
+        return self.species[-1]
 
+    def add_protein(
+        self,
+        name: Optional[str] = None,
+        sequence: Optional[str] = None,
+        organism: Optional[str] = None,
+        organism_tax_id: Optional[Identifier] = None,
+        references: List[Identifier] = ListPlus(),
+        id: Optional[str] = None,
+        **kwargs,
+    ) -> Protein:
         params = {
             "id": id,
             "name": name,
-            "constant": constant,
-            "vessel_id": vessel.id,
+            "sequence": sequence,
+            "organism": organism,
+            "organism_tax_id": organism_tax_id,
+            "references": references,
             **kwargs,
         }
 
-        return self._add_species(Reactant(**params))
+        protein = self.add_protein_to_species(**params)
+        protein.add_object_term("https://schema.org/Protein")
 
-    def _define_dummy_vessel(self):
-        return Vessel(
-            id="v0",
-            name="MTP 96 well",
-            volume=200,
-            unit="ul",
-        )
+        return protein
+
+    def add_reactant(
+        self,
+        name: Optional[str] = None,
+        smiles: Optional[str] = None,
+        inchi: Optional[str] = None,
+        references: List[Identifier] = ListPlus(),
+        id: Optional[str] = None,
+        **kwargs,
+    ) -> Reactant:
+        """Add a reactant to the species list.
+
+        Args:
+            name (Optional[str], optional): Name of the reactant. Defaults to None.
+            smiles (Optional[str], optional): Smiles code of the molecule. Defaults to None.
+            inchi (Optional[str], optional): Inchi code of the molecule. Defaults to None.
+            references (List[Identifier], optional): An link pointing to a reference. Defaults to ListPlus().
+            id (Optional[str], optional): ID of the reactant. This can be e.g. an Inchi-Key
+                or Chebi identifier. Defaults to None.
+
+        Returns:
+            Reactant: The reactant object.
+        """
+        params = {
+            "id": id,
+            "name": name,
+            "smiles": smiles,
+            "inchi": inchi,
+            "references": references,
+            **kwargs,
+        }
+
+        reactant = self.add_reactant_to_species(**params)
+
+        return reactant
 
     def assign_species(
         self,
-        species: AbstractSpecies,
+        species_id: str,
         init_conc: Union[float, List[float]],
         conc_unit: str,
         to: Literal["all", "rows", "columns", "except"],
         ids: Union[str, List[str], int, List[int]] = None,
         contributes_to_signal: Optional[bool] = None,
     ):
+        # Handle species
+        if isinstance(species_id, str):
+            species_id = self.get_species(species_id)
+        elif isinstance(species_id, Protein) or isinstance(species_id, Reactant):
+            species_id = species_id.id
+        else:
+            raise AttributeError(
+                """Argument 'species_id' must reference an `if` of a species listed in `species` 
+                attribute of a `Plate` or be an instance of Protein or Reactant."""
+            )
+
         cases = ["rows", "columns", "all", "except"]
-        if not to in cases:
+        if to not in cases:
             raise AttributeError(f"Argument 'to' must be one of {cases}.")
 
         if not isinstance(init_conc, list):
@@ -409,7 +340,7 @@ class Plate(sdRDM.DataModel):
 
         if to == "all":
             self.assign_species_to_all(
-                species=species,
+                species_id=species_id,
                 init_conc=init_conc,
                 conc_unit=conc_unit,
                 contributes_to_signal=contributes_to_signal,
@@ -418,7 +349,7 @@ class Plate(sdRDM.DataModel):
         elif to == "columns":
             self.assign_species_to_columns(
                 column_ids=ids,
-                species=species,
+                species_id=species_id,
                 init_concs=init_conc,
                 conc_unit=conc_unit,
                 contributes_to_signal=contributes_to_signal,
@@ -427,7 +358,7 @@ class Plate(sdRDM.DataModel):
         elif to == "rows":
             self.assign_species_to_rows(
                 row_ids=ids,
-                species=species,
+                species_id=species_id,
                 init_concs=init_conc,
                 conc_unit=conc_unit,
                 contributes_to_signal=contributes_to_signal,
@@ -436,7 +367,7 @@ class Plate(sdRDM.DataModel):
         else:
             self.assign_species_to_all_except(
                 well_ids=ids,
-                species=species,
+                species_id=species_id,
                 init_conc=init_conc,
                 conc_unit=conc_unit,
                 contributes_to_signal=contributes_to_signal,
@@ -446,7 +377,7 @@ class Plate(sdRDM.DataModel):
 
     def assign_species_to_all(
         self,
-        species: AbstractSpecies,
+        species_id: str,
         init_conc: float,
         conc_unit: str,
         contributes_to_signal: Optional[bool] = None,
@@ -458,7 +389,7 @@ class Plate(sdRDM.DataModel):
 
         for well in self.wells:
             well.add_to_init_conditions(
-                species_id=species.id,
+                species_id=species_id.id,
                 init_conc=init_conc[0],
                 conc_unit=conc_unit,
             )
@@ -473,16 +404,16 @@ class Plate(sdRDM.DataModel):
 
             for measurement in well.measurements:
                 measurement.add_to_blank_states(
-                    species_id=species.id,
+                    species_id=species_id.id,
                     contributes_to_signal=contributes,
                 )
 
-        print(f"Assigned {species.name} to all wells.")
+        print(f"Assigned {species_id.name} to all wells.")
 
     def assign_species_to_columns(
         self,
         column_ids: List[int],
-        species: AbstractSpecies,
+        species_id: str,
         init_concs: List[float],
         conc_unit: str,
         contributes_to_signal: Optional[bool] = None,
@@ -515,7 +446,9 @@ class Plate(sdRDM.DataModel):
                         continue
 
                     well.add_to_init_conditions(
-                        species_id=species.id, init_conc=init_conc, conc_unit=conc_unit
+                        species_id=species_id.id,
+                        init_conc=init_conc,
+                        conc_unit=conc_unit,
                     )
 
                     if contributes_to_signal is not None:
@@ -528,19 +461,19 @@ class Plate(sdRDM.DataModel):
 
                     for measurement in well.measurements:
                         measurement.add_to_blank_states(
-                            species_id=species.id,
+                            species_id=species_id.id,
                             contributes_to_signal=contributes,
                         )
 
         print(
-            f"Assigned {species.name} with concentrations of"
+            f"Assigned {species_id.name} with concentrations of"
             f" {init_concs} {conc_unit} to columns {column_ids}."
         )
 
     def assign_species_to_rows(
         self,
         row_ids: List[str],
-        species: AbstractSpecies,
+        species_id: str,
         init_concs: List[float],
         conc_unit: str,
         contributes_to_signal: Optional[bool] = None,
@@ -564,7 +497,7 @@ class Plate(sdRDM.DataModel):
             self._assign_species_to_row(
                 row_id=row_id,
                 init_concs=init_concs,
-                species=species,
+                species_id=species_id,
                 conc_unit=conc_unit,
                 contributes_to_signal=contributes_to_signal,
             )
@@ -573,7 +506,7 @@ class Plate(sdRDM.DataModel):
         self,
         row_id: str,
         init_concs: List[float],
-        species: AbstractSpecies,
+        species_id: str,
         conc_unit: str,
         contributes_to_signal: Optional[bool],
     ):
@@ -587,7 +520,7 @@ class Plate(sdRDM.DataModel):
 
         for well, init_conc in zip(wells, init_concs):
             well.add_to_init_conditions(
-                species_id=species.id,
+                species_id=species_id.id,
                 init_conc=init_conc,
                 conc_unit=conc_unit,
             )
@@ -602,12 +535,12 @@ class Plate(sdRDM.DataModel):
 
             for measurement in well.measurements:
                 measurement.add_to_blank_states(
-                    species_id=species.id,
+                    species_id=species_id.id,
                     contributes_to_signal=contributes,
                 )
 
         print(
-            f"Assigned {species.name} with concentrations of"
+            f"Assigned {species_id.name} with concentrations of"
             f" {init_concs} {conc_unit} to row {row_id}."
         )
 
@@ -623,9 +556,6 @@ class Plate(sdRDM.DataModel):
 
     def get_wells(
         self,
-        ids: List[str] = None,
-        rows: List[str] = None,
-        columns: List[int] = None,
         wavelength: int = None,
     ) -> List[Well]:
         if not wavelength:
@@ -671,7 +601,7 @@ class Plate(sdRDM.DataModel):
     def assign_species_to_all_except(
         self,
         well_ids: List[str],
-        species: AbstractSpecies,
+        species_id: str,
         init_conc: float,
         conc_unit: str,
         contributes_to_signal: Optional[bool] = None,
@@ -687,7 +617,7 @@ class Plate(sdRDM.DataModel):
         wells = (well for well in self.wells if well.id not in well_ids)
         for well in wells:
             well.add_to_init_conditions(
-                species_id=species.id,
+                species_id=species_id.id,
                 init_conc=init_conc[0],
                 conc_unit=conc_unit,
             )
@@ -702,13 +632,13 @@ class Plate(sdRDM.DataModel):
 
             for measurement in well.measurements:
                 measurement.add_to_blank_states(
-                    species_id=species.id,
+                    species_id=species_id.id,
                     contributes_to_signal=contributes,
                 )
 
     def assign_species_from_spreadsheet(
         self,
-        species: AbstractSpecies,
+        species_id: str,
         conc_unit: str,
         path: str,
         sheet_name: str,
@@ -728,7 +658,7 @@ class Plate(sdRDM.DataModel):
                 continue
 
             well.add_to_init_conditions(
-                species_id=species.id,
+                species_id=species_id,
                 init_conc=init_conc,
                 conc_unit=conc_unit,
             )
@@ -740,7 +670,7 @@ class Plate(sdRDM.DataModel):
 
             for measurement in well.measurements:
                 measurement.add_to_blank_states(
-                    species_id=species.id,
+                    species_id=species_id,
                     contributes_to_signal=contributes_to_signal,
                 )
 
@@ -753,7 +683,7 @@ class Plate(sdRDM.DataModel):
 
     def calibrate(
         self,
-        species: AbstractSpecies,
+        species: Union[Reactant, Protein],
         wavelength: int,
         signal_type: SignalType,
         cutoff: float = None,
@@ -766,79 +696,77 @@ class Plate(sdRDM.DataModel):
             cutoff=cutoff,
         )
 
-    def to_enzymeml(
-        self,
-        name: str,
-        detected_reactant: Reactant,
-        reactant_standard: Standard = None,
-        sort_measurements_by: AbstractSpecies = None,
-        ignore_blank_status: bool = False,
-        wavelength: int = None,
-        path: str = None,
-    ) -> "EnzymeML":
-        from MTPHandler.ioutils.enzymeml import create_enzymeml
-
-        return create_enzymeml(
-            name=name,
-            plate=self,
-            detected_reactant=detected_reactant,
-            reactant_standard=reactant_standard,
-            sort_measurements_by=sort_measurements_by,
-            ignore_blank_status=ignore_blank_status,
-            wavelength=wavelength,
-            path=path,
-        )
+    # def to_enzymeml(
+    #     self,
+    #     name: str,
+    #     detected_reactant: Reactant,
+    #     reactant_standard: Standard = None,
+    #     sort_measurements_by: AbstractSpecies = None,
+    #     ignore_blank_status: bool = False,
+    #     wavelength: int = None,
+    #     path: str = None,
+    # ) -> "EnzymeML":
+    #     return create_enzymeml(
+    #         name=name,
+    #         plate=self,
+    #         detected_reactant=detected_reactant,
+    #         reactant_standard=reactant_standard,
+    #         sort_measurements_by=sort_measurements_by,
+    #         ignore_blank_status=ignore_blank_status,
+    #         wavelength=wavelength,
+    #         path=path,
+    #     )
 
     def blank_species(
         self,
-        species: AbstractSpecies,
+        species_id: str,
         wavelength: int,
     ):
         wells = []
         blanking_wells = []
         for well in self.wells:
-            if not well._contains_species(species.id):
+            if not well._contains_species(species_id):
                 continue
 
-            if not wavelength in [
+            if wavelength not in [
                 measurement.wavelength for measurement in well.measurements
             ]:
                 continue
 
             measurement = well.get_measurement(wavelength)
 
-            if measurement.species_contibutes(species.id):
+            if measurement.species_contibutes(species_id):
                 wells.append(well)
 
-            if measurement.is_blanked_for(species.id):
+            if measurement.is_blanked_for(species_id):
                 blanking_wells.append(well)
 
         if len(wells) == 0:
-            print(f"{species.name} at {wavelength} nm does not contribute to signal.")
+            print(f"{species_id} at {wavelength} nm does not contribute to signal.")
             return
 
         if len(blanking_wells) == 0:
             raise ValueError(
                 "No wells found to calculate absorption contribution of"
-                f" {species.name} at {wavelength} nm."
+                f" {species_id} at {wavelength} nm."
             )
 
         # get mapping of concentration to blank wells
         conc_blank_mapping = self._get_conc_blank_mapping(
-            wells=blanking_wells, species=species, wavelength=wavelength
+            wells=blanking_wells, species_id=species_id, wavelength=wavelength
         )
 
         # apply to wells where species is present in respective concentration
         blanked_wells = []
         for well in wells:
-            init_conc = well._get_species_condition(species.id).init_conc
+            init_conc = well._get_species_condition(species_id.id).init_conc
             measurement = well.get_measurement(wavelength)
-            blank_state = measurement.get_blank_state(species.id)
+            blank_state = measurement.get_blank_state(species_id.id)
 
             if init_conc not in conc_blank_mapping.keys():
                 print(
                     f"Well {well.id} was not blanked for initial"
-                    f" {species.name} concentration"
+                    f" {species_id.name} concentration"
                     f" {init_conc}"
                 )
                 continue
@@ -854,7 +782,7 @@ class Plate(sdRDM.DataModel):
             blank_state.contributes_to_signal = False
             blanked_wells.append(well)
 
-        print(f"Blanked {len(blanked_wells)} wells containing {species.name}.")
+        print(f"Blanked {len(blanked_wells)} wells containing {species_id.name}.")
 
     def visualize(self, zoom: bool = False, wavelengths: float = None):
         if zoom:
@@ -907,7 +835,7 @@ class Plate(sdRDM.DataModel):
 
         fig.show()
 
-    def get_species(self, _id: str) -> AbstractSpecies:
+    def get_species(self, _id: str) -> Union[Reactant, Protein]:
         for species in self.species:
             if species.id == _id:
                 return species
@@ -929,11 +857,11 @@ class Plate(sdRDM.DataModel):
         return combinations
 
     def _get_conc_blank_mapping(
-        self, wells: List[Well], species: AbstractSpecies, wavelength: float
+        self, wells: List[Well], species_id: str, wavelength: float
     ) -> Dict[float, List[Well]]:
         blank_measurement_mapping = defaultdict(list)
         for well in wells:
-            condition = well._get_species_condition(species.id)
+            condition = well._get_species_condition(species_id.id)
 
             blank_measurement_mapping[condition.init_conc].append(
                 well.get_measurement(wavelength).absorptions
@@ -943,7 +871,7 @@ class Plate(sdRDM.DataModel):
         for conc, absorptions in blank_measurement_mapping.items():
             mean_absorption = np.nanmean(absorptions)
             print(
-                f"Mean absorption of {species.name} at {conc} {condition.conc_unit}:"
+                f"Mean absorption of {species_id} at {conc} {condition.conc_unit}:"
                 f" {mean_absorption}"
             )
             conc_mean_blank_mapping[conc] = mean_absorption

@@ -1,4 +1,3 @@
-import pytest
 from MTPHandler.core import Plate
 from MTPHandler.readers.megellan_parser import read_magellan
 
