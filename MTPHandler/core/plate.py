@@ -25,6 +25,7 @@ from sdRDM.base.listplus import ListPlus
 from sdRDM.tools.utils import elem2dict
 
 from MTPHandler.ioutils import initialize_calibrator
+from MTPHandler.readers.factory import MTPReaderFactory
 
 from .initcondition import InitCondition
 from .photometricmeasurement import PhotometricMeasurement
@@ -122,7 +123,7 @@ class Plate(
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
     _commit: Optional[str] = PrivateAttr(
-        default="14edae47e1593ff4326a61fc6a40ea14a528fb6a"
+        default="3c983732d880d06a212aacb82ddd1f880bc7ff13"
     )
 
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
@@ -470,7 +471,8 @@ class Plate(
             )
 
         print(
-            f"Assigned {init_conc} {conc_unit} {species.name} ({species.id}) to all wells."
+            f"Assigned {init_conc} {conc_unit} {species.name} ({species.id}) to all"
+            " wells."
         )
 
     def assign_species_to_columns(
@@ -502,7 +504,9 @@ class Plate(
             init_concs = init_concs * len(columns[0])
 
         for wells in columns:
-            assert len(init_concs) == len(wells), f"""
+            assert len(init_concs) == len(
+                wells
+            ), f"""
             Number of initial concentrations ({len(init_concs)}) does not match number 
             of wells ({len(wells)}) in columns ({column_ids}).
             """
@@ -546,7 +550,9 @@ class Plate(
             rows.append(wells)
 
         for wells in rows:
-            assert len(init_concs) == len(wells), f"""
+            assert len(init_concs) == len(
+                wells
+            ), f"""
             Number of initial concentrations ({len(init_concs)}) does not match number 
             of wells ({len(wells)}) in rows ({row_ids}).
             """
@@ -667,8 +673,8 @@ class Plate(
             )
 
         print(
-            f"Assigned {init_conc} {conc_unit} {species.name} ({species.id}) to all wells"
-            f" except {well_ids}."
+            f"Assigned {init_conc} {conc_unit} {species.name} ({species.id}) to all"
+            f" wells except {well_ids}."
         )
 
     def assign_species_from_spreadsheet(
@@ -725,7 +731,8 @@ class Plate(
             )
 
         print(
-            f"Assigned initial concentrations from {path} to {species.name} ({species.id})."
+            f"Assigned initial concentrations from {path} to"
+            f" {species.name} ({species.id})."
         )
 
     def get_well(self, _id: str) -> Well:
@@ -797,7 +804,8 @@ class Plate(
 
         if len(wells) == 0:
             print(
-                f"{species.name} ({species.id}) at {wavelength} nm does not contribute to signal."
+                f"{species.name} ({species.id}) at {wavelength} nm does not contribute"
+                " to signal."
             )
 
         if len(blanking_wells) == 0:
@@ -930,7 +938,8 @@ class Plate(
             mean_absorption = np.nanmean(absorptions)
             print(
                 f"Mean absorption of {species_id} at {conc} {condition.conc_unit.name}:"
-                f" {mean_absorption:.4f} calculated based on wells {[well.id for well in wells]}."
+                f" {mean_absorption:.4f} calculated based on wells"
+                f" {[well.id for well in wells]}."
             )
             conc_mean_blank_mapping[conc] = mean_absorption
 
@@ -957,7 +966,6 @@ class Plate(
         temperature: Optional[float] = None,
         temperature_unit: Optional[str] = None,
     ) -> Plate:
-        from MTPHandler.readers.factory import MTPReaderFactory
 
         return MTPReaderFactory.read(
             cls=cls,

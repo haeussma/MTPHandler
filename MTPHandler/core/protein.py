@@ -49,7 +49,7 @@ class Protein(
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
     _commit: Optional[str] = PrivateAttr(
-        default="14edae47e1593ff4326a61fc6a40ea14a528fb6a"
+        default="3c983732d880d06a212aacb82ddd1f880bc7ff13"
     )
 
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
