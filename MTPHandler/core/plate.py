@@ -123,7 +123,7 @@ class Plate(
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
     _commit: Optional[str] = PrivateAttr(
-        default="705735ae1bf76f556d14cd4f9f7dd4eb498960f1"
+        default="7c8baa9049c8c8a4520b326b921931efc637101b"
     )
 
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
@@ -504,7 +504,9 @@ class Plate(
             init_concs = init_concs * len(columns[0])
 
         for wells in columns:
-            assert len(init_concs) == len(wells), f"""
+            assert len(init_concs) == len(
+                wells
+            ), f"""
             Number of initial concentrations ({len(init_concs)}) does not match number 
             of wells ({len(wells)}) in columns ({column_ids}).
             """
@@ -548,7 +550,9 @@ class Plate(
             rows.append(wells)
 
         for wells in rows:
-            assert len(init_concs) == len(wells), f"""
+            assert len(init_concs) == len(
+                wells
+            ), f"""
             Number of initial concentrations ({len(init_concs)}) does not match number 
             of wells ({len(wells)}) in rows ({row_ids}).
             """
