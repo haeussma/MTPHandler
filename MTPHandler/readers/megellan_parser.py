@@ -1,23 +1,26 @@
-import os
+from __future__ import annotations
+
+import logging
+import math
 import re
-from datetime import datetime
-from copy import deepcopy
-import numpy as np
 from collections import defaultdict
+from datetime import datetime
+from typing import TYPE_CHECKING, Optional
 
 import pandas as pd
 
+if TYPE_CHECKING:
+    from MTPHandler.core.plate import Plate
+
+LOGGER = logging.getLogger(__name__)
+
 
 def read_magellan(
-    cls: "Plate",
+    cls: Plate,
     path: str,
-    ph: float,
     wavelength: float,
+    ph: Optional[float] = None,
 ):
-    created = datetime.fromtimestamp(os.path.getctime(path)).strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
-
     df = pd.read_excel(path, header=None)
 
     # Define the format of the input datetime string
@@ -42,14 +45,19 @@ def read_magellan(
             time_unit = time_unit.replace("sec", "s")
             dates.append(datetime.strptime(date_str.strip(), date_format))
 
+    created = dates[0]
+
     df = df.dropna(how="all")
 
     for row in df.iterrows():
-        if not re.findall(WELL_ID_PATTERN, str(row[1].values[0])):
+        first_cell = str(row[1].values[0])
+        if not re.findall(WELL_ID_PATTERN, first_cell):
             continue
         for element in row[1].values:
             if isinstance(element, str):
                 key = element
+            elif math.isnan(element):
+                continue
             else:
                 data[key].append(element)
 
@@ -59,8 +67,7 @@ def read_magellan(
     plate = cls(
         date_measured=created,
         n_rows=n_rows,
-        n_columns=n_columns,
-        measured_wavelengths=[wavelength],
+        n_cols=n_columns,
         temperature_unit=temp_unit,
         temperatures=temperatures,
         time_unit=time_unit,
@@ -70,16 +77,16 @@ def read_magellan(
     for well_id, abso_list in data.items():
         x_pos, y_pos = id_to_xy(well_id)
         well = plate.add_to_wells(
-            ph=ph,
+            ph=ph if ph else None,
             id=well_id,
-            x_position=x_pos,
-            y_position=y_pos,
+            x_pos=x_pos,
+            y_pos=y_pos,
         )
         well.add_to_measurements(
             wavelength=wavelength,
             wavelength_unit="nm",
-            absorptions=abso_list,
-            blank_states=[],
+            absorption=abso_list,
+            # blank_states=[],
         )
 
     return plate
