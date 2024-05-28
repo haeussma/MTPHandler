@@ -5,6 +5,7 @@ import sdRDM
 from lxml.etree import _Element
 from pydantic import PrivateAttr, model_validator
 from pydantic_xml import attr, element
+from sdRDM.base.datatypes import Identifier
 from sdRDM.base.listplus import ListPlus
 from sdRDM.tools.utils import elem2dict
 
