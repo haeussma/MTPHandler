@@ -35,9 +35,9 @@ classDiagram
     }
     
     class Well {
-        +float ph*
         +integer x_pos*
         +integer y_pos*
+        +float ph
         +InitCondition[0..*] init_conditions
         +PhotometricMeasurement[0..*] measurements
         +float volume

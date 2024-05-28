@@ -114,6 +114,13 @@ class Plate(
         ),
     )
 
+    _repo: Optional[str] = PrivateAttr(
+        default="https://github.com/FAIRChemistry/MTPHandler"
+    )
+    _commit: Optional[str] = PrivateAttr(
+        default="e334b0b111f8283b76d4ff24a987827a4cff7116"
+    )
+
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
 
     @model_validator(mode="after")
@@ -130,9 +137,9 @@ class Plate(
 
     def add_to_wells(
         self,
-        ph: float,
         x_pos: int,
         y_pos: int,
+        ph: Optional[float] = None,
         init_conditions: List[InitCondition] = ListPlus(),
         measurements: List[PhotometricMeasurement] = ListPlus(),
         volume: Optional[float] = None,
@@ -145,9 +152,9 @@ class Plate(
 
         Args:
             id (str): Unique identifier of the 'Well' object. Defaults to 'None'.
-            ph (): pH of the reaction.
             x_pos (): X position of the well on the plate.
             y_pos (): Y position of the well on the plate.
+            ph (): pH of the reaction. Defaults to None
             init_conditions (): List of initial conditions of different species. Defaults to ListPlus()
             measurements (): List of photometric measurements. Defaults to ListPlus()
             volume (): Volume of the reaction. Defaults to None
@@ -155,9 +162,9 @@ class Plate(
         """
 
         params = {
-            "ph": ph,
             "x_pos": x_pos,
             "y_pos": y_pos,
+            "ph": ph,
             "init_conditions": init_conditions,
             "measurements": measurements,
             "volume": volume,
@@ -172,6 +179,81 @@ class Plate(
         self.wells.append(obj)
 
         return self.wells[-1]
+
+    def add_reactant_to_species(
+        self,
+        name: Optional[str] = None,
+        smiles: Optional[str] = None,
+        inchi: Optional[str] = None,
+        references: List[Identifier] = ListPlus(),
+        id: Optional[str] = None,
+        **kwargs,
+    ) -> Reactant:
+        """
+        This method adds an object of type 'Reactant' to attribute species
+
+        Args:
+            id (str): Unique identifier of the 'Reactant' object. Defaults to 'None'.
+            name (): Name of the species. Defaults to None
+            smiles (): SMILES representation of the species. Defaults to None
+            inchi (): InChI representation of the species. Defaults to None
+            references (): List of references to the Reactant. Defaults to ListPlus()
+        """
+
+        params = {
+            "name": name,
+            "smiles": smiles,
+            "inchi": inchi,
+            "references": references,
+        }
+
+        if id is not None:
+            params["id"] = id
+
+        obj = Reactant(**params)
+
+        self.species.append(obj)
+
+        return self.species[-1]
+
+    def add_protein_to_species(
+        self,
+        name: Optional[str] = None,
+        sequence: Optional[str] = None,
+        organism: Optional[str] = None,
+        organism_tax_id: Optional[Identifier] = None,
+        references: List[Identifier] = ListPlus(),
+        id: Optional[str] = None,
+        **kwargs,
+    ) -> Protein:
+        """
+        This method adds an object of type 'Protein' to attribute species
+
+        Args:
+            id (str): Unique identifier of the 'Protein' object. Defaults to 'None'.
+            name (): Name of the species. Defaults to None
+            sequence (): Amino acid sequence of the protein. Defaults to None
+            organism (): Organism the protein originates from. Defaults to None
+            organism_tax_id (): NCBI taxonomy ID of the organism. Defaults to None
+            references (): List of references to the protein. Defaults to ListPlus()
+        """
+
+        params = {
+            "name": name,
+            "sequence": sequence,
+            "organism": organism,
+            "organism_tax_id": organism_tax_id,
+            "references": references,
+        }
+
+        if id is not None:
+            params["id"] = id
+
+        obj = Protein(**params)
+
+        self.species.append(obj)
+
+        return self.species[-1]
 
     def add_reactant_to_species(
         self,
