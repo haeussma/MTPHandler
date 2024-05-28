@@ -214,7 +214,7 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "calipytion"
-version = "0.2.0"
+version = "0.2.1"
 description = "Tool for managing and analyzing data from calibration measurements for concentration calculation."
 optional = false
 python-versions = "^3.10"
@@ -233,7 +233,7 @@ sympy = "^1.12"
 type = "git"
 url = "https://github.com/FAIRChemistry/CaliPytion.git"
 reference = "docs-tests"
-resolved_reference = "27e0097a1e4418c65eb898a591aa490fd1265ff5"
+resolved_reference = "437e967eb1ed86645bb9187371cdcbea090d8ccc"
 
 [[package]]
 name = "certifi"
@@ -2609,4 +2609,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "8f42451e1b5bee0d369d6197ba4e8dad0907c100b8e51f5f584f72883ca6f7f5"
+content-hash = "e656273f13ab4e1e33ec9f86d1ecb15f1d8353d5835732b2aa961fe14fbea16c"
