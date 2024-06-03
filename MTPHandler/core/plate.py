@@ -123,7 +123,7 @@ class Plate(
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
     _commit: Optional[str] = PrivateAttr(
-        default="7c8baa9049c8c8a4520b326b921931efc637101b"
+        default="862fbd059c9b36c968c7988ff728719b3737ac24"
     )
 
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
@@ -475,8 +475,8 @@ class Plate(
             )
 
         print(
-            f"Assigned {species.name} ({species.id}) with {init_conc} {conc_unit} to all"
-            " wells."
+            f"Assigned {species.name} ({species.id}) with {init_conc} {conc_unit} to"
+            " all wells."
         )
 
     def assign_species_to_columns(
@@ -508,7 +508,9 @@ class Plate(
             init_concs = init_concs * len(columns[0])
 
         for wells in columns:
-            assert len(init_concs) == len(wells), f"""
+            assert len(init_concs) == len(
+                wells
+            ), f"""
             Number of initial concentrations ({len(init_concs)}) does not match number 
             of wells ({len(wells)}) in columns ({column_ids}).
             """
@@ -552,7 +554,9 @@ class Plate(
             rows.append(wells)
 
         for wells in rows:
-            assert len(init_concs) == len(wells), f"""
+            assert len(init_concs) == len(
+                wells
+            ), f"""
             Number of initial concentrations ({len(init_concs)}) does not match number 
             of wells ({len(wells)}) in rows ({row_ids}).
             """
@@ -932,9 +936,9 @@ class Plate(
         for conc, absorptions in blank_measurement_mapping.items():
             mean_absorption = np.nanmean(absorptions)
             print(
-                f"Mean absorption of {species.name} ({species.id}) at {conc} {condition.conc_unit.name}:"
-                f" {mean_absorption:.4f} calculated based on wells"
-                f" {[well.id for well in wells]}."
+                f"Mean absorption of {species.name} ({species.id}) at"
+                f" {conc} {condition.conc_unit.name}: {mean_absorption:.4f} calculated"
+                f" based on wells {[well.id for well in wells]}."
             )
             conc_mean_blank_mapping[conc] = mean_absorption
 
