@@ -811,7 +811,7 @@ class Plate(
 
         # get mapping of concentration to blank wells
         conc_blank_mapping = self._get_conc_blank_mapping(
-            wells=blanking_wells, species_id=species, wavelength=wavelength
+            wells=blanking_wells, species=species, wavelength=wavelength
         )
 
         # apply to wells where species is present in respective concentration
@@ -922,7 +922,7 @@ class Plate(
     ) -> Dict[float, List[Well]]:
         blank_measurement_mapping = defaultdict(list)
         for well in wells:
-            condition = well._get_species_condition(species)
+            condition = well._get_species_condition(species.id)
 
             blank_measurement_mapping[condition.init_conc].append(
                 well.get_measurement(wavelength).absorption
