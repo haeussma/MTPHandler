@@ -77,7 +77,7 @@ class PhotometricMeasurement(
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
     _commit: Optional[str] = PrivateAttr(
-        default="862fbd059c9b36c968c7988ff728719b3737ac24"
+        default="5ee3de6718b09d1b136ee1b181934e8f582acda5"
     )
 
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
