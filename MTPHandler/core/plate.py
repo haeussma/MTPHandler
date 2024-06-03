@@ -444,6 +444,10 @@ class Plate(
             )
 
         else:
+            if isinstance(init_conc, list):
+                if len(init_conc) == 1:
+                    init_conc = init_conc[0]
+
             self.assign_species_to_all_except(
                 well_ids=ids,
                 species=species,
@@ -471,7 +475,7 @@ class Plate(
             )
 
         print(
-            f"Assigned {init_conc} {conc_unit} {species.name} ({species.id}) to all"
+            f"Assigned {species.name} ({species.id}) with {init_conc} {conc_unit} to all"
             " wells."
         )
 
@@ -504,9 +508,7 @@ class Plate(
             init_concs = init_concs * len(columns[0])
 
         for wells in columns:
-            assert len(init_concs) == len(
-                wells
-            ), f"""
+            assert len(init_concs) == len(wells), f"""
             Number of initial concentrations ({len(init_concs)}) does not match number 
             of wells ({len(wells)}) in columns ({column_ids}).
             """
@@ -550,9 +552,7 @@ class Plate(
             rows.append(wells)
 
         for wells in rows:
-            assert len(init_concs) == len(
-                wells
-            ), f"""
+            assert len(init_concs) == len(wells), f"""
             Number of initial concentrations ({len(init_concs)}) does not match number 
             of wells ({len(wells)}) in rows ({row_ids}).
             """
@@ -569,8 +569,8 @@ class Plate(
                 )
 
         print(
-            f"Assigned {species.name} ({species.id}) with concentrations of"
-            f" {init_concs} {conc_unit} to rows {row_ids}."
+            f"Assigned {species.name} ({species.id}) with {init_conc} {conc_unit}"
+            f" to rows {row_ids}."
         )
 
     @staticmethod
@@ -652,11 +652,6 @@ class Plate(
         conc_unit: str,
         contributes_to_signal: bool | None,
     ):
-        if not len(init_conc) == 1:
-            raise AttributeError(
-                "Argument 'init_conc' must be a float, when assigning to all wells."
-            )
-
         # validate well_id
         self._validate_well_id(well_ids)
 
@@ -664,7 +659,7 @@ class Plate(
         for well in wells:
             well.add_to_init_conditions(
                 species_id=species.id,
-                init_conc=init_conc[0],
+                init_conc=init_conc,
                 conc_unit=conc_unit,
             )
 
@@ -673,8 +668,8 @@ class Plate(
             )
 
         print(
-            f"Assigned {init_conc} {conc_unit} {species.name} ({species.id}) to all"
-            f" wells except {well_ids}."
+            f"Assigned {species.name} ({species.id}) with {init_conc} {conc_unit}"
+            f" to all wells except {well_ids}."
         )
 
     def assign_species_from_spreadsheet(
@@ -816,7 +811,7 @@ class Plate(
 
         # get mapping of concentration to blank wells
         conc_blank_mapping = self._get_conc_blank_mapping(
-            wells=blanking_wells, species_id=species.id, wavelength=wavelength
+            wells=blanking_wells, species_id=species, wavelength=wavelength
         )
 
         # apply to wells where species is present in respective concentration
@@ -923,11 +918,11 @@ class Plate(
         return combinations
 
     def _get_conc_blank_mapping(
-        self, wells: List[Well], species_id: str, wavelength: float
+        self, wells: List[Well], species: Species, wavelength: float
     ) -> Dict[float, List[Well]]:
         blank_measurement_mapping = defaultdict(list)
         for well in wells:
-            condition = well._get_species_condition(species_id)
+            condition = well._get_species_condition(species)
 
             blank_measurement_mapping[condition.init_conc].append(
                 well.get_measurement(wavelength).absorption
@@ -937,7 +932,7 @@ class Plate(
         for conc, absorptions in blank_measurement_mapping.items():
             mean_absorption = np.nanmean(absorptions)
             print(
-                f"Mean absorption of {species_id} at {conc} {condition.conc_unit.name}:"
+                f"Mean absorption of {species.name} ({species.id}) at {conc} {condition.conc_unit.name}:"
                 f" {mean_absorption:.4f} calculated based on wells"
                 f" {[well.id for well in wells]}."
             )
