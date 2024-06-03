@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import itertools as it
 import re
+import warnings
 from collections import defaultdict
 from datetime import datetime as Datetime
 from types import NoneType
-from typing import Callable, Dict, List, Literal, Optional, Union
+from typing import Dict, List, Literal, Optional, Union
 from uuid import uuid4
 
 import numpy as np
@@ -22,11 +25,13 @@ from sdRDM.base.listplus import ListPlus
 from sdRDM.tools.utils import elem2dict
 
 from MTPHandler.ioutils import initialize_calibrator
+from MTPHandler.readers.factory import MTPReaderFactory
 
 from .initcondition import InitCondition
 from .photometricmeasurement import PhotometricMeasurement
 from .protein import Protein
 from .reactant import Reactant
+from .species import Species
 from .well import Well
 
 
@@ -105,13 +110,20 @@ class Plate(
         ),
     )
 
-    species: List[Union[Reactant, Protein]] = element(
+    species: List[Species] = element(
         description="List of species present in wells of the plate",
         default_factory=ListPlus,
         tag="species",
         json_schema_extra=dict(
             multiple=True,
         ),
+    )
+
+    _repo: Optional[str] = PrivateAttr(
+        default="https://github.com/FAIRChemistry/MTPHandler"
+    )
+    _commit: Optional[str] = PrivateAttr(
+        default="862fbd059c9b36c968c7988ff728719b3737ac24"
     )
 
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
@@ -130,9 +142,9 @@ class Plate(
 
     def add_to_wells(
         self,
-        ph: float,
         x_pos: int,
         y_pos: int,
+        ph: Optional[float] = None,
         init_conditions: List[InitCondition] = ListPlus(),
         measurements: List[PhotometricMeasurement] = ListPlus(),
         volume: Optional[float] = None,
@@ -145,9 +157,9 @@ class Plate(
 
         Args:
             id (str): Unique identifier of the 'Well' object. Defaults to 'None'.
-            ph (): pH of the reaction.
             x_pos (): X position of the well on the plate.
             y_pos (): Y position of the well on the plate.
+            ph (): pH of the reaction. Defaults to None
             init_conditions (): List of initial conditions of different species. Defaults to ListPlus()
             measurements (): List of photometric measurements. Defaults to ListPlus()
             volume (): Volume of the reaction. Defaults to None
@@ -155,9 +167,9 @@ class Plate(
         """
 
         params = {
-            "ph": ph,
             "x_pos": x_pos,
             "y_pos": y_pos,
+            "ph": ph,
             "init_conditions": init_conditions,
             "measurements": measurements,
             "volume": volume,
@@ -172,6 +184,36 @@ class Plate(
         self.wells.append(obj)
 
         return self.wells[-1]
+
+    def add_to_species(
+        self,
+        name: Optional[str] = None,
+        references: List[Identifier] = ListPlus(),
+        id: Optional[str] = None,
+        **kwargs,
+    ) -> Species:
+        """
+        This method adds an object of type 'Species' to attribute species
+
+        Args:
+            id (str): Unique identifier of the 'Species' object. Defaults to 'None'.
+            name (): Name of the species. Defaults to None
+            references (): List of references to the species. Defaults to ListPlus()
+        """
+
+        params = {
+            "name": name,
+            "references": references,
+        }
+
+        if id is not None:
+            params["id"] = id
+
+        obj = Species(**params)
+
+        self.species.append(obj)
+
+        return self.species[-1]
 
     def add_reactant_to_species(
         self,
@@ -268,12 +310,15 @@ class Plate(
             **kwargs,
         }
 
+        if id in [species.id for species in self.species]:
+            old_species = self.get_species(id)
+            del self.species[self.species.index(old_species)]
         protein = self.add_protein_to_species(**params)
         protein.add_object_term("https://schema.org/Protein")
 
         return protein
 
-    def add_reactant(
+    def add_species(
         self,
         name: Optional[str] = None,
         smiles: Optional[str] = None,
@@ -295,6 +340,13 @@ class Plate(
         Returns:
             Reactant: The reactant object.
         """
+
+        if not id:
+            warnings.warn(
+                """No ID provided for species. This might cause issues when referencing the species. 
+                Consider providing an ID which references the species such as a Chebi ID."""
+            )
+
         params = {
             "id": id,
             "name": name,
@@ -304,31 +356,54 @@ class Plate(
             **kwargs,
         }
 
-        reactant = self.add_reactant_to_species(**params)
+        if id in [species.id for species in self.species]:
+            old_species = self.get_species(id)
+            del self.species[self.species.index(old_species)]
+        reactant = self.add_to_species(**params)
 
         return reactant
 
     def assign_species(
         self,
-        species_id: str,
+        species: Species,
         init_conc: Union[float, List[float]],
         conc_unit: str,
-        to: Literal["all", "rows", "columns", "except"],
+        to: Literal["all", "rows", "columns", "all except"],
         ids: Union[str, List[str], int, List[int]] = None,
-        contributes_to_signal: Optional[bool] = None,
+        contributes_to_signal: bool | None = None,
     ):
+        """
+        Assigns a species to specific wells on the plate based on the provided criteria.
+
+        Args:
+            species (Species): The species object to assign to the wells.
+            init_conc (Union[float, List[float]]): The initial concentration(s) of the species.
+            conc_unit (str): The unit of concentration.
+            to (Literal["all", "rows", "columns", "all except"]): The target location(s) for assigning the species.
+                This can be individual or multiple wells as well as individual or multiple rows or columns.
+            ids (Union[str, List[str], int, List[int]], optional): The specific row or column IDs where the species should be assigned.
+                Defaults to None.
+            contributes_to_signal (bool, optional): Indicates if the assigned species contributes to the signal.
+                Defaults to None.
+
+        Raises:
+            AttributeError: If the 'species' argument does not reference an `id` of a Species listed in `species`.
+            AttributeError: If the 'to' argument is not one of ["all", "rows", "columns", "all_except"].
+
+        Returns:
+            None
+        """
         # Handle species
-        if isinstance(species_id, str):
-            species_id = self.get_species(species_id)
-        elif isinstance(species_id, Protein) or isinstance(species_id, Reactant):
-            species_id = species_id.id
+        if isinstance(species, str):
+            species = self.get_species(species)
+        elif isinstance(species, Species):
+            pass
         else:
             raise AttributeError(
-                """Argument 'species_id' must reference an `if` of a species listed in `species` 
-                attribute of a `Plate` or be an instance of Protein or Reactant."""
+                """Argument 'species' must reference an `id` of a Species listed in `species`."""
             )
 
-        cases = ["rows", "columns", "all", "except"]
+        cases = ["rows", "columns", "all", "all except"]
         if to not in cases:
             raise AttributeError(f"Argument 'to' must be one of {cases}.")
 
@@ -339,8 +414,12 @@ class Plate(
             ids = [ids]
 
         if to == "all":
+            if isinstance(init_conc, list):
+                if len(init_conc) == 1:
+                    init_conc = init_conc[0]
+
             self.assign_species_to_all(
-                species_id=species_id,
+                species=species,
                 init_conc=init_conc,
                 conc_unit=conc_unit,
                 contributes_to_signal=contributes_to_signal,
@@ -349,7 +428,7 @@ class Plate(
         elif to == "columns":
             self.assign_species_to_columns(
                 column_ids=ids,
-                species_id=species_id,
+                species=species,
                 init_concs=init_conc,
                 conc_unit=conc_unit,
                 contributes_to_signal=contributes_to_signal,
@@ -358,191 +437,166 @@ class Plate(
         elif to == "rows":
             self.assign_species_to_rows(
                 row_ids=ids,
-                species_id=species_id,
+                species=species,
                 init_concs=init_conc,
                 conc_unit=conc_unit,
                 contributes_to_signal=contributes_to_signal,
             )
 
         else:
+            if isinstance(init_conc, list):
+                if len(init_conc) == 1:
+                    init_conc = init_conc[0]
+
             self.assign_species_to_all_except(
                 well_ids=ids,
-                species_id=species_id,
+                species=species,
                 init_conc=init_conc,
                 conc_unit=conc_unit,
                 contributes_to_signal=contributes_to_signal,
             )
 
-        return
-
     def assign_species_to_all(
         self,
-        species_id: str,
+        species: Species,
         init_conc: float,
         conc_unit: str,
-        contributes_to_signal: Optional[bool] = None,
+        contributes_to_signal: bool | None,
     ):
-        if not len(init_conc) == 1:
-            raise AttributeError(
-                "Argument 'init_conc' must be a float, when assigning to all wells."
-            )
-
         for well in self.wells:
             well.add_to_init_conditions(
-                species_id=species_id.id,
-                init_conc=init_conc[0],
+                species_id=species.id,
+                init_conc=init_conc,
                 conc_unit=conc_unit,
             )
 
-            if contributes_to_signal is not None:
-                contributes = contributes_to_signal
-            else:
-                if init_conc == 0:
-                    contributes = False
-                else:
-                    contributes = True
+            self._handle_blank_status(
+                well, species.id, init_conc, contributes_to_signal
+            )
 
-            for measurement in well.measurements:
-                measurement.add_to_blank_states(
-                    species_id=species_id.id,
-                    contributes_to_signal=contributes,
-                )
-
-        print(f"Assigned {species_id.name} to all wells.")
+        print(
+            f"Assigned {species.name} ({species.id}) with {init_conc} {conc_unit} to"
+            " all wells."
+        )
 
     def assign_species_to_columns(
         self,
-        column_ids: List[int],
-        species_id: str,
-        init_concs: List[float],
+        column_ids: list[int],
+        species: Species,
+        init_concs: list[float],
         conc_unit: str,
-        contributes_to_signal: Optional[bool] = None,
+        contributes_to_signal: bool | None,
     ):
         # Handle column_ids
         if not all([isinstance(column_id, int) for column_id in column_ids]):
             raise AttributeError("Argument 'column_ids' must be a list of integers.")
 
-        if not all([column_id <= self.n_columns for column_id in column_ids]):
+        if not all([column_id <= self.n_cols for column_id in column_ids]):
             raise AttributeError(
                 "Argument 'column_ids' must be a list of integers between 1 and"
-                f" {self.n_columns+1}."
+                f" {self.n_cols+1}."
             )
+
+        columns = []
+        for column_id in column_ids:
+            wells = [well for well in self.wells if well.x_pos + 1 == column_id]
+            wells = sorted(wells, key=lambda x: x.y_pos)
+            columns.append(wells)
 
         # Handle init_concs
         if len(init_concs) == 1:
-            init_concs = init_concs * self.n_rows
+            init_concs = init_concs * len(columns[0])
 
-        if not len(init_concs) == self.n_rows:
-            raise AttributeError(
-                f"Argument 'init_concs' must be a list of length {self.n_rows}."
-            )
+        for wells in columns:
+            assert len(init_concs) == len(
+                wells
+            ), f"""
+            Number of initial concentrations ({len(init_concs)}) does not match number 
+            of wells ({len(wells)}) in columns ({column_ids}).
+            """
 
-        for column_id in column_ids:
-            for row_id, init_conc in zip(range(self.n_rows), init_concs):
-                for well in self.wells:
-                    if not well.x_position == column_id - 1:
-                        continue
-                    if not well.y_position == row_id:
-                        continue
+            for well, init_conc in zip(wells, init_concs):
+                well.add_to_init_conditions(
+                    species_id=species.id,
+                    init_conc=init_conc,
+                    conc_unit=conc_unit,
+                )
 
-                    well.add_to_init_conditions(
-                        species_id=species_id.id,
-                        init_conc=init_conc,
-                        conc_unit=conc_unit,
-                    )
-
-                    if contributes_to_signal is not None:
-                        contributes = contributes_to_signal
-                    else:
-                        if init_conc == 0:
-                            contributes = False
-                        else:
-                            contributes = True
-
-                    for measurement in well.measurements:
-                        measurement.add_to_blank_states(
-                            species_id=species_id.id,
-                            contributes_to_signal=contributes,
-                        )
+                self._handle_blank_status(
+                    well, species.id, init_conc, contributes_to_signal
+                )
 
         print(
-            f"Assigned {species_id.name} with concentrations of"
+            f"Assigned {species.name} ({species.id}) with concentrations of"
             f" {init_concs} {conc_unit} to columns {column_ids}."
         )
 
     def assign_species_to_rows(
         self,
         row_ids: List[str],
-        species_id: str,
+        species: Species,
         init_concs: List[float],
         conc_unit: str,
-        contributes_to_signal: Optional[bool] = None,
+        contributes_to_signal: bool | None,
     ):
         # Handle row_ids
-        if not row_ids:
-            row_ids = [chr(i) for i in range(65, 65 + self.n_rows)]
+
+        if isinstance(row_ids, str):
+            row_ids = [row_ids]
 
         if not all([isinstance(row_id, str) for row_id in row_ids]):
             raise AttributeError("Argument 'row_ids' must be a list of strings.")
 
-        else:
-            row_ids = [_id.upper() for _id in row_ids]
-
-        # Handle init_concs
-
+        rows = []
         for row_id in row_ids:
-            if len(init_concs) == 1:
-                init_concs = init_concs * len(self._get_wells_by_row_id(row_id))
+            wells = [well for well in self.wells if row_id in well.id]
+            wells = sorted(wells, key=lambda x: x.x_pos)
+            rows.append(wells)
 
-            self._assign_species_to_row(
-                row_id=row_id,
-                init_concs=init_concs,
-                species_id=species_id,
-                conc_unit=conc_unit,
-                contributes_to_signal=contributes_to_signal,
-            )
+        for wells in rows:
+            assert len(init_concs) == len(
+                wells
+            ), f"""
+            Number of initial concentrations ({len(init_concs)}) does not match number 
+            of wells ({len(wells)}) in rows ({row_ids}).
+            """
 
-    def _assign_species_to_row(
-        self,
-        row_id: str,
-        init_concs: List[float],
-        species_id: str,
-        conc_unit: str,
-        contributes_to_signal: Optional[bool],
-    ):
-        wells = self._get_wells_by_row_id(row_id)
+            for well, init_conc in zip(wells, init_concs):
+                well.add_to_init_conditions(
+                    species_id=species.id,
+                    init_conc=init_conc,
+                    conc_unit=conc_unit,
+                )
 
-        if not len(init_concs) == len(wells):
-            raise AttributeError(
-                f"Number of initial concentrations ({len(init_concs)}) does not match"
-                f"number of rows in row {row_id} ({len(wells)})"
-            )
-
-        for well, init_conc in zip(wells, init_concs):
-            well.add_to_init_conditions(
-                species_id=species_id.id,
-                init_conc=init_conc,
-                conc_unit=conc_unit,
-            )
-
-            if contributes_to_signal is not None:
-                contributes = contributes_to_signal
-            else:
-                if init_conc == 0:
-                    contributes = False
-                else:
-                    contributes = True
-
-            for measurement in well.measurements:
-                measurement.add_to_blank_states(
-                    species_id=species_id.id,
-                    contributes_to_signal=contributes,
+                self._handle_blank_status(
+                    well, species.id, init_conc, contributes_to_signal
                 )
 
         print(
-            f"Assigned {species_id.name} with concentrations of"
-            f" {init_concs} {conc_unit} to row {row_id}."
+            f"Assigned {species.name} ({species.id}) with {init_conc} {conc_unit}"
+            f" to rows {row_ids}."
         )
+
+    @staticmethod
+    def _handle_blank_status(
+        well: Well,
+        species_id: str,
+        init_conc: float,
+        contributes_to_signal: bool | None,
+    ):
+        if contributes_to_signal is None:
+            if init_conc == 0:
+                contributes = False
+            else:
+                contributes = True
+        else:
+            contributes = contributes_to_signal
+
+        for measurement in well.measurements:
+            measurement.add_to_blank_states(
+                species_id=species_id,
+                contributes_to_signal=contributes,
+            )
 
     def _handle_wavelength(self) -> float:
         if len(self.measured_wavelengths) == 1:
@@ -561,93 +615,101 @@ class Plate(
         if not wavelength:
             wavelength = self._handle_wavelength()
 
-    def _get_well_by_id(self, _id: str) -> List[Well]:
+    def get_well_by_id(self, _id: str) -> Well:
         for well in self.wells:
-            if well.id == _id:
+            if well.id == _id.upper():
                 return well
 
         raise ValueError(f"No well found with id {_id}")
 
     def _get_wells_by_column_id(self, column_id: int, wavelength: int) -> Well:
-        x_position = column_id - 1
+        x_pos = column_id - 1
         y_positions = [
-            well.y_position
+            well.y_pos
             for well in self.wells
-            if well.x_position == x_position and well.wavelength == wavelength
+            if well.x_pos == x_pos and well.wavelength == wavelength
         ]
 
-        return [
-            self._get_well_by_xy(x_position, y_pos, wavelength) for y_pos in y_positions
-        ]
+        return [self._get_well_by_xy(x_pos, y_pos, wavelength) for y_pos in y_positions]
 
     def _get_wells_by_row_id(self, row_id: str) -> List[Well]:
         return [well for well in self.wells if row_id in well.id and well.measurements]
 
-    def _get_well_by_xy(
-        self, x_position: int, y_position: int, wavelength: int
-    ) -> Well:
+    def _get_well_by_xy(self, x_pos: int, y_pos: int, wavelength: int) -> Well:
         for well in self.wells:
             if (
-                well.x_position == x_position
-                and well.y_position == y_position
+                well.x_pos == x_pos
+                and well.y_pos == y_pos
                 and well.wavelength == wavelength
             ):
                 return well
 
         raise ValueError(
-            f"No well found with x position {x_position} and y position {y_position}"
+            f"No well found with x position {x_pos} and y position {y_pos}"
         )
 
     def assign_species_to_all_except(
         self,
         well_ids: List[str],
-        species_id: str,
+        species: Species,
         init_conc: float,
         conc_unit: str,
-        contributes_to_signal: Optional[bool] = None,
+        contributes_to_signal: bool | None,
     ):
-        if not len(init_conc) == 1:
-            raise AttributeError(
-                "Argument 'init_conc' must be a float, when assigning to all wells."
-            )
-
         # validate well_id
         self._validate_well_id(well_ids)
 
         wells = (well for well in self.wells if well.id not in well_ids)
         for well in wells:
             well.add_to_init_conditions(
-                species_id=species_id.id,
-                init_conc=init_conc[0],
+                species_id=species.id,
+                init_conc=init_conc,
                 conc_unit=conc_unit,
             )
 
-            if contributes_to_signal is not None:
-                contributes = contributes_to_signal
-            else:
-                if init_conc == 0:
-                    contributes = False
-                else:
-                    contributes = True
+            self._handle_blank_status(
+                well, species.id, init_conc, contributes_to_signal
+            )
 
-            for measurement in well.measurements:
-                measurement.add_to_blank_states(
-                    species_id=species_id.id,
-                    contributes_to_signal=contributes,
-                )
+        print(
+            f"Assigned {species.name} ({species.id}) with {init_conc} {conc_unit}"
+            f" to all wells except {well_ids}."
+        )
 
     def assign_species_from_spreadsheet(
         self,
-        species_id: str,
+        species: Species,
         conc_unit: str,
         path: str,
-        sheet_name: str,
-        header: int = 1,
-        index_col: int = 0,
+        sheet_name: str | None = None,
+        header: int = 0,
+        index: int = 0,
+        contributes_to_signal: bool | None = None,
     ):
-        df = pd.read_excel(
-            path, sheet_name=sheet_name, header=header, index_col=index_col
-        )
+        """Allows to read in a spreadsheet harboring a plate map describing the
+        initial concentrations of a species in the wells of the plate.
+        The parser expects the first row to contain the row ids numbered from 1 to 12.
+        The first column should contain the column ids labeled from A to H.
+        If additional columns or rows are present, adjust the `header` and `index`
+        arguments accordingly.
+
+        Args:
+            species (Species): Species object to assign initial concentrations to.
+            conc_unit (str): Unit of the concentration.
+            path (str): Path to the spreadsheet.
+            sheet_name (str | None, optional): Name of the sheet containing the plate map.
+                Defaults to None.
+            header (int, optional): Number of columns before the header starts.
+                Defaults to 0.
+            index (int, optional): Number of columns before the index column starts.
+                Defaults to 0.
+            contributes_to_signal (bool | None, optional): Whether the species contributes
+                to the signal. Defaults to None.
+        """
+        df = pd.read_excel(path, sheet_name=sheet_name, header=header, index_col=index)
+
+        if isinstance(species, str):
+            species = self.get_species(species)
 
         for well in self.wells:
             row = well.id[0]
@@ -658,21 +720,19 @@ class Plate(
                 continue
 
             well.add_to_init_conditions(
-                species_id=species_id,
+                species_id=species.id,
                 init_conc=init_conc,
                 conc_unit=conc_unit,
             )
 
-            if init_conc == 0:
-                contributes_to_signal = False
-            else:
-                contributes_to_signal = True
+            self._handle_blank_status(
+                well, species.id, init_conc, contributes_to_signal
+            )
 
-            for measurement in well.measurements:
-                measurement.add_to_blank_states(
-                    species_id=species_id,
-                    contributes_to_signal=contributes_to_signal,
-                )
+        print(
+            f"Assigned initial concentrations from {path} to"
+            f" {species.name} ({species.id})."
+        )
 
     def get_well(self, _id: str) -> Well:
         for well in self.wells:
@@ -719,13 +779,13 @@ class Plate(
 
     def blank_species(
         self,
-        species_id: str,
+        species: Species,
         wavelength: int,
     ):
         wells = []
         blanking_wells = []
         for well in self.wells:
-            if not well._contains_species(species_id):
+            if not well._contains_species(species.id):
                 continue
 
             if wavelength not in [
@@ -735,38 +795,40 @@ class Plate(
 
             measurement = well.get_measurement(wavelength)
 
-            if measurement.species_contibutes(species_id):
+            if measurement.species_contibutes(species.id):
                 wells.append(well)
 
-            if measurement.is_blanked_for(species_id):
+            if measurement.is_blanked_for(species.id):
                 blanking_wells.append(well)
 
         if len(wells) == 0:
-            print(f"{species_id} at {wavelength} nm does not contribute to signal.")
-            return
+            print(
+                f"{species.name} ({species.id}) at {wavelength} nm does not contribute"
+                " to signal."
+            )
 
         if len(blanking_wells) == 0:
             raise ValueError(
                 "No wells found to calculate absorption contribution of"
-                f" {species_id} at {wavelength} nm."
+                f" {species.name} ({species.id}) at {wavelength} nm."
             )
 
         # get mapping of concentration to blank wells
         conc_blank_mapping = self._get_conc_blank_mapping(
-            wells=blanking_wells, species_id=species_id, wavelength=wavelength
+            wells=blanking_wells, species_id=species, wavelength=wavelength
         )
 
         # apply to wells where species is present in respective concentration
         blanked_wells = []
         for well in wells:
-            init_conc = well._get_species_condition(species_id.id).init_conc
+            init_conc = well._get_species_condition(species.id).init_conc
             measurement = well.get_measurement(wavelength)
-            blank_state = measurement.get_blank_state(species_id.id)
+            blank_state = measurement.get_blank_state(species.id)
 
             if init_conc not in conc_blank_mapping.keys():
                 print(
                     f"Well {well.id} was not blanked for initial"
-                    f" {species_id.name} concentration"
+                    f" {species.name} concentration"
                     f" {init_conc}"
                 )
                 continue
@@ -774,15 +836,15 @@ class Plate(
             if not blank_state.contributes_to_signal:
                 continue
 
-            measurement.absorptions = [
+            measurement.absorption = [
                 absorption - conc_blank_mapping[init_conc]
-                for absorption in measurement.absorptions
+                for absorption in measurement.absorption
             ]
 
             blank_state.contributes_to_signal = False
             blanked_wells.append(well)
 
-        print(f"Blanked {len(blanked_wells)} wells containing {species_id.name}.")
+        print(f"Blanked {len(blanked_wells)} wells containing {species.name}.\n")
 
     def visualize(self, zoom: bool = False, wavelengths: float = None):
         if zoom:
@@ -790,12 +852,15 @@ class Plate(
         else:
             shared_yaxes = True
 
+        if not wavelengths:
+            wavelengths = self.wells[0].measurements[0].wavelength
+
         if not isinstance(wavelengths, list):
             wavelengths = [wavelengths]
 
         fig = make_subplots(
             rows=self.n_rows,
-            cols=self.n_columns,
+            cols=self.n_cols,
             shared_xaxes=True,
             subplot_titles=self._generate_possible_well_ids(),
             shared_yaxes=shared_yaxes,
@@ -810,15 +875,15 @@ class Plate(
                 fig.add_trace(
                     go.Scatter(
                         x=self.times,
-                        y=measurement.absorptions,
+                        y=measurement.absorption,
                         name=f"{measurement.wavelength} nm",
                         mode="lines",
                         showlegend=False,
                         line=dict(color=color),
                         hovertemplate="%{y:.2f}<br>",
                     ),
-                    col=well.x_position + 1,
-                    row=well.y_position + 1,
+                    col=well.x_pos + 1,
+                    row=well.y_pos + 1,
                 )
 
         fig.update_xaxes(showticklabels=False)
@@ -828,7 +893,7 @@ class Plate(
             plot_bgcolor="white",
             hovermode="x",
             title=dict(
-                text=f"{self.temperatures[0]} °{self.temperature_unit}",
+                text=f"{self.temperatures[0]} °{self.temperature_unit.name}",
             ),
             margin=dict(l=20, r=20, t=100, b=20),
         )
@@ -847,7 +912,7 @@ class Plate(
         integers = range(1, 13)  # 1 to 12
 
         sub_char = characters[: self.n_rows]
-        sub_int = integers[: self.n_columns]
+        sub_int = integers[: self.n_cols]
 
         # Generate combinations of characters and integers
         combinations = [
@@ -857,22 +922,23 @@ class Plate(
         return combinations
 
     def _get_conc_blank_mapping(
-        self, wells: List[Well], species_id: str, wavelength: float
+        self, wells: List[Well], species: Species, wavelength: float
     ) -> Dict[float, List[Well]]:
         blank_measurement_mapping = defaultdict(list)
         for well in wells:
-            condition = well._get_species_condition(species_id.id)
+            condition = well._get_species_condition(species)
 
             blank_measurement_mapping[condition.init_conc].append(
-                well.get_measurement(wavelength).absorptions
+                well.get_measurement(wavelength).absorption
             )
 
         conc_mean_blank_mapping = {}
         for conc, absorptions in blank_measurement_mapping.items():
             mean_absorption = np.nanmean(absorptions)
             print(
-                f"Mean absorption of {species_id} at {conc} {condition.conc_unit}:"
-                f" {mean_absorption}"
+                f"Mean absorption of {species.name} ({species.id}) at"
+                f" {conc} {condition.conc_unit.name}: {mean_absorption:.4f} calculated"
+                f" based on wells {[well.id for well in wells]}."
             )
             conc_mean_blank_mapping[conc] = mean_absorption
 
@@ -889,5 +955,30 @@ class Plate(
             )
 
     @classmethod
-    def from_reader(cls, reader: Callable, path: str, **kwargs):
-        return reader(cls, path, **kwargs)
+    def from_file(
+        cls: Plate,
+        path: str,
+        ph: Optional[float] = None,
+        wavelength: Optional[float] = None,
+        time: Optional[List[float]] = None,
+        time_unit: Optional[str] = None,
+        temperature: Optional[float] = None,
+        temperature_unit: Optional[str] = None,
+    ) -> Plate:
+        return MTPReaderFactory.read(
+            cls=cls,
+            path=path,
+            ph=ph,
+            wavelength=wavelength,
+            time=time,
+            time_unit=time_unit,
+            temperature=temperature,
+            temperature_unit=temperature_unit,
+        )
+
+    @classmethod
+    def from_reader(cls):
+        warnings.warn(
+            "Method 'from_reader' is deprecated. Use 'from_file' instead.",
+            DeprecationWarning,
+        )

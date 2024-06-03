@@ -7,10 +7,8 @@ from typing import TYPE_CHECKING, List
 import numpy as np
 import pandas as pd
 
-from MTPHandler.core import Well
-
 if TYPE_CHECKING:
-    from MTPHandler.core import Plate
+    from MTPHandler.core import Plate, Well
 
 
 def read_spectramax(

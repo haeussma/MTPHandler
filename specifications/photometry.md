@@ -31,16 +31,24 @@ Description of a microtiter plate consisting of wells.
     - Type: Well[]
     - Description: List of wells on the plate
 - species
-    - Type: Reactant[], Protein[]
+    - Type: Species[]
     - Description: List of species present in wells of the plate
 
-### Protein
+### Species
 
-Description of a protein species that might be present in the wells of the plate.
+Description of a species that might be present in the wells of the plate.
 
 - name
     - Type: str
     - Description: Name of the species
+- references
+    - Type: Identifier[]
+    - Description: List of references to the species
+
+### Protein (_Species_)
+
+Description of a protein species that might be present in the wells of the plate.
+
 - sequence
     - Type: str
     - Description: Amino acid sequence of the protein
@@ -50,26 +58,6 @@ Description of a protein species that might be present in the wells of the plate
 - organism_tax_id
     - Type: Identifier
     - Description: NCBI taxonomy ID of the organism
-- references
-    - Type: Identifier[]
-    - Description: List of references to the protein
-
-### Reactant
-
-Description of a chemical species that might be present in the wells of the plate.
-
-- name
-    - Type: str
-    - Description: Name of the species
-- smiles
-    - Type: str
-    - Description: SMILES representation of the species
-- inchi
-    - Type: str
-    - Description: InChI representation of the species
-- references
-    - Type: Identifier[]
-    - Description: List of references to the Reactant
 
 ### Well
 

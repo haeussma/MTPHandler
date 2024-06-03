@@ -5,7 +5,6 @@ from typing import Dict, List
 from calipytion.core import Standard
 from sdRDM import DataModel
 
-from MTPHandler.core.depr_abstractspecies import AbstractSpecies
 from MTPHandler.core.protein import Protein
 from MTPHandler.core.reactant import Reactant
 from MTPHandler.core.well import Well

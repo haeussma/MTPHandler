@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 class MTPReaderFactory:
     @staticmethod
     def read(
+        cls: Plate,
         path: str,
         ph: Optional[float] = None,
         wavelength: Optional[float] = None,
@@ -17,25 +18,40 @@ class MTPReaderFactory:
         temperature: Optional[float] = None,
         temperature_unit: Optional[str] = None,
     ) -> Plate:
-        from MTPHandler.core import Plate
         from MTPHandler.readers.megellan_parser import read_magellan
-        from MTPHandler.readers.multiskan_parser import read_multiskan
+        from MTPHandler.readers.multiskan_spectrum_parser import read_multiskan_spectrum
         from MTPHandler.readers.spectramax_parser import read_spectramax
 
         try:
-            return read_magellan(Plate, path, ph, wavelength)
+            return read_magellan(
+                cls=cls,
+                path=path,
+                ph=ph,
+                wavelength=wavelength,
+            )
         except Exception:
             pass
 
         try:
-            return read_multiskan(
-                Plate, path, time, time_unit, ph, temperature, temperature_unit
+            return read_multiskan_spectrum(
+                cls=cls,
+                path=path,
+                time=time,
+                time_unit=time_unit,
+                ph=ph,
+                temperature=temperature,
+                temperature_unit=temperature_unit,
             )
         except ValueError:
             pass
 
         try:
-            return read_spectramax(Plate, path, ph, time_unit)
+            return read_spectramax(
+                cls=cls,
+                path=path,
+                ph=ph,
+                time_unit=time_unit,
+            )
         except ValueError:
             pass
 

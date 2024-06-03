@@ -73,6 +73,13 @@ class PhotometricMeasurement(
         ),
     )
 
+    _repo: Optional[str] = PrivateAttr(
+        default="https://github.com/FAIRChemistry/MTPHandler"
+    )
+    _commit: Optional[str] = PrivateAttr(
+        default="862fbd059c9b36c968c7988ff728719b3737ac24"
+    )
+
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
 
     @model_validator(mode="after")
