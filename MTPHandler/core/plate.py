@@ -20,6 +20,7 @@ from lxml.etree import _Element
 from plotly.subplots import make_subplots
 from pydantic import PrivateAttr, model_validator
 from pydantic_xml import attr, element
+from rich.jupyter import print
 from sdRDM.base.datatypes import Identifier, Unit
 from sdRDM.base.listplus import ListPlus
 from sdRDM.tools.utils import elem2dict
@@ -343,7 +344,7 @@ class Plate(
 
         if not id:
             warnings.warn(
-                """No ID provided for species. This might cause issues when referencing the species. 
+                """No ID provided for species. This might cause issues when referencing the species.
                 Consider providing an ID which references the species such as a Chebi ID."""
             )
 
@@ -475,7 +476,7 @@ class Plate(
             )
 
         print(
-            f"Assigned {species.name} ({species.id}) with {init_conc} {conc_unit} to"
+            f"Assigned [bold magenta]{species.name}[/] ({species.id}) with {init_conc} {conc_unit} to"
             " all wells."
         )
 
@@ -511,7 +512,7 @@ class Plate(
             assert len(init_concs) == len(
                 wells
             ), f"""
-            Number of initial concentrations ({len(init_concs)}) does not match number 
+            Number of initial concentrations ({len(init_concs)}) does not match number
             of wells ({len(wells)}) in columns ({column_ids}).
             """
 
@@ -527,7 +528,7 @@ class Plate(
                 )
 
         print(
-            f"Assigned {species.name} ({species.id}) with concentrations of"
+            f"Assigned [bold magenta]{species.name}[/] ({species.id}) with concentrations of"
             f" {init_concs} {conc_unit} to columns {column_ids}."
         )
 
@@ -557,7 +558,7 @@ class Plate(
             assert len(init_concs) == len(
                 wells
             ), f"""
-            Number of initial concentrations ({len(init_concs)}) does not match number 
+            Number of initial concentrations ({len(init_concs)}) does not match number
             of wells ({len(wells)}) in rows ({row_ids}).
             """
 
@@ -573,7 +574,7 @@ class Plate(
                 )
 
         print(
-            f"Assigned {species.name} ({species.id}) with {init_conc} {conc_unit}"
+            f"Assigned [bold magenta]{species.name}[/] ({species.id}) with {init_conc} {conc_unit}"
             f" to rows {row_ids}."
         )
 
@@ -597,56 +598,6 @@ class Plate(
                 species_id=species_id,
                 contributes_to_signal=contributes,
             )
-
-    def _handle_wavelength(self) -> float:
-        if len(self.measured_wavelengths) == 1:
-            return self.measured_wavelengths[0]
-
-        else:
-            raise AttributeError(
-                "Argument 'wavelength' must be provided. Measured wavelengths are:"
-                f" {self.measured_wavelengths}"
-            )
-
-    def get_wells(
-        self,
-        wavelength: int = None,
-    ) -> List[Well]:
-        if not wavelength:
-            wavelength = self._handle_wavelength()
-
-    def get_well_by_id(self, _id: str) -> Well:
-        for well in self.wells:
-            if well.id == _id.upper():
-                return well
-
-        raise ValueError(f"No well found with id {_id}")
-
-    def _get_wells_by_column_id(self, column_id: int, wavelength: int) -> Well:
-        x_pos = column_id - 1
-        y_positions = [
-            well.y_pos
-            for well in self.wells
-            if well.x_pos == x_pos and well.wavelength == wavelength
-        ]
-
-        return [self._get_well_by_xy(x_pos, y_pos, wavelength) for y_pos in y_positions]
-
-    def _get_wells_by_row_id(self, row_id: str) -> List[Well]:
-        return [well for well in self.wells if row_id in well.id and well.measurements]
-
-    def _get_well_by_xy(self, x_pos: int, y_pos: int, wavelength: int) -> Well:
-        for well in self.wells:
-            if (
-                well.x_pos == x_pos
-                and well.y_pos == y_pos
-                and well.wavelength == wavelength
-            ):
-                return well
-
-        raise ValueError(
-            f"No well found with x position {x_pos} and y position {y_pos}"
-        )
 
     def assign_species_to_all_except(
         self,
@@ -672,7 +623,7 @@ class Plate(
             )
 
         print(
-            f"Assigned {species.name} ({species.id}) with {init_conc} {conc_unit}"
+            f"Assigned [bold magenta]{species.name}[/] ({species.id}) with {init_conc} {conc_unit}"
             f" to all wells except {well_ids}."
         )
 
@@ -730,8 +681,7 @@ class Plate(
             )
 
         print(
-            f"Assigned initial concentrations from {path} to"
-            f" {species.name} ({species.id})."
+            f"Assigned initial concentrations for [bold magenta]{species.name}[/] ({species.id}) from {path}."
         )
 
     def get_well(self, _id: str) -> Well:
@@ -804,7 +754,7 @@ class Plate(
         if len(wells) == 0:
             print(
                 f"{species.name} ({species.id}) at {wavelength} nm does not contribute"
-                " to signal."
+                " to signal. Is the specified wavelength correct?print"
             )
 
         if len(blanking_wells) == 0:
@@ -846,14 +796,14 @@ class Plate(
 
         print(f"Blanked {len(blanked_wells)} wells containing {species.name}.\n")
 
-    def visualize(self, zoom: bool = False, wavelengths: float = None):
+    def visualize(self, zoom: bool = False, wavelengths: list[float] = []):
         if zoom:
             shared_yaxes = False
         else:
             shared_yaxes = True
 
         if not wavelengths:
-            wavelengths = self.wells[0].measurements[0].wavelength
+            wavelengths = [self.wells[0].measurements[0].wavelength]
 
         if not isinstance(wavelengths, list):
             wavelengths = [wavelengths]
@@ -893,7 +843,7 @@ class Plate(
             plot_bgcolor="white",
             hovermode="x",
             title=dict(
-                text=f"{self.temperatures[0]} °{self.temperature_unit.name}",
+                text=f"{self.temperatures[0]} {self.temperature_unit.name}",
             ),
             margin=dict(l=20, r=20, t=100, b=20),
         )
@@ -935,9 +885,11 @@ class Plate(
         conc_mean_blank_mapping = {}
         for conc, absorptions in blank_measurement_mapping.items():
             mean_absorption = np.nanmean(absorptions)
+            std_absorption = np.nanstd(absorptions)
+            std_perc = abs(std_absorption / mean_absorption) * 100
             print(
-                f"Mean absorption of {species.name} ({species.id}) at"
-                f" {conc} {condition.conc_unit.name}: {mean_absorption:.4f} calculated"
+                f"Mean absorption of [bold magenta]{species.name}[/] ({species.id}) at"
+                f" {conc} {condition.conc_unit.name}: {mean_absorption:.4f} ± {std_perc:.0f}%  calculated"
                 f" based on wells {[well.id for well in wells]}."
             )
             conc_mean_blank_mapping[conc] = mean_absorption

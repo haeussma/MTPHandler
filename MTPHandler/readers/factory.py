@@ -21,6 +21,7 @@ class MTPReaderFactory:
         from MTPHandler.readers.megellan_parser import read_magellan
         from MTPHandler.readers.multiskan_spectrum_parser import read_multiskan_spectrum
         from MTPHandler.readers.spectramax_parser import read_spectramax
+        from MTPHandler.readers.tekan_spark_parser import read_tekan_spark
 
         try:
             return read_magellan(
@@ -42,7 +43,7 @@ class MTPReaderFactory:
                 temperature=temperature,
                 temperature_unit=temperature_unit,
             )
-        except ValueError:
+        except Exception:
             pass
 
         try:
@@ -52,7 +53,16 @@ class MTPReaderFactory:
                 ph=ph,
                 time_unit=time_unit,
             )
-        except ValueError:
+        except Exception:
+            pass
+
+        try:
+            return read_tekan_spark(
+                cls=cls,
+                path=path,
+                ph=ph,
+            )
+        except Exception:
             pass
 
         raise ValueError("Could not read file with implemented readers.")
