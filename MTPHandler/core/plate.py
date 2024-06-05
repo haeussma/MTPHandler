@@ -124,7 +124,7 @@ class Plate(
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
     _commit: Optional[str] = PrivateAttr(
-        default="5ee3de6718b09d1b136ee1b181934e8f582acda5"
+        default="b67724f080afb13c3b78cd2a559646f8b3f2e6e7"
     )
 
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
@@ -476,8 +476,8 @@ class Plate(
             )
 
         print(
-            f"Assigned [bold magenta]{species.name}[/] ({species.id}) with {init_conc} {conc_unit} to"
-            " all wells."
+            f"Assigned [bold magenta]{species.name}[/] ({species.id}) with"
+            f" {init_conc} {conc_unit} to all wells."
         )
 
     def assign_species_to_columns(
@@ -528,8 +528,8 @@ class Plate(
                 )
 
         print(
-            f"Assigned [bold magenta]{species.name}[/] ({species.id}) with concentrations of"
-            f" {init_concs} {conc_unit} to columns {column_ids}."
+            f"Assigned [bold magenta]{species.name}[/] ({species.id}) with"
+            f" concentrations of {init_concs} {conc_unit} to columns {column_ids}."
         )
 
     def assign_species_to_rows(
@@ -574,8 +574,8 @@ class Plate(
                 )
 
         print(
-            f"Assigned [bold magenta]{species.name}[/] ({species.id}) with {init_conc} {conc_unit}"
-            f" to rows {row_ids}."
+            f"Assigned [bold magenta]{species.name}[/] ({species.id}) with"
+            f" {init_conc} {conc_unit} to rows {row_ids}."
         )
 
     @staticmethod
@@ -623,8 +623,8 @@ class Plate(
             )
 
         print(
-            f"Assigned [bold magenta]{species.name}[/] ({species.id}) with {init_conc} {conc_unit}"
-            f" to all wells except {well_ids}."
+            f"Assigned [bold magenta]{species.name}[/] ({species.id}) with"
+            f" {init_conc} {conc_unit} to all wells except {well_ids}."
         )
 
     def assign_species_from_spreadsheet(
@@ -681,7 +681,8 @@ class Plate(
             )
 
         print(
-            f"Assigned initial concentrations for [bold magenta]{species.name}[/] ({species.id}) from {path}."
+            f"Assigned initial concentrations for [bold magenta]{species.name}[/]"
+            f" ({species.id}) from {path}."
         )
 
     def get_well(self, _id: str) -> Well:
@@ -889,8 +890,9 @@ class Plate(
             std_perc = abs(std_absorption / mean_absorption) * 100
             print(
                 f"Mean absorption of [bold magenta]{species.name}[/] ({species.id}) at"
-                f" {conc} {condition.conc_unit.name}: {mean_absorption:.4f} ± {std_perc:.0f}%  calculated"
-                f" based on wells {[well.id for well in wells]}."
+                f" {conc} {condition.conc_unit.name}: {mean_absorption:.4f} ±"
+                f" {std_perc:.0f}%  calculated based on wells"
+                f" {[well.id for well in wells]}."
             )
             conc_mean_blank_mapping[conc] = mean_absorption
 
