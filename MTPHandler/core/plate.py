@@ -127,16 +127,12 @@ class Plate(
         ),
     )
 
-<<<<<<< Updated upstream
     _repo: Optional[str] = PrivateAttr(
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
     _commit: Optional[str] = PrivateAttr(
         default="b67724f080afb13c3b78cd2a559646f8b3f2e6e7"
     )
-
-=======
->>>>>>> Stashed changes
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
 
     @model_validator(mode="after")
@@ -519,9 +515,7 @@ class Plate(
             init_concs = init_concs * len(columns[0])
 
         for wells in columns:
-            assert len(init_concs) == len(
-                wells
-            ), f"""
+            assert len(init_concs) == len(wells), f"""
             Number of initial concentrations ({len(init_concs)}) does not match number
             of wells ({len(wells)}) in columns ({column_ids}).
             """
@@ -565,9 +559,7 @@ class Plate(
             rows.append(wells)
 
         for wells in rows:
-            assert len(init_concs) == len(
-                wells
-            ), f"""
+            assert len(init_concs) == len(wells), f"""
             Number of initial concentrations ({len(init_concs)}) does not match number
             of wells ({len(wells)}) in rows ({row_ids}).
             """
@@ -807,7 +799,9 @@ class Plate(
 
         print(f"Blanked {len(blanked_wells)} wells containing {species.name}.\n")
 
-    def visualize(self, zoom: bool = False, wavelengths: list[float] = []):
+    def visualize(
+        self, zoom: bool = False, wavelengths: list[float] = [], static: bool = False
+    ):
         if zoom:
             shared_yaxes = False
         else:
@@ -858,6 +852,9 @@ class Plate(
             ),
             margin=dict(l=20, r=20, t=100, b=20),
         )
+
+        if static:
+            fig.show("svg")
 
         fig.show()
 
