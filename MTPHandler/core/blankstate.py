@@ -37,6 +37,7 @@ class BlankState(
         json_schema_extra=dict(),
     )
 
+<<<<<<< Updated upstream
     _repo: Optional[str] = PrivateAttr(
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
@@ -44,6 +45,8 @@ class BlankState(
         default="b67724f080afb13c3b78cd2a559646f8b3f2e6e7"
     )
 
+=======
+>>>>>>> Stashed changes
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
 
     @model_validator(mode="after")

@@ -78,6 +78,7 @@ class Well(
         json_schema_extra=dict(),
     )
 
+<<<<<<< Updated upstream
     _repo: Optional[str] = PrivateAttr(
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
@@ -85,6 +86,8 @@ class Well(
         default="b67724f080afb13c3b78cd2a559646f8b3f2e6e7"
     )
 
+=======
+>>>>>>> Stashed changes
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
 
     @model_validator(mode="after")
@@ -137,7 +140,7 @@ class Well(
         wavelength: float,
         wavelength_unit: Unit,
         absorption: List[float] = ListPlus(),
-        time: Optional[float] = None,
+        time: List[float] = ListPlus(),
         time_unit: Optional[Unit] = None,
         blank_states: List[BlankState] = ListPlus(),
         id: Optional[str] = None,
@@ -151,7 +154,7 @@ class Well(
             wavelength (): Wavelength of the measurement.
             wavelength_unit (): Unit of the wavelength.
             absorption (): Absorption of the species. Defaults to ListPlus()
-            time (): Time of the measurement. Defaults to None
+            time (): Time of the measurement. Defaults to ListPlus()
             time_unit (): Unit of the time. Defaults to None
             blank_states (): List of blank states, referring to the blank state of the species of the well. Defaults to ListPlus()
         """

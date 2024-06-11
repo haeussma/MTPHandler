@@ -12,13 +12,13 @@ if TYPE_CHECKING:
 
 
 def read_multiskan_spectrum(
-    cls: "Plate",
+    cls: Plate,
     path: str,
     time: list[float] | np.ndarray,
     time_unit: str,
-    ph: float = None,
-    temperature: float = None,
-    temperature_unit: str = None,
+    ph: float|None = None,
+    temperature: float|None = None,
+    temperature_unit: str|None = None,
 ) -> "Plate":
     # Extract temperature from path
     if not temperature:

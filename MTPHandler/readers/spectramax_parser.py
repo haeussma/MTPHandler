@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 def read_spectramax(
     cls: Plate,
     path: str,
-    ph: float = None,
+    ph: float|None = None,
     time_unit: str = "min",
 ):
     df = pd.read_csv(

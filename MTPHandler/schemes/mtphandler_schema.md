@@ -10,6 +10,7 @@ classDiagram
     class Plate {
         +integer n_rows*
         +integer n_cols*
+        +str name
         +datetime date_measured
         +float[0..*] times
         +Unit time_unit
@@ -44,7 +45,7 @@ classDiagram
         +float wavelength*
         +Unit wavelength_unit*
         +float[0..*] absorption
-        +float time
+        +float[0..*] time
         +Unit time_unit
         +BlankState[0..*] blank_states
     }

@@ -61,6 +61,13 @@ class Plate(
         json_schema_extra=dict(),
     )
 
+    name: Optional[str] = element(
+        description="Name of the plate",
+        default=None,
+        tag="name",
+        json_schema_extra=dict(),
+    )
+
     date_measured: Optional[Datetime] = element(
         description="Date and time when the plate was measured",
         default=None,
@@ -120,6 +127,7 @@ class Plate(
         ),
     )
 
+<<<<<<< Updated upstream
     _repo: Optional[str] = PrivateAttr(
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
@@ -127,6 +135,8 @@ class Plate(
         default="b67724f080afb13c3b78cd2a559646f8b3f2e6e7"
     )
 
+=======
+>>>>>>> Stashed changes
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
 
     @model_validator(mode="after")

@@ -12,6 +12,9 @@ Description of a microtiter plate consisting of wells.
 - __n_cols__
     - Type: integer
     - Description: Number of columns on the plate
+- name
+    - Type: str
+    - Description: Name of the plate
 - date_measured
     - Type: datetime
     - Description: Date and time when the plate was measured
@@ -99,7 +102,7 @@ Description of a photometric measurement of a single well on the plate.
     - Type: float[]
     - Description: Absorption of the species
 - time
-    - Type: float
+    - Type: float[]
     - Description: Time of the measurement
 - time_unit
     - Type: Unit
