@@ -43,8 +43,9 @@ class Species(
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
     _commit: Optional[str] = PrivateAttr(
-        default="b67724f080afb13c3b78cd2a559646f8b3f2e6e7"
+        default="144ab684bd097bcb712862ced7f73dba47de783c"
     )
+
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
 
     @model_validator(mode="after")
