@@ -8,13 +8,13 @@ import numpy as np
 import pandas as pd
 
 if TYPE_CHECKING:
-    from MTPHandler.core import Plate, Well
+    from MTPHandler.core import Plate
 
 
 def read_spectramax(
     cls: Plate,
     path: str,
-    ph: float|None = None,
+    ph: float | None = None,
     time_unit: str = "min",
 ):
     df = pd.read_csv(
@@ -24,6 +24,7 @@ def read_spectramax(
         engine="python",
         skiprows=15,
     )
+    from MTPHandler.core import Well
 
     df = df.map(lambda x: x.split("\t"))
 
@@ -92,23 +93,24 @@ def read_spectramax(
             well = Well(
                 id=_coordinates_to_id(column_id, row_id),
                 ph=ph,
-                x_position=column_id,
-                y_position=row_id,
+                x_pos=column_id,
+                y_pos=row_id,
             )
             for wavelength_id, wavelength in enumerate(column):
                 well.add_to_measurements(
                     wavelength=wavelengths[wavelength_id],
                     wavelength_unit="nm",
-                    absorptions=wavelength.tolist(),
+                    absorption=wavelength.tolist(),
+                    time=times,
                 )
             wells.append(well)
 
     # Create plate
     plate = cls(
         n_rows=data.shape[0],
-        n_columns=data.shape[1],
+        n_cols=data.shape[1],
         date_measured=created,
-        times=times,
+        time=times,
         time_unit=time_unit,
         temperatures=temperatures,
         temperature_unit="C",
