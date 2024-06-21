@@ -82,7 +82,7 @@ class Well(
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
     _commit: Optional[str] = PrivateAttr(
-        default="3f4f41221deb83f95b5ba33dbacd0f44ce3c7dbe"
+        default="c1ace6fef38751e79952a37557221f0540ca9d77"
     )
 
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
