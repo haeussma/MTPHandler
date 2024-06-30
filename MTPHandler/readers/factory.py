@@ -11,19 +11,18 @@ class MTPReaderFactory:
     def read(
         cls: Plate,
         path: str,
-        ph: float|None = None,
-        wavelength: float|None = None,
-        time: list[float]|None = None,
-        time_unit: str|None = None,
-        temperature: float|None = None,
-        temperature_unit: str|None = None,
+        ph: float | None = None,
+        wavelength: float | None = None,
+        time: list[float] | None = None,
+        time_unit: str | None = None,
+        temperature: float | None = None,
+        temperature_unit: str | None = None,
     ) -> Plate:
+        from MTPHandler.readers.biotek import read_biotek
         from MTPHandler.readers.megellan_parser import read_magellan
         from MTPHandler.readers.multiskan_spectrum_parser import read_multiskan_spectrum
         from MTPHandler.readers.spectramax_parser import read_spectramax
         from MTPHandler.readers.tekan_spark_parser import read_tekan_spark
-        from MTPHandler.readers.biotek import read_biotek
-
 
         try:
             return read_magellan(

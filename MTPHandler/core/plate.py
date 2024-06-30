@@ -468,7 +468,7 @@ class Plate(
         self,
         species: Species,
         init_conc: float,
-        conc_unit: str,
+        conc_unit: Unit,
         contributes_to_signal: bool | None,
     ):
         for well in self.wells:
@@ -516,9 +516,7 @@ class Plate(
             init_concs = init_concs * len(columns[0])
 
         for wells in columns:
-            assert len(init_concs) == len(
-                wells
-            ), f"""
+            assert len(init_concs) == len(wells), f"""
             Number of initial concentrations ({len(init_concs)}) does not match number
             of wells ({len(wells)}) in columns ({column_ids}).
             """
@@ -562,9 +560,7 @@ class Plate(
             rows.append(wells)
 
         for wells in rows:
-            assert len(init_concs) == len(
-                wells
-            ), f"""
+            assert len(init_concs) == len(wells), f"""
             Number of initial concentrations ({len(init_concs)}) does not match number
             of wells ({len(wells)}) in rows ({row_ids}).
             """

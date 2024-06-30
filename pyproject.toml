@@ -1,11 +1,13 @@
 [tool.poetry]
 name = "MTPHandler"
-version = "0.2.3"
+version = "0.2.4"
 description = "Tool to work with microtiter plate data."
 authors = ["haeussma <83341109+haeussma@users.noreply.github.com>"]
 license = "MIT License"
 readme = "README.md"
 packages = [{ include = "MTPHandler" }]
+include = ["MTPHandler/units/ontomaps.toml"]
+
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
@@ -13,14 +15,15 @@ sympy = "^1.12"
 numpy = "^1.26.4"
 plotly = "^5.18.0"
 openpyxl = "^3.1.2"
-calipytion = { git = "https://github.com/FAIRChemistry/CaliPytion.git", branch = "docs-tests" }
+calipytion = { git = "https://github.com/FAIRChemistry/CaliPytion.git" }
 ipython = "^8.21.0"
-sdrdm = { git = "https://github.com/JR-1991/software-driven-rdm.git" }
+pyenzyme = { git = "https://github.com/EnzymeML/PyEnzyme", branch = "v2-migration" }
 rich = "^13.7.1"
 
 [tool.poetry.group.dev.dependencies]
 mkdocs-material = "^9.5.7"
 pytest = "^8.0.0"
+devtools = "^0.12.2"
 
 [build-system]
 requires = ["poetry-core"]

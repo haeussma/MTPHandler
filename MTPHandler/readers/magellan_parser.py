@@ -5,18 +5,18 @@ import math
 import re
 from collections import defaultdict
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 import pandas as pd
 
-if TYPE_CHECKING:
-    from MTPHandler.core.plate import Plate
+from MTPHandler.model import Plate
+from MTPHandler.readers.utils import WELL_ID_PATTERN, id_to_xy
+from MTPHandler.units import C, nm, s
 
 LOGGER = logging.getLogger(__name__)
 
 
 def read_magellan(
-    cls: Plate,
     path: str,
     wavelength: float,
     ph: Optional[float] = None,
@@ -25,7 +25,6 @@ def read_magellan(
 
     # Define the format of the input datetime string
     date_format = "%A, %B %d, %Y: %H:%M:%S"
-    WELL_ID_PATTERN = r"[A-H][0-9]{1,2}"
 
     data = defaultdict(list)
     temperatures = []
@@ -37,12 +36,11 @@ def read_magellan(
             break
         else:
             date_str, time_str, temperature_str = timecourser_data.split("/")
-            temp_value, temp_unit = temperature_str.strip().split("°")
+            temp_value, _ = temperature_str.strip().split("°")
             temperatures.append(float(temp_value))
             time, time_unit = time_str[1:-1].split(" ")
 
             times.append(time)
-            time_unit = time_unit.replace("sec", "s")
             dates.append(datetime.strptime(date_str.strip(), date_format))
 
     created = dates[0]
@@ -61,16 +59,11 @@ def read_magellan(
             else:
                 data[key].append(element)
 
-    n_rows = 8
-    n_columns = 12
-
-    plate = cls(
-        date_measured=created,
-        n_rows=n_rows,
-        n_cols=n_columns,
-        temperature_unit=temp_unit,
+    plate = Plate(
+        date_measured=str(created),
+        temperature_unit=C,
         temperatures=temperatures,
-        time_unit=time_unit,
+        time_unit=s,
         times=times,
     )
 
@@ -84,13 +77,17 @@ def read_magellan(
         )
         well.add_to_measurements(
             wavelength=wavelength,
-            wavelength_unit="nm",
+            wavelength_unit=nm,
             absorption=abso_list,
-            # blank_states=[],
+            time_unit=s,
+            time=times,
         )
 
     return plate
 
+if __name__ == "__main__":
+    path = "tests/data/magellan.xlsx"
+    from devtools import pprint
 
-def id_to_xy(well_id: str):
-    return int(well_id[1:]) - 1, ord(well_id[0].upper()) - 65
+    plate = read_magellan(path, wavelength=600, ph=7)
+    pprint(plate)

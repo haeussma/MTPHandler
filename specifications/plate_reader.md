@@ -1,3 +1,7 @@
+---
+repo: https://github.com/FAIRChemistry/MTPHandler
+---
+
 # Data model for microtiter plate photometry
 
 ## Modules
@@ -6,66 +10,77 @@
 
 Description of a microtiter plate consisting of wells.
 
-- __n_rows__
-    - Type: integer
-    - Description: Number of rows on the plate
-- __n_cols__
-    - Type: integer
-    - Description: Number of columns on the plate
+- id
+    - Type: string
+    - Description: Identifier of the plate
 - name
-    - Type: str
-    - Description: Name of the plate
+    - Type: string
+    - Description: Arbitrary name of the plate.
+- wells
+    - Type: Well[]
+    - Description: List of wells on the plate.
+- species
+    - Type: Species[], Well[]
+    - Description: List of species present in wells of the plate.
 - date_measured
-    - Type: datetime
-    - Description: Date and time when the plate was measured
-- times
-    - Type: float[]
-    - Description: Time points of the measurement, corresponding to temperature measurements
-- time_unit
-    - Type: Unit
-    - Description: Unit of the time
+    - Type: string
+    - Description: Date and time when the plate was measured.
 - temperatures
     - Type: float[]
     - Description: Thermostat temperature
 - temperature_unit
-    - Type: Unit
+    - Type: UnitDefinition
     - Description: Unit of the temperature
-- wells
-    - Type: Well[]
-    - Description: List of wells on the plate
-- species
-    - Type: Species[]
-    - Description: List of species present in wells of the plate
+- times
+    - Type: float[]
+    - Description: Time points of the measurement, corresponding to temperature measurements.
+- time_unit
+    - Type: UnitDefinition
+    - Description: Unit of the time
 
 ### Species
 
 Description of a species that might be present in the wells of the plate.
 
+- id
+    - Type: string
+    - Description: Identifier of the molecule
 - name
-    - Type: str
-    - Description: Name of the species
-- references
-    - Type: Identifier[]
-    - Description: List of references to the species
+    - Type: string
+    - Description: Name of the molecule
 
-### Protein (_Species_)
+### Molecule [Species]
+
+Description of a molecule species that might be present in the wells of the plate.
+
+- smiles
+    - Type: string
+    - Description: SMILES representation of the molecule
+- inchi_key
+    - Type: string
+    - Description: InChIKey of the molecule
+
+### Protein [Species]
 
 Description of a protein species that might be present in the wells of the plate.
 
 - sequence
-    - Type: str
+    - Type: string
     - Description: Amino acid sequence of the protein
 - organism
-    - Type: str
+    - Type: string
     - Description: Organism the protein originates from
 - organism_tax_id
-    - Type: Identifier
+    - Type: integer
     - Description: NCBI taxonomy ID of the organism
 
 ### Well
 
 Description of a well on the plate.
 
+- __id__
+    - Type: string
+    - Description: Identifier of the well
 - __x_pos__
     - Type: integer
     - Description: X position of the well on the plate
@@ -85,18 +100,18 @@ Description of a well on the plate.
     - Type: float
     - Description: Volume of the reaction
 - volume_unit
-    - Type: Unit
+    - Type: UnitDefinition
     - Description: Unit of the volume
 
 ### PhotometricMeasurement
 
-Description of a photometric measurement of a single well on the plate.
+Description of a photometric measurement of a single well and wavelength on the plate.
 
 - __wavelength__
     - Type: float
     - Description: Wavelength of the measurement
 - __wavelength_unit__
-    - Type: Unit
+    - Type: UnitDefinition
     - Description: Unit of the wavelength
 - absorption
     - Type: float[]
@@ -105,7 +120,7 @@ Description of a photometric measurement of a single well on the plate.
     - Type: float[]
     - Description: Time of the measurement
 - time_unit
-    - Type: Unit
+    - Type: UnitDefinition
     - Description: Unit of the time
 - blank_states
     - Type: BlankState[]
@@ -116,13 +131,13 @@ Description of a photometric measurement of a single well on the plate.
 Description of the initial condition of a species in a well.
 
 - __species_id__
-    - Type: str
+    - Type: string
     - Description: Reference to species
 - __init_conc__
     - Type: float
     - Description: Initial concentration of the species
 - __conc_unit__
-    - Type: Unit
+    - Type: UnitDefinition
     - Description: Concentration unit
 
 ### BlankState
@@ -130,9 +145,9 @@ Description of the initial condition of a species in a well.
 Describes if the respective species contributes to the absorption signal.
 
 - __species_id__
-    - Type: str
+    - Type: string
     - Description: Reference to species
 - __contributes_to_signal__
-    - Type: bool
+    - Type: boolean
     - Description: Whether the species' absorption contributes to the absorption signal
     - Default: True

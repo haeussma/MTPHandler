@@ -16,9 +16,9 @@ def read_multiskan_spectrum(
     path: str,
     time: list[float] | np.ndarray,
     time_unit: str,
-    ph: float|None = None,
-    temperature: float|None = None,
-    temperature_unit: str|None = None,
+    ph: float | None = None,
+    temperature: float | None = None,
+    temperature_unit: str | None = None,
 ) -> "Plate":
     # Extract temperature from path
     if not temperature:
