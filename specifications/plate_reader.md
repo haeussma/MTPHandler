@@ -25,10 +25,10 @@ Description of a microtiter plate consisting of wells.
 - date_measured
     - Type: string
     - Description: Date and time when the plate was measured.
-- temperatures
+- __temperatures__
     - Type: float[]
     - Description: Thermostat temperature
-- temperature_unit
+- __temperature_unit__
     - Type: UnitDefinition
     - Description: Unit of the temperature
 - times
@@ -42,10 +42,10 @@ Description of a microtiter plate consisting of wells.
 
 Description of a species that might be present in the wells of the plate.
 
-- id
+- __id__
     - Type: string
     - Description: Identifier of the molecule
-- name
+- __name__
     - Type: string
     - Description: Name of the molecule
 

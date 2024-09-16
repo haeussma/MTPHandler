@@ -1,6 +1,6 @@
-from MTPHandler.model import Plate
+from MTPHandler.dataclasses import Plate
 from MTPHandler.readers import read_magellan
-from MTPHandler.units import C, nm, s
+from MTPHandler.units import nm, s
 
 
 def test_magellan():

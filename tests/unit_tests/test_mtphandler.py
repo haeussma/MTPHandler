@@ -3,7 +3,7 @@ import pytest
 from devtools import pprint
 
 from MTPHandler import PlateManager
-from MTPHandler.model import Plate
+from MTPHandler.dataclasses import Plate
 from MTPHandler.units import C, mmol, nm, s, ul
 
 # create an artificaial plate with some wells and species

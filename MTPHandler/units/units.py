@@ -3,23 +3,23 @@ from functools import partial
 
 from pydantic import model_validator
 
-from MTPHandler.model import (
+from MTPHandler.dataclasses import (
     BaseUnit as _BaseUnit,
 )
-from MTPHandler.model import (
+from MTPHandler.dataclasses import (
     UnitDefinition as _UnitDefinition,
 )
-from MTPHandler.model import (
+from MTPHandler.dataclasses import (
     UnitType,
 )
 
 UNIT_OF_MEAS_TYPE = "OBO:UO_0000000"
 NAME_MAPS = {
-    UnitType.LITRE: "l",
-    UnitType.MOLE: "mol",
-    UnitType.SECOND: "s",
-    UnitType.GRAM: "g",
-    UnitType.KELVIN: "K",
+    UnitType.LITRE.value: "l",
+    UnitType.MOLE.value: "mol",
+    UnitType.SECOND.value: "s",
+    UnitType.GRAM.value: "g",
+    UnitType.KELVIN.value: "K",
 }
 
 
@@ -239,8 +239,8 @@ class UnitDefinition(_UnitDefinition):
         return mapping.get(scale, "")
 
     @staticmethod
-    def _map_name(kind: UnitType) -> str:
-        return NAME_MAPS.get(kind, kind.name.capitalize())
+    def _map_name(kind: str) -> str:
+        return NAME_MAPS.get(kind, kind.capitalize())
 
     @staticmethod
     def _exponent(exponent: int) -> str:

@@ -15,7 +15,7 @@ sympy = "^1.12"
 numpy = "^1.26.4"
 plotly = "^5.18.0"
 openpyxl = "^3.1.2"
-calipytion = { git = "https://github.com/FAIRChemistry/CaliPytion.git" }
+calipytion = { git = "https://github.com/FAIRChemistry/CaliPytion.git", branch = "dev" }
 ipython = "^8.21.0"
 pyenzyme = { git = "https://github.com/EnzymeML/PyEnzyme", branch = "v2-migration" }
 rich = "^13.7.1"
@@ -24,6 +24,7 @@ rich = "^13.7.1"
 mkdocs-material = "^9.5.7"
 pytest = "^8.0.0"
 devtools = "^0.12.2"
+ipykernel = "^6.29.4"
 
 [build-system]
 requires = ["poetry-core"]

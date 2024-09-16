@@ -9,7 +9,7 @@ from typing import Optional
 
 import pandas as pd
 
-from MTPHandler.model import Plate
+from MTPHandler.dataclasses import Plate
 from MTPHandler.readers.utils import WELL_ID_PATTERN, id_to_xy
 from MTPHandler.units import C, nm, s
 
@@ -84,6 +84,7 @@ def read_magellan(
         )
 
     return plate
+
 
 if __name__ == "__main__":
     path = "tests/data/magellan.xlsx"

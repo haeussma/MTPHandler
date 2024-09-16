@@ -1,14 +1,32 @@
 from __future__ import annotations
 
 import warnings
+from collections import defaultdict
 from typing import Literal, Optional, Tuple, get_args
 
 import numpy as np
 import pandas as pd
 from pydantic import BaseModel, Field
+from rich import print
 
-from MTPHandler.model import Molecule, Plate, Protein, Species, Well
+from MTPHandler.dataclasses import (
+    BlankState,
+    Molecule,
+    PhotometricMeasurement,
+    Plate,
+    Protein,
+    Species,
+    Well,
+)
+from MTPHandler.tools import (
+    get_measurement,
+    get_species_condition,
+    handle_blank_status,
+    measurement_is_blanked_for,
+    well_contains_species,
+)
 from MTPHandler.units import UnitDefinition
+from MTPHandler.visualize import visualize_plate
 
 ASSIGN_CASE = Literal["rows", "columns", "all", "all except"]
 ASSIGN_CASE_VALUES: Tuple[ASSIGN_CASE, ...] = get_args(ASSIGN_CASE)
@@ -20,9 +38,9 @@ class PlateManager(BaseModel):
     # Adders for species, molecules and proteins
     def add_species(
         self,
-        ld_id: Optional[str],
-        id: Optional[str],
-        name: Optional[str],
+        id: str,
+        name: str,
+        ld_id: Optional[str] = None,
     ) -> Species:
         params = {
             "ld_id": ld_id,
@@ -34,6 +52,7 @@ class PlateManager(BaseModel):
             warnings.warn("""
             No linked-data ID provided. Use UniProt, ChEBI or PubChem URL to uniquely identify the species.
             """)
+            params.pop("ld_id")
             unique_id = id
         else:
             unique_id = ld_id
@@ -51,11 +70,11 @@ class PlateManager(BaseModel):
 
     def add_molecule(
         self,
-        ld_id: Optional[str],
-        id: Optional[str],
-        name: Optional[str],
-        smiles: Optional[str],
-        inchi_key: Optional[str],
+        id: str,
+        name: str,
+        smiles: Optional[str] = None,
+        inchi_key: Optional[str] = None,
+        ld_id: Optional[str] = None,
     ) -> Molecule:
         params = {
             "ld_id": ld_id,
@@ -69,6 +88,7 @@ class PlateManager(BaseModel):
             warnings.warn("""
             No linked-data ID provided. Use ChEBI or PubChem URL to uniquely identify the molecule.
             """)
+            params.pop("ld_id")
             unique_id = id
         else:
             unique_id = ld_id
@@ -86,12 +106,12 @@ class PlateManager(BaseModel):
 
     def add_protein(
         self,
-        ld_id: Optional[str],
-        id: Optional[str],
-        name: Optional[str],
-        sequence: Optional[str],
-        organism: Optional[str],
-        organism_tax_id: Optional[int],
+        id: str,
+        name: str,
+        ld_id: Optional[str] = None,
+        sequence: Optional[str] = None,
+        organism: Optional[str] = None,
+        organism_tax_id: Optional[int] = None,
     ) -> Protein:
         params = {
             "ld_id": ld_id,
@@ -106,6 +126,7 @@ class PlateManager(BaseModel):
             warnings.warn("""
             No linked-data ID provided. Use UniProt URL to uniquely identify the protein.
             """)
+            params.pop("ld_id")
             unique_id = id
         else:
             unique_id = ld_id
@@ -118,6 +139,7 @@ class PlateManager(BaseModel):
                 protein.__dict__.update(params)
                 return protein
 
+        print(params)
         protein = self.plate.add_protein_to_species(**params)
         return protein
 
@@ -155,7 +177,7 @@ class PlateManager(BaseModel):
         # Handle species
         if isinstance(species, str):
             species = self.get_species(species)
-        elif isinstance(species, Species):
+        elif isinstance(species, (Species, Molecule, Protein)):
             pass
         else:
             raise AttributeError(
@@ -175,8 +197,9 @@ class PlateManager(BaseModel):
             if isinstance(init_conc, list):
                 if len(init_conc) == 1:
                     init_conc = init_conc[0]
-
-            assert isinstance(init_conc, float)
+            assert isinstance(
+                init_conc, (float, int)
+            ), "Argument 'init_conc' must be a float or an integer."
 
             self.assign_to_all(
                 species=species,
@@ -242,9 +265,7 @@ class PlateManager(BaseModel):
                 conc_unit=conc_unit,
             )
 
-            self._handle_blank_status(
-                well, species.id, init_conc, contributes_to_signal
-            )
+            handle_blank_status(well, species.id, init_conc, contributes_to_signal)
 
         print(
             f"Assigned [bold magenta]{species.name}[/] ({species.id}) with"
@@ -291,9 +312,7 @@ class PlateManager(BaseModel):
                     conc_unit=conc_unit,
                 )
 
-                self._handle_blank_status(
-                    well, species.id, init_conc, contributes_to_signal
-                )
+                handle_blank_status(well, species.id, init_conc, contributes_to_signal)
 
         print(
             f"Assigned [bold magenta]{species.name}[/] ({species.id}) with"
@@ -335,35 +354,12 @@ class PlateManager(BaseModel):
                     conc_unit=conc_unit,
                 )
 
-                self._handle_blank_status(
-                    well, species.id, init_conc, contributes_to_signal
-                )
+                handle_blank_status(well, species.id, init_conc, contributes_to_signal)
 
         print(
             f"Assigned [bold magenta]{species.name}[/] ({species.id}) with"
             f" {init_concs} {conc_unit} to rows {row_ids}."
         )
-
-    @staticmethod
-    def _handle_blank_status(
-        well: Well,
-        species_id: str,
-        init_conc: float,
-        contributes_to_signal: bool | None,
-    ):
-        if contributes_to_signal is None:
-            if init_conc == 0:
-                contributes = False
-            else:
-                contributes = True
-        else:
-            contributes = contributes_to_signal
-
-        for measurement in well.measurements:
-            measurement.add_to_blank_states(
-                species_id=species_id,
-                contributes_to_signal=contributes,
-            )
 
     def assign_species_to_all_except(
         self,
@@ -386,9 +382,7 @@ class PlateManager(BaseModel):
                 conc_unit=conc_unit,
             )
 
-            self._handle_blank_status(
-                well, species.id, init_conc, contributes_to_signal
-            )
+            handle_blank_status(well, species.id, init_conc, contributes_to_signal)
 
         print(
             f"Assigned [bold magenta]{species.name}[/] ({species.id}) with"
@@ -444,9 +438,7 @@ class PlateManager(BaseModel):
                 conc_unit=conc_unit,
             )
 
-            self._handle_blank_status(
-                well, species.id, init_conc, contributes_to_signal
-            )
+            handle_blank_status(well, species.id, init_conc, contributes_to_signal)
 
         print(
             f"Assigned initial concentrations for [bold magenta]{species.name}[/]"
@@ -467,9 +459,139 @@ class PlateManager(BaseModel):
 
         raise ValueError(f"Species {id} not found")
 
+    def visualize(
+        self,
+        zoom: bool = False,
+        wavelengths: list[float] = [],
+        static: bool = False,
+    ):
+        """Visualize the measured signal for each well on the plate."""
+
+        visualize_plate(self.plate, zoom=zoom, wavelengths=wavelengths, static=static)
+
+    def blank_species(
+        self,
+        species: Species,
+        wavelength: int,
+    ):
+        wells = []
+        blanking_wells = []
+        for well in self.plate.wells:
+            if not well_contains_species(well, species.id):
+                continue
+
+            if wavelength not in [
+                measurement.wavelength for measurement in well.measurements
+            ]:
+                continue
+
+            measurement = get_measurement(well, wavelength)
+
+            if self._species_contibutes(measurement, species.id):
+                wells.append(well)
+
+            if measurement_is_blanked_for(measurement, species.id):
+                blanking_wells.append(well)
+
+        if len(wells) == 0:
+            print(
+                f"{species.name} ({species.id}) at {wavelength} nm does not contribute"
+                " to signal. Is the specified wavelength correct?print"
+            )
+
+        if len(blanking_wells) == 0:
+            raise ValueError(
+                "No wells found to calculate absorption contribution of"
+                f" {species.name} ({species.id}) at {wavelength} nm."
+            )
+
+        # get mapping of concentration to blank wells
+        conc_blank_mapping = self._get_conc_blank_mapping(
+            wells=blanking_wells, species=species, wavelength=wavelength
+        )
+
+        # apply to wells where species is present in respective concentration
+        blanked_wells = []
+        for well in wells:
+            init_conc = get_species_condition(well, species.id).init_conc
+            measurement = get_measurement(well, wavelength)
+            blank_state = self._get_blank_state(measurement, species.id)
+
+            if init_conc not in conc_blank_mapping:
+                print(
+                    f"Well {well.id} was not blanked for initial"
+                    f" {species.name} concentration"
+                    f" {init_conc}"
+                )
+                continue
+
+            if not blank_state.contributes_to_signal:
+                continue
+
+            measurement.absorption = [
+                absorption - conc_blank_mapping[init_conc]
+                for absorption in measurement.absorption
+            ]
+
+            blank_state.contributes_to_signal = False
+            blanked_wells.append(well)
+
+        print(f"Blanked {len(blanked_wells)} wells containing {species.name}.\n")
+
     def _well_id_exists(self, well_id: str) -> bool:
         """Check if a well with the given id exists in the plate."""
         return any([well_id in well.id for well in self.plate.wells])
+
+    def _get_conc_blank_mapping(
+        self,
+        wells: list[Well],
+        species: Species | Protein | Molecule,
+        wavelength: float,
+    ) -> dict[float, float]:
+        blank_measurement_mapping = defaultdict(list)
+        for well in wells:
+            condition = get_species_condition(well, species.id)
+
+            blank_measurement_mapping[condition.init_conc].append(
+                get_measurement(well, wavelength).absorption
+            )
+
+        conc_mean_blank_mapping = {}
+        for conc, absorptions in blank_measurement_mapping.items():
+            mean_absorption = np.nanmean(absorptions)
+            std_absorption = np.nanstd(absorptions)
+            std_perc = abs(std_absorption / mean_absorption) * 100
+            print(
+                f"Mean absorption of [bold magenta]{species.name}[/] ({species.id}) at"
+                f" {conc} {condition.conc_unit.name}: {mean_absorption:.4f} ±"
+                f" {std_perc:.0f}%  calculated based on wells"
+                f" {[well.id for well in wells]}."
+            )
+            conc_mean_blank_mapping[conc] = mean_absorption
+
+        return conc_mean_blank_mapping
+
+    @staticmethod
+    def _species_contibutes(
+        measurement: PhotometricMeasurement, species_id: str
+    ) -> bool:
+        species_contributes = [
+            state.contributes_to_signal
+            for state in measurement.blank_states
+            if state.species_id == species_id
+        ][0]
+
+        return species_contributes
+
+    @staticmethod
+    def _get_blank_state(
+        measurement: PhotometricMeasurement, species_id: str
+    ) -> BlankState:
+        for state in measurement.blank_states:
+            if state.species_id == species_id:
+                return state
+
+        raise ValueError(f"Species {species_id} is not present in this well.")
 
     @classmethod
     def read_magellan(
@@ -483,6 +605,19 @@ class PlateManager(BaseModel):
 
         return cls(plate=reader(path, wavelength, ph))
 
+    @classmethod
+    def read_multiskan(
+        cls,
+        path: str,
+        time: list[float],
+        time_unit: UnitDefinition,
+        temperature: float
+    ) -> PlateManager:
+        from MTPHandler.readers import read_multiskan_spectrum
 
-if __name__ == "__main__":
-    pm = PlateManager(plate=Plate())
+        return cls(plate=read_multiskan_spectrum(
+            path=path,
+            time=time,
+            time_unit=time_unit,
+            temperature=temperature
+        ))

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
 from enum import Enum
 from typing import Generic, Optional, TypeVar
 from uuid import uuid4
@@ -78,13 +77,13 @@ class Plate(BaseModel):
         validate_assigment=True,
     )  # type: ignore
 
+    temperatures: list[float]
+    temperature_unit: UnitDefinition
     id: Optional[str] = Field(default=None)
     name: Optional[str] = Field(default=None)
     wells: list[Well] = Field(default_factory=list)
     species: list[Species | Molecule | Protein] = Field(default_factory=list)
     date_measured: Optional[str] = Field(default=None)
-    temperatures: list[float] = Field(default_factory=list)
-    temperature_unit: Optional[UnitDefinition] = Field(default=None)
     times: list[float] = Field(default_factory=list)
     time_unit: Optional[UnitDefinition] = Field(default=None)
 
@@ -235,6 +234,8 @@ class Plate(BaseModel):
             "id": id,
             "name": name,
         }
+        if not ld_id:
+            params.pop("ld_id")
 
         species = Species(**params)
 
@@ -257,6 +258,8 @@ class Plate(BaseModel):
             "id": id,
             "name": name,
         }
+        if not ld_id:
+            params.pop("ld_id")
 
         molecule = Molecule(**params)
 
@@ -281,6 +284,8 @@ class Plate(BaseModel):
             "id": id,
             "name": name,
         }
+        if not ld_id:
+            params.pop("ld_id")
 
         protein = Protein(**params)
 
@@ -295,7 +300,7 @@ class Species(BaseModel):
     )  # type: ignore
 
     id: str
-    name: Optional[str] = Field(default=None)
+    name: str
 
     # JSON-LD fields
     ld_id: str = Field(
@@ -388,7 +393,7 @@ class Molecule(BaseModel):
     smiles: Optional[str] = Field(default=None)
     inchi_key: Optional[str] = Field(default=None)
     id: str
-    name: Optional[str] = Field(default=None)
+    name: str
 
     # JSON-LD fields
     ld_id: str = Field(
@@ -482,7 +487,7 @@ class Protein(BaseModel):
     organism: Optional[str] = Field(default=None)
     organism_tax_id: Optional[int] = Field(default=None)
     id: str
-    name: Optional[str] = Field(default=None)
+    name: str
 
     # JSON-LD fields
     ld_id: str = Field(
@@ -735,6 +740,33 @@ class Well(BaseModel):
 
         return self.measurements[-1]
 
+class InitCondition(BaseModel):
+    model_config: ConfigDict = ConfigDict(  # type: ignore
+        validate_assigment=True,
+    )  # type: ignore
+
+    species_id: str
+    init_conc: float
+    conc_unit: UnitDefinition
+
+    # JSON-LD fields
+    ld_id: str = Field(
+        serialization_alias="@id",
+        default_factory=lambda: "md:PhotometricMeasurement/" + str(uuid4()),
+    )
+    ld_type: list[str] = Field(
+        serialization_alias="@type",
+        default_factory=lambda: [
+            "md:InitCondition",
+        ],
+    )
+    ld_context: dict[str, str | dict] = Field(
+        serialization_alias="@context",
+        default_factory=lambda: {
+            "md": "https://github.com/FAIRChemistry/MTPHandler",
+        },
+    )
+
 
 class PhotometricMeasurement(BaseModel):
     model_config: ConfigDict = ConfigDict(  # type: ignore
@@ -862,7 +894,7 @@ class PhotometricMeasurement(BaseModel):
         return self.blank_states[-1]
 
 
-class InitCondition(BaseModel):
+class spec(BaseModel):
     model_config: ConfigDict = ConfigDict(  # type: ignore
         validate_assigment=True,
     )  # type: ignore
@@ -1049,7 +1081,7 @@ class BlankState(BaseModel):
 
 class UnitDefinition(BaseModel):
     model_config: ConfigDict = ConfigDict(  # type: ignore
-        validate_assigment=True,
+        validate_assigment=True, use_enum_values=True
     )  # type: ignore
 
     id: Optional[str] = Field(default=None)
@@ -1176,7 +1208,7 @@ class UnitDefinition(BaseModel):
 
 class BaseUnit(BaseModel):
     model_config: ConfigDict = ConfigDict(  # type: ignore
-        validate_assigment=True,
+        validate_assigment=True, use_enum_values=True
     )  # type: ignore
 
     kind: UnitType

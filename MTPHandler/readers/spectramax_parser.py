@@ -2,20 +2,20 @@ from __future__ import annotations
 
 import re
 from datetime import datetime
-from typing import TYPE_CHECKING, List
+from typing import List
 
 import numpy as np
 import pandas as pd
+from pyenzyme.model import UnitDefinition
 
-if TYPE_CHECKING:
-    from MTPHandler.core import Plate
+from MTPHandler.dataclasses import Plate, Well
+from MTPHandler.units import C, nm
 
 
 def read_spectramax(
-    cls: Plate,
     path: str,
+    time_unit: UnitDefinition,
     ph: float | None = None,
-    time_unit: str = "min",
 ):
     df = pd.read_csv(
         path,
@@ -24,7 +24,6 @@ def read_spectramax(
         engine="python",
         skiprows=15,
     )
-    from MTPHandler.core import Well
 
     df = df.map(lambda x: x.split("\t"))
 
@@ -32,7 +31,7 @@ def read_spectramax(
     last_saved = re.findall(
         r"\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2} [APMapm]{2}", df.iloc[-1, 0][0]
     )[0]
-    created = datetime.strptime(last_saved, "%Y/%m/%d %I:%M:%S %p")
+    created = datetime.strptime(last_saved, "%Y/%m/%d %I:%M:%S %p").isoformat()
 
     wavelengths = df.iloc[0, 0][-6]
     wavelengths = [
@@ -99,44 +98,29 @@ def read_spectramax(
             for wavelength_id, wavelength in enumerate(column):
                 well.add_to_measurements(
                     wavelength=wavelengths[wavelength_id],
-                    wavelength_unit="nm",
+                    wavelength_unit=nm,
                     absorption=wavelength.tolist(),
                     time=times,
                 )
             wells.append(well)
 
     # Create plate
-    plate = cls(
-        n_rows=data.shape[0],
-        n_cols=data.shape[1],
+    plate = Plate(
         date_measured=created,
-        time=times,
         time_unit=time_unit,
         temperatures=temperatures,
-        temperature_unit="C",
+        temperature_unit=C,
         wells=wells,
     )
 
     return plate
 
 
-def to_time(string: str, unit: str) -> List[int]:
-    time = datetime.strptime(string, "%H:%M:%S").time()
-
-    if unit == "s":
-        return time.hour * 3600 + time.minute * 60 + time.second
-
-    elif unit == "min":
-        return time.hour * 60 + time.minute + time.second / 60
-
-    elif unit == "h":
-        return time.hour + time.minute / 60 + time.second / 3600
-
-    else:
-        raise ValueError(
-            f"Unit '{unit}' not supported. Supported units are 's', 'min', and 'h'"
-        )
-
-
 def _coordinates_to_id(x: int, y: int) -> str:
     return f"{chr(y + 65)}{x+1}"
+
+if __name__ == "__main__":
+    from MTPHandler.units import s
+    path="tests/data/ABTS_EnzymeML_340nm_420nm_2.5x_pH3_25deg.txt"
+
+    print(read_spectramax(path, ph=6.9, time_unit=s)
