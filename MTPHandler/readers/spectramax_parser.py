@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import re
 from datetime import datetime
-from typing import List
 
 import numpy as np
 import pandas as pd
 from pyenzyme.model import UnitDefinition
 
-from MTPHandler.dataclasses import Plate, Well
+from MTPHandler.model import Plate, Well
 from MTPHandler.units import C, nm
 
 
@@ -119,8 +118,10 @@ def read_spectramax(
 def _coordinates_to_id(x: int, y: int) -> str:
     return f"{chr(y + 65)}{x+1}"
 
+
 if __name__ == "__main__":
     from MTPHandler.units import s
-    path="tests/data/ABTS_EnzymeML_340nm_420nm_2.5x_pH3_25deg.txt"
 
-    print(read_spectramax(path, ph=6.9, time_unit=s)
+    path = "tests/data/ABTS_EnzymeML_340nm_420nm_2.5x_pH3_25deg.txt"
+
+    print(read_spectramax(path, ph=6.9, time_unit=s))

@@ -4,7 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from MTPHandler.dataclasses import Plate
+from MTPHandler.model import Plate
 
 
 def visualize_plate(
@@ -42,7 +42,7 @@ def visualize_plate(
 
             fig.add_trace(
                 go.Scatter(
-                    x=plate.times,
+                    x=measurement.time,
                     y=measurement.absorption,
                     name=f"{measurement.wavelength} nm",
                     mode="lines",

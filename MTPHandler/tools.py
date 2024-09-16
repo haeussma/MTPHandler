@@ -2,7 +2,7 @@ import importlib.resources as pkg_resources
 
 import toml
 
-from MTPHandler.dataclasses import InitCondition, PhotometricMeasurement, Well
+from MTPHandler.model import InitCondition, PhotometricMeasurement, Well
 
 
 def read_static_file(path, filename: str):

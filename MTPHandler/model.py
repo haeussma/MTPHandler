@@ -77,13 +77,12 @@ class Plate(BaseModel):
         validate_assigment=True,
     )  # type: ignore
 
-    temperatures: list[float]
     temperature_unit: UnitDefinition
     id: Optional[str] = Field(default=None)
     name: Optional[str] = Field(default=None)
     wells: list[Well] = Field(default_factory=list)
-    species: list[Species | Molecule | Protein] = Field(default_factory=list)
     date_measured: Optional[str] = Field(default=None)
+    temperatures: list[float] = Field(default_factory=list)
     times: list[float] = Field(default_factory=list)
     time_unit: Optional[UnitDefinition] = Field(default=None)
 
@@ -115,18 +114,6 @@ class Plate(BaseModel):
         """
 
         return FilterWrapper[Well](self.wells, **kwargs).filter()
-
-    def filter_species(self, **kwargs) -> list[Species]:
-        """Filters the species attribute based on the given kwargs
-
-        Args:
-            **kwargs: The attributes to filter by.
-
-        Returns:
-            list[Species]: The filtered list of Species objects
-        """
-
-        return FilterWrapper[Species](self.species, **kwargs).filter()
 
     def set_attr_term(
         self,
@@ -222,354 +209,6 @@ class Plate(BaseModel):
         self.wells.append(Well(**params))
 
         return self.wells[-1]
-
-    def add_species_to_species(
-        self,
-        ld_id: Optional[str] = None,
-        id: Optional[str] = None,
-        name: Optional[str] = None,
-    ):
-        params = {
-            "ld_id": ld_id,
-            "id": id,
-            "name": name,
-        }
-        if not ld_id:
-            params.pop("ld_id")
-
-        species = Species(**params)
-
-        self.species.append(species)
-
-        return species
-
-    def add_molecule_to_species(
-        self,
-        smiles: Optional[str] = None,
-        inchi_key: Optional[str] = None,
-        ld_id: Optional[str] = None,
-        id: Optional[str] = None,
-        name: Optional[str] = None,
-    ) -> Molecule:
-        params = {
-            "smiles": smiles,
-            "inchi_key": inchi_key,
-            "ld_id": ld_id,
-            "id": id,
-            "name": name,
-        }
-        if not ld_id:
-            params.pop("ld_id")
-
-        molecule = Molecule(**params)
-
-        self.species.append(molecule)
-
-        return molecule
-
-    def add_protein_to_species(
-        self,
-        sequence: Optional[str] = None,
-        organism: Optional[str] = None,
-        organism_tax_id: Optional[str] = None,
-        ld_id: Optional[str] = None,
-        id: Optional[str] = None,
-        name: Optional[str] = None,
-    ):
-        params = {
-            "sequence": sequence,
-            "organism": organism,
-            "organism_tax_id": organism_tax_id,
-            "ld_id": ld_id,
-            "id": id,
-            "name": name,
-        }
-        if not ld_id:
-            params.pop("ld_id")
-
-        protein = Protein(**params)
-
-        self.species.append(protein)
-
-        return protein
-
-
-class Species(BaseModel):
-    model_config: ConfigDict = ConfigDict(  # type: ignore
-        validate_assigment=True,
-    )  # type: ignore
-
-    id: str
-    name: str
-
-    # JSON-LD fields
-    ld_id: str = Field(
-        serialization_alias="@id", default_factory=lambda: "md:Species/" + str(uuid4())
-    )
-    ld_type: list[str] = Field(
-        serialization_alias="@type",
-        default_factory=lambda: [
-            "md:Species",
-        ],
-    )
-    ld_context: dict[str, str | dict] = Field(
-        serialization_alias="@context",
-        default_factory=lambda: {
-            "md": "https://github.com/FAIRChemistry/MTPHandler",
-        },
-    )
-
-    def set_attr_term(
-        self,
-        attr: str,
-        term: str | dict,
-        prefix: str | None = None,
-        iri: str | None = None,
-    ):
-        """Sets the term for a given attribute in the JSON-LD object
-
-        Example:
-            # Using an IRI term
-            >> obj.set_attr_term("name", "http://schema.org/givenName")
-
-            # Using a prefix and term
-            >> obj.set_attr_term("name", "schema:givenName", "schema", "http://schema.org")
-
-            # Usinng a dictionary term
-            >> obj.set_attr_term("name", {"@id": "http://schema.org/givenName", "@type": "@id"})
-
-        Args:
-            attr (str): The attribute to set the term for
-            term (str | dict): The term to set for the attribute
-
-        Raises:
-            AssertionError: If the attribute is not found in the model
-        """
-
-        assert (
-            attr in self.model_fields
-        ), f"Attribute {attr} not found in {self.__class__.__name__}"
-
-        if prefix:
-            validate_prefix(term, prefix)
-
-        add_namespace(self, prefix, iri)
-        self.ld_context[attr] = term
-
-    def add_type_term(
-        self, term: str, prefix: str | None = None, iri: str | None = None
-    ):
-        """Adds a term to the @type field of the JSON-LD object
-
-        Example:
-            # Using a term
-            >> obj.add_type_term("https://schema.org/Person")
-
-            # Using a prefixed term
-            >> obj.add_type_term("schema:Person", "schema", "https://schema.org/Person")
-
-        Args:
-            term (str): The term to add to the @type field
-            prefix (str, optional): The prefix to use for the term. Defaults to None.
-            iri (str, optional): The IRI to use for the term prefix. Defaults to None.
-
-        Raises:
-            ValueError: If prefix is provided but iri is not
-            ValueError: If iri is provided but prefix is not
-        """
-
-        if prefix:
-            validate_prefix(term, prefix)
-
-        add_namespace(self, prefix, iri)
-        self.ld_type.append(term)
-
-
-class Molecule(BaseModel):
-    model_config: ConfigDict = ConfigDict(  # type: ignore
-        validate_assigment=True,
-    )  # type: ignore
-
-    smiles: Optional[str] = Field(default=None)
-    inchi_key: Optional[str] = Field(default=None)
-    id: str
-    name: str
-
-    # JSON-LD fields
-    ld_id: str = Field(
-        serialization_alias="@id", default_factory=lambda: "md:Molecule/" + str(uuid4())
-    )
-    ld_type: list[str] = Field(
-        serialization_alias="@type",
-        default_factory=lambda: [
-            "md:Molecule",
-        ],
-    )
-    ld_context: dict[str, str | dict] = Field(
-        serialization_alias="@context",
-        default_factory=lambda: {
-            "md": "https://github.com/FAIRChemistry/MTPHandler",
-        },
-    )
-
-    def set_attr_term(
-        self,
-        attr: str,
-        term: str | dict,
-        prefix: str | None = None,
-        iri: str | None = None,
-    ):
-        """Sets the term for a given attribute in the JSON-LD object
-
-        Example:
-            # Using an IRI term
-            >> obj.set_attr_term("name", "http://schema.org/givenName")
-
-            # Using a prefix and term
-            >> obj.set_attr_term("name", "schema:givenName", "schema", "http://schema.org")
-
-            # Usinng a dictionary term
-            >> obj.set_attr_term("name", {"@id": "http://schema.org/givenName", "@type": "@id"})
-
-        Args:
-            attr (str): The attribute to set the term for
-            term (str | dict): The term to set for the attribute
-
-        Raises:
-            AssertionError: If the attribute is not found in the model
-        """
-
-        assert (
-            attr in self.model_fields
-        ), f"Attribute {attr} not found in {self.__class__.__name__}"
-
-        if prefix:
-            validate_prefix(term, prefix)
-
-        add_namespace(self, prefix, iri)
-        self.ld_context[attr] = term
-
-    def add_type_term(
-        self, term: str, prefix: str | None = None, iri: str | None = None
-    ):
-        """Adds a term to the @type field of the JSON-LD object
-
-        Example:
-            # Using a term
-            >> obj.add_type_term("https://schema.org/Person")
-
-            # Using a prefixed term
-            >> obj.add_type_term("schema:Person", "schema", "https://schema.org/Person")
-
-        Args:
-            term (str): The term to add to the @type field
-            prefix (str, optional): The prefix to use for the term. Defaults to None.
-            iri (str, optional): The IRI to use for the term prefix. Defaults to None.
-
-        Raises:
-            ValueError: If prefix is provided but iri is not
-            ValueError: If iri is provided but prefix is not
-        """
-
-        if prefix:
-            validate_prefix(term, prefix)
-
-        add_namespace(self, prefix, iri)
-        self.ld_type.append(term)
-
-
-class Protein(BaseModel):
-    model_config: ConfigDict = ConfigDict(  # type: ignore
-        validate_assigment=True,
-    )  # type: ignore
-
-    sequence: Optional[str] = Field(default=None)
-    organism: Optional[str] = Field(default=None)
-    organism_tax_id: Optional[int] = Field(default=None)
-    id: str
-    name: str
-
-    # JSON-LD fields
-    ld_id: str = Field(
-        serialization_alias="@id", default_factory=lambda: "md:Protein/" + str(uuid4())
-    )
-    ld_type: list[str] = Field(
-        serialization_alias="@type",
-        default_factory=lambda: [
-            "md:Protein",
-        ],
-    )
-    ld_context: dict[str, str | dict] = Field(
-        serialization_alias="@context",
-        default_factory=lambda: {
-            "md": "https://github.com/FAIRChemistry/MTPHandler",
-        },
-    )
-
-    def set_attr_term(
-        self,
-        attr: str,
-        term: str | dict,
-        prefix: str | None = None,
-        iri: str | None = None,
-    ):
-        """Sets the term for a given attribute in the JSON-LD object
-
-        Example:
-            # Using an IRI term
-            >> obj.set_attr_term("name", "http://schema.org/givenName")
-
-            # Using a prefix and term
-            >> obj.set_attr_term("name", "schema:givenName", "schema", "http://schema.org")
-
-            # Usinng a dictionary term
-            >> obj.set_attr_term("name", {"@id": "http://schema.org/givenName", "@type": "@id"})
-
-        Args:
-            attr (str): The attribute to set the term for
-            term (str | dict): The term to set for the attribute
-
-        Raises:
-            AssertionError: If the attribute is not found in the model
-        """
-
-        assert (
-            attr in self.model_fields
-        ), f"Attribute {attr} not found in {self.__class__.__name__}"
-
-        if prefix:
-            validate_prefix(term, prefix)
-
-        add_namespace(self, prefix, iri)
-        self.ld_context[attr] = term
-
-    def add_type_term(
-        self, term: str, prefix: str | None = None, iri: str | None = None
-    ):
-        """Adds a term to the @type field of the JSON-LD object
-
-        Example:
-            # Using a term
-            >> obj.add_type_term("https://schema.org/Person")
-
-            # Using a prefixed term
-            >> obj.add_type_term("schema:Person", "schema", "https://schema.org/Person")
-
-        Args:
-            term (str): The term to add to the @type field
-            prefix (str, optional): The prefix to use for the term. Defaults to None.
-            iri (str, optional): The IRI to use for the term prefix. Defaults to None.
-
-        Raises:
-            ValueError: If prefix is provided but iri is not
-            ValueError: If iri is provided but prefix is not
-        """
-
-        if prefix:
-            validate_prefix(term, prefix)
-
-        add_namespace(self, prefix, iri)
-        self.ld_type.append(term)
 
 
 class Well(BaseModel):
@@ -717,7 +356,6 @@ class Well(BaseModel):
     def add_to_measurements(
         self,
         wavelength: float,
-        wavelength_unit: UnitDefinition,
         absorption: list[float] = [],
         time: list[float] = [],
         time_unit: Optional[UnitDefinition] = None,
@@ -726,7 +364,6 @@ class Well(BaseModel):
     ):
         params = {
             "wavelength": wavelength,
-            "wavelength_unit": wavelength_unit,
             "absorption": absorption,
             "time": time,
             "time_unit": time_unit,
@@ -740,33 +377,6 @@ class Well(BaseModel):
 
         return self.measurements[-1]
 
-class InitCondition(BaseModel):
-    model_config: ConfigDict = ConfigDict(  # type: ignore
-        validate_assigment=True,
-    )  # type: ignore
-
-    species_id: str
-    init_conc: float
-    conc_unit: UnitDefinition
-
-    # JSON-LD fields
-    ld_id: str = Field(
-        serialization_alias="@id",
-        default_factory=lambda: "md:PhotometricMeasurement/" + str(uuid4()),
-    )
-    ld_type: list[str] = Field(
-        serialization_alias="@type",
-        default_factory=lambda: [
-            "md:InitCondition",
-        ],
-    )
-    ld_context: dict[str, str | dict] = Field(
-        serialization_alias="@context",
-        default_factory=lambda: {
-            "md": "https://github.com/FAIRChemistry/MTPHandler",
-        },
-    )
-
 
 class PhotometricMeasurement(BaseModel):
     model_config: ConfigDict = ConfigDict(  # type: ignore
@@ -774,7 +384,6 @@ class PhotometricMeasurement(BaseModel):
     )  # type: ignore
 
     wavelength: float
-    wavelength_unit: UnitDefinition
     absorption: list[float] = Field(default_factory=list)
     time: list[float] = Field(default_factory=list)
     time_unit: Optional[UnitDefinition] = Field(default=None)
@@ -894,7 +503,7 @@ class PhotometricMeasurement(BaseModel):
         return self.blank_states[-1]
 
 
-class spec(BaseModel):
+class InitCondition(BaseModel):
     model_config: ConfigDict = ConfigDict(  # type: ignore
         validate_assigment=True,
     )  # type: ignore
@@ -1081,7 +690,7 @@ class BlankState(BaseModel):
 
 class UnitDefinition(BaseModel):
     model_config: ConfigDict = ConfigDict(  # type: ignore
-        validate_assigment=True, use_enum_values=True
+        validate_assigment=True,
     )  # type: ignore
 
     id: Optional[str] = Field(default=None)
@@ -1208,7 +817,7 @@ class UnitDefinition(BaseModel):
 
 class BaseUnit(BaseModel):
     model_config: ConfigDict = ConfigDict(  # type: ignore
-        validate_assigment=True, use_enum_values=True
+        validate_assigment=True,
     )  # type: ignore
 
     kind: UnitType

@@ -7,7 +7,7 @@ from typing import Dict, List, Optional
 import numpy as np
 import pandas as pd
 
-from MTPHandler.dataclasses import Plate
+from MTPHandler.model import Plate
 from MTPHandler.units import C, nm
 from MTPHandler.units.units import UnitDefinition
 
@@ -80,7 +80,8 @@ def read_multiskan_spectrum(
                     wavelength=wavelength,
                     wavelength_unit=nm,
                     absorption=column.tolist(),
-                    time=time
+                    time=time,
+                    time_unit=time_unit,
                 )
 
     return plate
@@ -174,13 +175,12 @@ def id_to_xy(well_id: str):
 
 if __name__ == "__main__":
     import numpy as np
-
-    from MTPHandler.dataclasses import Plate
-    from MTPHandler.units import C, min
-
     from devtools import pprint
 
-    path = "tests/data/multiskan_spectrum_1500.txt"
+    from MTPHandler.model import Plate
+    from MTPHandler.units import C, min
+
+    path = "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/multiskan_spectrum_1500.txt"
 
     ph = 7.0
     wavelength = 450.0

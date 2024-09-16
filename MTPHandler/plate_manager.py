@@ -6,18 +6,17 @@ from typing import Literal, Optional, Tuple, get_args
 
 import numpy as np
 import pandas as pd
+from devtools import pprint
 from pydantic import BaseModel, Field
 from rich import print
 
-from MTPHandler.dataclasses import (
+from MTPHandler.model import (
     BlankState,
-    Molecule,
     PhotometricMeasurement,
     Plate,
-    Protein,
-    Species,
     Well,
 )
+from MTPHandler.molecule import Molecule, Protein
 from MTPHandler.tools import (
     get_measurement,
     get_species_condition,
@@ -34,9 +33,11 @@ ASSIGN_CASE_VALUES: Tuple[ASSIGN_CASE, ...] = get_args(ASSIGN_CASE)
 
 class PlateManager(BaseModel):
     plate: Plate = Field(..., description="Plate object")
+    molecules: list[Molecule] = Field(default=[], description="List of molecules")
+    proteins: list[Protein] = Field(default=[], description="List of proteins")
 
     # Adders for species, molecules and proteins
-    def add_species(
+    def add_molecule(
         self,
         id: str,
         name: str,
@@ -594,30 +595,105 @@ class PlateManager(BaseModel):
         raise ValueError(f"Species {species_id} is not present in this well.")
 
     @classmethod
-    def read_magellan(
+    def read_spectra_max_190(
+        cls,
+        path: str,
+        ph: float | None = None,
+    ):
+        from MTPHandler.readers import read_spectra_max_190
+
+        return cls(plate=read_spectra_max_190(path, ph))
+
+    @classmethod
+    def read_tecan_spark(
+        cls,
+        path: str,
+        ph: float | None = None,
+    ) -> PlateManager:
+        """Read a `*.xlsx` TECAN Spark file and create a PlateManager object.
+
+        Args:
+            path (str): Path to the TECAN Spark file.
+            ph (float | None, optional): The pH value of the measurements. Defaults to None.
+
+        Returns:
+            PlateManager: PlateManager object.
+        """
+        from MTPHandler.readers import read_tekan_spark
+
+        return cls(plate=read_tekan_spark(path, ph))
+
+    @classmethod
+    def read_tekan_magellan(
         cls,
         path: str,
         wavelength: float,
         ph: Optional[float] = None,
     ) -> PlateManager:
-        """Create a PlateManager object from a Magellan .xlsx file"""
-        from MTPHandler.readers import read_magellan as reader
+        """Read a `*.xlsx` file exported from a TECAN Magellan software and create a PlateManager object.
+
+        Args:
+            path (str): Path to the Magellan file.
+            wavelength (float): The wavelength of the measurements.
+            ph (Optional[float], optional): The pH value of the measurements. Defaults to None.
+
+        Returns:
+            PlateManager: PlateManager object.
+        """
+        from MTPHandler.readers import read_tekan_magellan as reader
 
         return cls(plate=reader(path, wavelength, ph))
 
     @classmethod
     def read_multiskan(
-        cls,
-        path: str,
-        time: list[float],
-        time_unit: UnitDefinition,
-        temperature: float
+        cls, path: str, time: list[float], time_unit: UnitDefinition, temperature: float
     ) -> PlateManager:
         from MTPHandler.readers import read_multiskan_spectrum
 
-        return cls(plate=read_multiskan_spectrum(
-            path=path,
-            time=time,
-            time_unit=time_unit,
-            temperature=temperature
-        ))
+        return cls(
+            plate=read_multiskan_spectrum(
+                path=path, time=time, time_unit=time_unit, temperature=temperature
+            )
+        )
+
+
+if __name__ == "__main__":
+    path = (
+        "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/spectra_max_190.txt"
+    )
+
+    pm = PlateManager.read_spectra_max_190(path, ph=6.9)
+    pm.visualize()
+
+    # pm
+
+    # h1 = pm.get_well("H1")
+
+    # print(h1.id)
+    # print(h1.x_pos)
+    # print(h1.y_pos)
+    # print(h1.measurements[0].absorption[0])
+    # print(h1.measurements[0].absorption[-1])
+
+    # path = "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/tekan_spark.xlsx"
+    # from MTPHandler.model import Plate
+
+    # p = PlateManager.read_tecan_spark(path, 7.4)
+
+    # print(p.plate.temperatures)
+
+    # p.visualize()
+
+    # path = "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/magellan.xlsx"
+
+    # plate = PlateManager.read_tekan_magellan(path, wavelength=600, ph=7)
+
+    # plate.visualize()
+
+    path = (
+        "/Users/max/Documents/training_course/jules/Spectramax190 molecular Devices.txt"
+    )
+
+    pm = PlateManager.read_spectra_max_190(path, ph=7)
+    pm.visualize()
+    pprint(pm.plate.wells[0])

@@ -6,7 +6,7 @@ import numpy as np
 from calipytion.model import Sample, SignalType, Standard, UnitDefinition
 from calipytion.tools.calibrator import Calibrator
 
-from MTPHandler.dataclasses import Molecule, Plate, Protein, Species, Well
+from MTPHandler.model import Molecule, Plate, Protein, Species, Well
 from MTPHandler.tools import (
     get_measurement,
     get_species_condition,

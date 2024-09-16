@@ -1,7 +1,7 @@
 import numpy as np
 
-from MTPHandler.dataclasses import Plate
-from MTPHandler.units import celsius, minute, mM
+from MTPHandler.model import Plate
+from MTPHandler.units import celsius, minute
 
 times = np.linspace(0, 10, 11)
 

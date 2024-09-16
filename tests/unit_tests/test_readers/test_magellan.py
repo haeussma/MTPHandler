@@ -1,5 +1,5 @@
-from MTPHandler.dataclasses import Plate
-from MTPHandler.readers import read_magellan
+from MTPHandler.model import Plate
+from MTPHandler.readers import read_tekan_magellan
 from MTPHandler.units import nm, s
 
 
@@ -10,7 +10,7 @@ def test_magellan():
     wavelength = 450.0
 
     # Act
-    plate = read_magellan(
+    plate = read_tekan_magellan(
         path=path,
         wavelength=wavelength,
         ph=ph,

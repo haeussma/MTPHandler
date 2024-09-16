@@ -2,40 +2,35 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Dict, List, Optional
 
-# from calipytion.core import Standard
-import pyenzyme as pe
-from pyenzyme.model import DataTypes
-
-from MTPHandler.dataclasses import Molecule, Plate, Protein, Species, Well
-from calipytion.model import Standard
-
 import numpy as np
 
+# from calipytion.core import Standard
+import pyenzyme as pe
+from calipytion.model import Standard
+from pyenzyme.model import DataTypes
+
+from MTPHandler.model import Molecule, Plate, Protein, Species, Well
 from MTPHandler.tools import get_measurement
 
 
 class Plate_to_EnzymeMLDocument:
-
     def __init__(
         self,
         plate: Plate,
         measured_molecule: Molecule,
         standard: Optional[Standard] = None,
     ) -> None:
-
-        assert measured_molecule or standard, (
-            "Either a measured molecule or a standard must be provided."
-        )
+        assert (
+            measured_molecule or standard
+        ), "Either a measured molecule or a standard must be provided."
 
         self.plate = plate
         self.measured_molecule = measured_molecule
         self.standard = standard
 
-
     @property
     def temperature(self) -> float:
         return np.mean(self.plate.temperatures).tolist()
-
 
     @staticmethod
     def map_protein(protein: Protein) -> pe.Protein:
@@ -50,17 +45,20 @@ class Plate_to_EnzymeMLDocument:
             canonical_smiles=molecule.smiles,
         )
 
-    def map_measurement_data(self, well: Well, wavelength: float) -> list[pe.MeasurementData]:
-
+    def map_measurement_data(
+        self, well: Well, wavelength: float
+    ) -> list[pe.MeasurementData]:
         measurement = pe.Measurement(
             id=well.id,
-            name=f"{self.measured_molecule.name}", #type: ignore
+            name=f"{self.measured_molecule.name}",  # type: ignore
             ph=well.ph,
             temperature=self.temperature,
         )
 
         photo_meas = get_measurement(well, wavelength)
-        data_type = pe.DataTypes.ABSORPTION if not self.standard else pe.DataTypes.CONCENTRATION
+        data_type = (
+            pe.DataTypes.ABSORPTION if not self.standard else pe.DataTypes.CONCENTRATION
+        )
 
         for meas in well.init_conditions:
             if meas.species_id == self.measured_molecule.id:
@@ -71,7 +69,9 @@ class Plate_to_EnzymeMLDocument:
             measurement.add_to_species(
                 species_id=meas.species_id,
                 init_conc=meas.init_conc,
-                data_type=DataTypes.ABSORPTION if is_measured_species else DataTypes.CONCENTRATION,
+                data_type=DataTypes.ABSORPTION
+                if is_measured_species
+                else DataTypes.CONCENTRATION,
                 data_unit=photo_meas.data_unit,
                 data=photo_meas.absorption if is_measured_species else [],
                 time=photo_meas.time if is_measured_species else [],

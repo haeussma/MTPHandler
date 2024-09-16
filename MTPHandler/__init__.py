@@ -1,3 +1,3 @@
 import os
 
-from MTPHandler import PlateManager
+from MTPHandler.plate_manager import PlateManager

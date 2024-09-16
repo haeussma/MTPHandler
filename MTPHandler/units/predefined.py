@@ -1,4 +1,4 @@
-from MTPHandler.dataclasses import UnitType
+from MTPHandler.model import UnitType
 from MTPHandler.tools import read_static_file
 
 from .units import BaseUnit, Prefix, UnitDefinition

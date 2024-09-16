@@ -1,19 +1,16 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
 
 import pandas as pd
 from typing_extensions import Optional
 
+from MTPHandler.model import Plate
 from MTPHandler.readers.utils import id_to_xy
-
-if TYPE_CHECKING:
-    from MTPHandler.core.plate import Plate
+from MTPHandler.units import C, minute
 
 
 def read_tekan_spark(
-    cls: Plate,
     path: str,
     ph: Optional[float],
 ) -> Plate:
@@ -40,18 +37,14 @@ def read_tekan_spark(
     first_nan_index = data_df.isna().any(axis=1).idxmax()
     data_df = data_df.iloc[:first_nan_index, :]
 
-    time_series = data_df.pop("Time [s]")
-    time_unit = "s"
+    time_series = data_df.pop("Time [s]") / 60
     temp_series = data_df.pop("Temp. [°C]")
-    temp_unit = "°C"
 
-    plate = cls(
-        date_measured=time_measured,
-        n_rows=8,
-        n_cols=12,
+    plate = Plate(
+        date_measured=str(time_measured),
         temperatures=temp_series.values.tolist(),
-        temperature_unit=temp_unit,
-        time_unit=time_unit,
+        temperature_unit=C,
+        time_unit=minute,
         times=time_series.values.tolist(),
     )
 
@@ -68,13 +61,19 @@ def read_tekan_spark(
             wavelength=wavelength,
             wavelength_unit="nm",
             absorption=data_df[column].values.tolist(),
+            time=time_series.values.tolist(),
+            time_unit=minute,
         )
 
     return plate
 
 
 if __name__ == "__main__":
-    path = "/Users/max/Documents/GitHub/MTPHandler/tests/data/tekan_spark.xlsx"
-    from MTPHandler.core import Plate
+    from devtools import pprint
 
-    read_tekan_spark(Plate, path, 7.4)
+    path = "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/tekan_spark.xlsx"
+    from MTPHandler.model import Plate
+
+    p = read_tekan_spark(path, 7.4)
+
+    pprint(p.wells[0])

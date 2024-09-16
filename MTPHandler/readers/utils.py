@@ -10,3 +10,10 @@ def xy_to_id(x: int, y: int) -> str:
 def id_to_xy(well_id: str) -> tuple[int, int]:
     """Well ID to well coordinates"""
     return int(well_id[1:]) - 1, ord(well_id[0].upper()) - 65
+
+
+if __name__ == "__main__":
+    print(xy_to_id(0, 0))
+    print(id_to_xy("A1"))
+    print(id_to_xy("H12"))
+    print(id_to_xy("C3"))
