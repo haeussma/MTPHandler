@@ -1,3 +1,7 @@
+---
+repo: https://github.com/FAIRChemistry/MTPHandler
+---
+
 # Data model for microtiter plate photometry
 
 ## Modules
@@ -6,63 +10,38 @@
 
 Description of a microtiter plate consisting of wells.
 
-- __n_rows__
-    - Type: integer
-    - Description: Number of rows on the plate
-- __n_cols__
-    - Type: integer
-    - Description: Number of columns on the plate
-- date_measured
-    - Type: datetime
-    - Description: Date and time when the plate was measured
-- times
-    - Type: float[]
-    - Description: Time points of the measurement, corresponding to temperature measurements
-- time_unit
-    - Type: Unit
-    - Description: Unit of the time
-- temperatures
-    - Type: float[]
-    - Description: Thermostat temperature
-- temperature_unit
-    - Type: Unit
-    - Description: Unit of the temperature
+- id
+    - Type: string
+    - Description: Identifier of the plate
+- name
+    - Type: string
+    - Description: Arbitrary name of the plate.
 - wells
     - Type: Well[]
-    - Description: List of wells on the plate
-- species
-    - Type: Species[]
-    - Description: List of species present in wells of the plate
-
-### Species
-
-Description of a species that might be present in the wells of the plate.
-
-- name
-    - Type: str
-    - Description: Name of the species
-- references
-    - Type: Identifier[]
-    - Description: List of references to the species
-
-### Protein (_Species_)
-
-Description of a protein species that might be present in the wells of the plate.
-
-- sequence
-    - Type: str
-    - Description: Amino acid sequence of the protein
-- organism
-    - Type: str
-    - Description: Organism the protein originates from
-- organism_tax_id
-    - Type: Identifier
-    - Description: NCBI taxonomy ID of the organism
+    - Description: List of wells on the plate.
+- date_measured
+    - Type: string
+    - Description: Date and time when the plate was measured.
+- __temperatures__
+    - Type: float[]
+    - Description: Thermostat temperature
+- __temperature_unit__
+    - Type: UnitDefinition
+    - Description: Unit of the temperature
+- times
+    - Type: float[]
+    - Description: Time points of the measurement, corresponding to temperature measurements.
+- time_unit
+    - Type: UnitDefinition
+    - Description: Unit of the time
 
 ### Well
 
 Description of a well on the plate.
 
+- __id__
+    - Type: string
+    - Description: Identifier of the well
 - __x_pos__
     - Type: integer
     - Description: X position of the well on the plate
@@ -82,27 +61,24 @@ Description of a well on the plate.
     - Type: float
     - Description: Volume of the reaction
 - volume_unit
-    - Type: Unit
+    - Type: UnitDefinition
     - Description: Unit of the volume
 
 ### PhotometricMeasurement
 
-Description of a photometric measurement of a single well on the plate.
+Description of a photometric measurement of a single well and wavelength on the plate.
 
 - __wavelength__
     - Type: float
     - Description: Wavelength of the measurement
-- __wavelength_unit__
-    - Type: Unit
-    - Description: Unit of the wavelength
 - absorption
     - Type: float[]
     - Description: Absorption of the species
 - time
-    - Type: float
+    - Type: float[]
     - Description: Time of the measurement
 - time_unit
-    - Type: Unit
+    - Type: UnitDefinition
     - Description: Unit of the time
 - blank_states
     - Type: BlankState[]
@@ -113,13 +89,13 @@ Description of a photometric measurement of a single well on the plate.
 Description of the initial condition of a species in a well.
 
 - __species_id__
-    - Type: str
+    - Type: string
     - Description: Reference to species
 - __init_conc__
     - Type: float
     - Description: Initial concentration of the species
 - __conc_unit__
-    - Type: Unit
+    - Type: UnitDefinition
     - Description: Concentration unit
 
 ### BlankState
@@ -127,9 +103,9 @@ Description of the initial condition of a species in a well.
 Describes if the respective species contributes to the absorption signal.
 
 - __species_id__
-    - Type: str
+    - Type: string
     - Description: Reference to species
 - __contributes_to_signal__
-    - Type: bool
+    - Type: boolean
     - Description: Whether the species' absorption contributes to the absorption signal
     - Default: True

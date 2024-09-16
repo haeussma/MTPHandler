@@ -61,6 +61,13 @@ class Plate(
         json_schema_extra=dict(),
     )
 
+    name: Optional[str] = element(
+        description="Name of the plate",
+        default=None,
+        tag="name",
+        json_schema_extra=dict(),
+    )
+
     date_measured: Optional[Datetime] = element(
         description="Date and time when the plate was measured",
         default=None,
@@ -124,7 +131,7 @@ class Plate(
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
     _commit: Optional[str] = PrivateAttr(
-        default="b67724f080afb13c3b78cd2a559646f8b3f2e6e7"
+        default="c1ace6fef38751e79952a37557221f0540ca9d77"
     )
 
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
@@ -461,7 +468,7 @@ class Plate(
         self,
         species: Species,
         init_conc: float,
-        conc_unit: str,
+        conc_unit: Unit,
         contributes_to_signal: bool | None,
     ):
         for well in self.wells:
@@ -509,9 +516,7 @@ class Plate(
             init_concs = init_concs * len(columns[0])
 
         for wells in columns:
-            assert len(init_concs) == len(
-                wells
-            ), f"""
+            assert len(init_concs) == len(wells), f"""
             Number of initial concentrations ({len(init_concs)}) does not match number
             of wells ({len(wells)}) in columns ({column_ids}).
             """
@@ -555,9 +560,7 @@ class Plate(
             rows.append(wells)
 
         for wells in rows:
-            assert len(init_concs) == len(
-                wells
-            ), f"""
+            assert len(init_concs) == len(wells), f"""
             Number of initial concentrations ({len(init_concs)}) does not match number
             of wells ({len(wells)}) in rows ({row_ids}).
             """
@@ -797,7 +800,9 @@ class Plate(
 
         print(f"Blanked {len(blanked_wells)} wells containing {species.name}.\n")
 
-    def visualize(self, zoom: bool = False, wavelengths: list[float] = []):
+    def visualize(
+        self, zoom: bool = False, wavelengths: list[float] = [], static: bool = False
+    ):
         if zoom:
             shared_yaxes = False
         else:
@@ -848,6 +853,9 @@ class Plate(
             ),
             margin=dict(l=20, r=20, t=100, b=20),
         )
+
+        if static:
+            fig.show("svg")
 
         fig.show()
 

@@ -1,31 +1,27 @@
 from __future__ import annotations
 
-import logging
 import math
 import re
 from collections import defaultdict
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 import pandas as pd
 
-if TYPE_CHECKING:
-    from MTPHandler.core.plate import Plate
+from MTPHandler.model import Plate
+from MTPHandler.readers.utils import WELL_ID_PATTERN, id_to_xy
+from MTPHandler.units import C, minute, nm
 
-LOGGER = logging.getLogger(__name__)
 
-
-def read_magellan(
-    cls: Plate,
+def read_tekan_magellan(
     path: str,
     wavelength: float,
     ph: Optional[float] = None,
-):
+) -> Plate:
     df = pd.read_excel(path, header=None)
 
     # Define the format of the input datetime string
     date_format = "%A, %B %d, %Y: %H:%M:%S"
-    WELL_ID_PATTERN = r"[A-H][0-9]{1,2}"
 
     data = defaultdict(list)
     temperatures = []
@@ -37,15 +33,15 @@ def read_magellan(
             break
         else:
             date_str, time_str, temperature_str = timecourser_data.split("/")
-            temp_value, temp_unit = temperature_str.strip().split("°")
+            temp_value, _ = temperature_str.strip().split("°")
             temperatures.append(float(temp_value))
             time, time_unit = time_str[1:-1].split(" ")
 
-            times.append(time)
-            time_unit = time_unit.replace("sec", "s")
+            times.append(float(time) / 60)
             dates.append(datetime.strptime(date_str.strip(), date_format))
 
     created = dates[0]
+    print(times)
 
     df = df.dropna(how="all")
 
@@ -53,6 +49,8 @@ def read_magellan(
         first_cell = str(row[1].values[0])
         if not re.findall(WELL_ID_PATTERN, first_cell):
             continue
+
+        key = None
         for element in row[1].values:
             if isinstance(element, str):
                 key = element
@@ -61,21 +59,20 @@ def read_magellan(
             else:
                 data[key].append(element)
 
-    n_rows = 8
-    n_columns = 12
-
-    plate = cls(
-        date_measured=created,
-        n_rows=n_rows,
-        n_cols=n_columns,
-        temperature_unit=temp_unit,
+    plate = Plate(
+        date_measured=str(created),
+        temperature_unit=C,
         temperatures=temperatures,
-        time_unit=time_unit,
+        time_unit=minute,
         times=times,
     )
 
     for well_id, abso_list in data.items():
-        x_pos, y_pos = id_to_xy(well_id)
+        if well_id is not None:
+            x_pos, y_pos = id_to_xy(well_id)
+        else:
+            raise ValueError("Well ID not found in the data.")
+
         well = plate.add_to_wells(
             ph=ph if ph else None,
             id=well_id,
@@ -84,13 +81,18 @@ def read_magellan(
         )
         well.add_to_measurements(
             wavelength=wavelength,
-            wavelength_unit="nm",
+            wavelength_unit=nm,
             absorption=abso_list,
-            # blank_states=[],
+            time_unit=minute,
+            time=times,
         )
 
     return plate
 
 
-def id_to_xy(well_id: str):
-    return int(well_id[1:]) - 1, ord(well_id[0].upper()) - 65
+if __name__ == "__main__":
+    path = "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/magellan.xlsx"
+    from devtools import pprint
+
+    plate = read_tekan_magellan(path, wavelength=600, ph=7)
+    pprint(plate.wells[0])

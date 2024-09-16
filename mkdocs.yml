@@ -5,8 +5,13 @@ repo_name: FAIRChemistry/MTPHandler
 
 nav:
   - Home: index.md
-  - Getting Started: getting_started.md
-  - Examples: examples.md
+  - Usage: usage.md
+  #- Getting Started: getting_started.md
+  #- Examples: examples.md
+
+plugins:
+  - plotly
+  - mkdocstrings
 
 theme:
   name: material
@@ -43,7 +48,14 @@ markdown_extensions:
       pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - pymdownx.superfences
+  - pymdownx.superfences:
+        custom_fences:
+          - name: mermaid
+            class: mermaid
+            format: !!python/name:pymdownx.superfences.fence_code_format
+          - name: plotly
+            class: mkdocs-plotly
+            format: !!python/name:mkdocs_plotly_plugin.fences.fence_plotly
   - tables
   - attr_list
   - pymdownx.emoji:

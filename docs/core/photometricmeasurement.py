@@ -47,11 +47,13 @@ class PhotometricMeasurement(
         ),
     )
 
-    time: Optional[float] = element(
+    time: List[float] = element(
         description="Time of the measurement",
-        default=None,
+        default_factory=ListPlus,
         tag="time",
-        json_schema_extra=dict(),
+        json_schema_extra=dict(
+            multiple=True,
+        ),
     )
 
     time_unit: Optional[Unit] = element(
@@ -77,7 +79,7 @@ class PhotometricMeasurement(
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
     _commit: Optional[str] = PrivateAttr(
-        default="b67724f080afb13c3b78cd2a559646f8b3f2e6e7"
+        default="c1ace6fef38751e79952a37557221f0540ca9d77"
     )
 
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)

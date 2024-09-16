@@ -1,20 +1,20 @@
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 from uuid import uuid4
 
 import sdRDM
 from lxml.etree import _Element
 from pydantic import PrivateAttr, model_validator
 from pydantic_xml import attr, element
-from sdRDM.base.datatypes import Identifier
+from sdRDM.base.datatypes import Unit
 from sdRDM.base.listplus import ListPlus
 from sdRDM.tools.utils import elem2dict
 
 
-class Species(
+class InitCondition(
     sdRDM.DataModel,
     search_mode="unordered",
 ):
-    """Description of a species that might be present in the wells of the plate."""
+    """Description of the initial condition of a species in a well."""
 
     id: Optional[str] = attr(
         name="id",
@@ -23,27 +23,29 @@ class Species(
         default_factory=lambda: str(uuid4()),
     )
 
-    name: Optional[str] = element(
-        description="Name of the species",
-        default=None,
-        tag="name",
+    species_id: str = element(
+        description="Reference to species",
+        tag="species_id",
         json_schema_extra=dict(),
     )
 
-    references: List[Identifier] = element(
-        description="List of references to the species",
-        default_factory=ListPlus,
-        tag="references",
-        json_schema_extra=dict(
-            multiple=True,
-        ),
+    init_conc: float = element(
+        description="Initial concentration of the species",
+        tag="init_conc",
+        json_schema_extra=dict(),
+    )
+
+    conc_unit: Unit = element(
+        description="Concentration unit",
+        tag="conc_unit",
+        json_schema_extra=dict(),
     )
 
     _repo: Optional[str] = PrivateAttr(
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
     _commit: Optional[str] = PrivateAttr(
-        default="b67724f080afb13c3b78cd2a559646f8b3f2e6e7"
+        default="c1ace6fef38751e79952a37557221f0540ca9d77"
     )
 
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)

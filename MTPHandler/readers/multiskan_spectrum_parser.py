@@ -2,24 +2,24 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
-from typing import TYPE_CHECKING, Dict, List
+from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
 
-if TYPE_CHECKING:
-    from MTPHandler.core.plate import Plate
+from MTPHandler.model import Plate
+from MTPHandler.units import C, nm
+from MTPHandler.units.units import UnitDefinition
 
 
 def read_multiskan_spectrum(
-    cls: "Plate",
     path: str,
-    time: list[float] | np.ndarray,
-    time_unit: str,
-    ph: float = None,
-    temperature: float = None,
-    temperature_unit: str = None,
-) -> "Plate":
+    time: list[float],
+    time_unit: UnitDefinition,
+    ph: Optional[float] = None,
+    temperature: Optional[float] = None,
+    temperature_unit: Optional[UnitDefinition] = C,
+) -> Plate:
     # Extract temperature from path
     if not temperature:
         TEMP_PATTERN = r"\d{1,3}deg"
@@ -29,7 +29,7 @@ def read_multiskan_spectrum(
             raise ValueError("Could not find pH in path. Please specify 'ph'.")
 
     if not temperature_unit:
-        temperature_unit = "C"
+        temperature_unit = C
 
     # Extract pH from path
     if not ph:
@@ -48,8 +48,6 @@ def read_multiskan_spectrum(
     if isinstance(time, list):
         time = np.array(time)
 
-    print(time)
-
     if len(time) != n_timepoints:
         raise ValueError(
             f"Number of timepoints in data set ({n_timepoints}) does not match "
@@ -57,14 +55,11 @@ def read_multiskan_spectrum(
         )
 
     # Create plate
-    plate = cls(
+    plate = Plate(
         temperatures=[temperature],
         temperature_unit=temperature_unit,
         times=time,
         time_unit=time_unit,
-        n_rows=n_rows,
-        n_cols=n_columns,
-        measured_wavelengths=list(data_dict.keys()),
     )
 
     # Add wells to plate
@@ -83,8 +78,10 @@ def read_multiskan_spectrum(
                 well = [well for well in plate.wells if well.id == id][0]
                 well.add_to_measurements(
                     wavelength=wavelength,
-                    wavelength_unit="nm",
+                    wavelength_unit=nm,
                     absorption=column.tolist(),
+                    time=time,
+                    time_unit=time_unit,
                 )
 
     return plate
@@ -178,25 +175,25 @@ def id_to_xy(well_id: str):
 
 if __name__ == "__main__":
     import numpy as np
+    from devtools import pprint
 
-    from MTPHandler.core.plate import Plate
+    from MTPHandler.model import Plate
+    from MTPHandler.units import C, min
 
-    path = "tests/data/multiskan_spectrum_1500.txt"
+    path = "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/multiskan_spectrum_1500.txt"
 
     ph = 7.0
     wavelength = 450.0
 
-    time = np.arange(0, 15.5, 0.5)
+    time = np.arange(0, 15.5, 0.5).tolist()
     print(f"the thime is {time}")
 
-    print(
+    pprint(
         read_multiskan_spectrum(
-            cls=Plate,
             path=path,
             ph=ph,
             time=time,
-            time_unit="min",
+            time_unit=min,
             temperature=37.0,
-            temperature_unit="C",
         )
     )

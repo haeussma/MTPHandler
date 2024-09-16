@@ -1,33 +1,94 @@
 from collections import defaultdict
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 
-from calipytion.core import Standard
-from sdRDM import DataModel
+import numpy as np
 
-from MTPHandler.core.protein import Protein
-from MTPHandler.core.reactant import Reactant
-from MTPHandler.core.well import Well
+# from calipytion.core import Standard
+import pyenzyme as pe
+from calipytion.model import Standard
+from pyenzyme.model import DataTypes
 
-# Specify EnzymeML version
-URL = "https://github.com/EnzymeML/enzymeml-specifications.git"
-COMMIT = "5e5f05b9dc76134305b8f9cef65271e35563ac76"
-
-EnzymeML = DataModel.from_git(URL, COMMIT)
-SBOTerm = EnzymeML.enums.SBOTerm
-DataTypes = EnzymeML.enums.DataTypes
+from MTPHandler.model import Molecule, Plate, Protein, Species, Well
+from MTPHandler.tools import get_measurement
 
 
-def create_enzymeml(
+class Plate_to_EnzymeMLDocument:
+    def __init__(
+        self,
+        plate: Plate,
+        measured_molecule: Molecule,
+        standard: Optional[Standard] = None,
+    ) -> None:
+        assert (
+            measured_molecule or standard
+        ), "Either a measured molecule or a standard must be provided."
+
+        self.plate = plate
+        self.measured_molecule = measured_molecule
+        self.standard = standard
+
+    @property
+    def temperature(self) -> float:
+        return np.mean(self.plate.temperatures).tolist()
+
+    @staticmethod
+    def map_protein(protein: Protein) -> pe.Protein:
+        return pe.Protein(**protein.model_dump())
+
+    @staticmethod
+    def map_small_molecule(molecule: Molecule) -> pe.SmallMolecule:
+        return pe.SmallMolecule(
+            id=molecule.id,
+            ld_id=molecule.ld_id,
+            name=molecule.name,
+            canonical_smiles=molecule.smiles,
+        )
+
+    def map_measurement_data(
+        self, well: Well, wavelength: float
+    ) -> list[pe.MeasurementData]:
+        measurement = pe.Measurement(
+            id=well.id,
+            name=f"{self.measured_molecule.name}",  # type: ignore
+            ph=well.ph,
+            temperature=self.temperature,
+        )
+
+        photo_meas = get_measurement(well, wavelength)
+        data_type = (
+            pe.DataTypes.ABSORPTION if not self.standard else pe.DataTypes.CONCENTRATION
+        )
+
+        for meas in well.init_conditions:
+            if meas.species_id == self.measured_molecule.id:
+                is_measured_species = True
+            else:
+                is_measured_species = False
+
+            measurement.add_to_species(
+                species_id=meas.species_id,
+                init_conc=meas.init_conc,
+                data_type=DataTypes.ABSORPTION
+                if is_measured_species
+                else DataTypes.CONCENTRATION,
+                data_unit=photo_meas.data_unit,
+                data=photo_meas.absorption if is_measured_species else [],
+                time=photo_meas.time if is_measured_species else [],
+                time_unit=photo_meas.time_unit,
+            )
+
+
+def enzememl_from_plate(
     name: str,
-    plate: "Plate",
-    detected_reactant: Reactant,
-    reactant_standard: Standard,
-    sort_measurements_by: AbstractSpecies = None,
+    plate: Plate,
+    detected_molecule: Molecule | Species,
+    wavelength: float,
+    standard: Standard,
+    sort_measurements_by: Optional[Molecule | Protein] = None,
     ignore_blank_status: bool = False,
-    wavelength: int = None,
-    path: str = None,
-) -> EnzymeML.EnzymeMLDocument:
+    path: Optional[str] = None,
+) -> pe.EnzymeMLDocument:
     """
     Creates an EnzymeML document based on the information of a `Plate`.
 
@@ -48,38 +109,37 @@ def create_enzymeml(
         'reactants', 'proteins', and a 'vessel'.
     """
 
-    # handel wavelength
-    if not wavelength:
-        if len(plate.measured_wavelengths) == 1:
-            wavelength = plate.measured_wavelengths[0]
-        else:
-            raise AttributeError(
-                f"Argument 'wavelength' must be provided. Measured wavelengths are: {plate.measured_wavelengths}"
-            )
-
     # Get defined reactants and proteins
-    reactants = [species for species in plate.species if isinstance(species, Reactant)]
-
+    molecules = [
+        species for species in plate.species if isinstance(species, (Molecule, Species))
+    ]
     proteins = [species for species in plate.species if isinstance(species, Protein)]
+
+    small_mol_dict = {}
+    for mol_id, molecule in enumerate(molecules):
+        species_id = f"s{molecule.id}"
+        small_mol_dict[species_id] = pe.SmallMolecule(
+            ld_id=molecule.ld_id,
+            name=molecule.name,
+            id=species_id,
+        )
 
     # Create measurements
     measurements = assamble_measurements(
         plate=plate,
         wavelength=wavelength,
-        detected_reactant=detected_reactant,
-        reactant_standard=reactant_standard,
+        detected_reactant=detected_molecule,
+        reactant_standard=standard,
         ignore_blank_status=ignore_blank_status,
         proteins=proteins,
         time_unit=plate.time_unit,
         time=plate.times,
     )
 
-    enzymeml = EnzymeML.EnzymeMLDocument(
+    enzymeml = pe.EnzymeMLDocument(
         name=name,
-        created=datetime.now(),
-        vessels=[plate._define_dummy_vessel()],
+        created=datetime.now().isoformat(),
         measurements=measurements,
-        reactants=reactants,
         proteins=proteins,
     )
 
@@ -95,13 +155,13 @@ def create_enzymeml(
 def assamble_measurements(
     plate: "Plate",
     wavelength: float,
-    detected_reactant: Reactant,
+    detected_reactant: Molecule | Species,
     reactant_standard: Standard,
     proteins: List[Protein],
     ignore_blank_status: bool,
-    time_unit: str,
+    time_unit: pe.UnitDefinition,
     time: List[float],
-) -> List[EnzymeML.Measurement]:
+) -> list[pe.Measurement]:
     """
     Creates a list of measurements based on the information of a `Plate`.
     Species are added to the respective measurements based on their initial concentration.
@@ -137,11 +197,9 @@ def assamble_measurements(
     # Create measurements
     measurements = []
     for meas_id, well_group in enumerate(well_groups):
-        measurement = EnzymeML.Measurement(
+        measurement = pe.Measurement(
             id=f"m{meas_id}",
             name=f"{detected_reactant.name} measurement",
-            global_time=plate.times,
-            global_time_unit=plate.time_unit,
             ph=well_group[0].ph,
             temperature=plate.temperatures[0],
             temperature_unit=plate.temperature_unit,

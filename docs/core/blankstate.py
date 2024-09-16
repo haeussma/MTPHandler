@@ -1,21 +1,19 @@
 from typing import Dict, Optional
 from uuid import uuid4
 
+import sdRDM
 from lxml.etree import _Element
 from pydantic import PrivateAttr, model_validator
 from pydantic_xml import attr, element
-from sdRDM.base.datatypes import Identifier
 from sdRDM.base.listplus import ListPlus
 from sdRDM.tools.utils import elem2dict
 
-from .species import Species
 
-
-class Protein(
-    Species,
+class BlankState(
+    sdRDM.DataModel,
     search_mode="unordered",
 ):
-    """Description of a protein species that might be present in the wells of the plate."""
+    """Describes if the respective species contributes to the absorption signal."""
 
     id: Optional[str] = attr(
         name="id",
@@ -24,24 +22,18 @@ class Protein(
         default_factory=lambda: str(uuid4()),
     )
 
-    sequence: Optional[str] = element(
-        description="Amino acid sequence of the protein",
-        default=None,
-        tag="sequence",
+    species_id: str = element(
+        description="Reference to species",
+        tag="species_id",
         json_schema_extra=dict(),
     )
 
-    organism: Optional[str] = element(
-        description="Organism the protein originates from",
-        default=None,
-        tag="organism",
-        json_schema_extra=dict(),
-    )
-
-    organism_tax_id: Optional[Identifier] = element(
-        description="NCBI taxonomy ID of the organism",
-        default=None,
-        tag="organism_tax_id",
+    contributes_to_signal: bool = element(
+        description=(
+            "Whether the species' absorption contributes to the absorption signal"
+        ),
+        default=True,
+        tag="contributes_to_signal",
         json_schema_extra=dict(),
     )
 
@@ -49,7 +41,7 @@ class Protein(
         default="https://github.com/FAIRChemistry/MTPHandler"
     )
     _commit: Optional[str] = PrivateAttr(
-        default="b67724f080afb13c3b78cd2a559646f8b3f2e6e7"
+        default="c1ace6fef38751e79952a37557221f0540ca9d77"
     )
 
     _raw_xml_data: Dict = PrivateAttr(default_factory=dict)
