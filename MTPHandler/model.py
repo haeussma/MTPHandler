@@ -356,17 +356,17 @@ class Well(BaseModel):
     def add_to_measurements(
         self,
         wavelength: float,
+        time_unit: UnitDefinition,
         absorption: list[float] = [],
         time: list[float] = [],
-        time_unit: Optional[UnitDefinition] = None,
         blank_states: list[BlankState] = [],
         **kwargs,
     ):
         params = {
             "wavelength": wavelength,
+            "time_unit": time_unit,
             "absorption": absorption,
             "time": time,
-            "time_unit": time_unit,
             "blank_states": blank_states,
         }
 
@@ -384,9 +384,9 @@ class PhotometricMeasurement(BaseModel):
     )  # type: ignore
 
     wavelength: float
+    time_unit: UnitDefinition
     absorption: list[float] = Field(default_factory=list)
     time: list[float] = Field(default_factory=list)
-    time_unit: Optional[UnitDefinition] = Field(default=None)
     blank_states: list[BlankState] = Field(default_factory=list)
 
     # JSON-LD fields
@@ -691,6 +691,7 @@ class BlankState(BaseModel):
 class UnitDefinition(BaseModel):
     model_config: ConfigDict = ConfigDict(  # type: ignore
         validate_assigment=True,
+        use_enum_values=True,
     )  # type: ignore
 
     id: Optional[str] = Field(default=None)
@@ -818,6 +819,7 @@ class UnitDefinition(BaseModel):
 class BaseUnit(BaseModel):
     model_config: ConfigDict = ConfigDict(  # type: ignore
         validate_assigment=True,
+        use_enum_values=True,
     )  # type: ignore
 
     kind: UnitType

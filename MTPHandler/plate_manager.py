@@ -1,19 +1,20 @@
 from __future__ import annotations
 
-import warnings
 from collections import defaultdict
-from typing import Literal, Optional, Tuple, get_args
+from typing import Any, Literal, Optional, Tuple, get_args
 
 import numpy as np
 import pandas as pd
-from devtools import pprint
-from pydantic import BaseModel, Field
+from loguru import logger
+from pydantic import BaseModel, Field, model_validator
+from pyenzyme import EnzymeMLDocument
 from rich import print
 
 from MTPHandler.model import (
     BlankState,
     PhotometricMeasurement,
     Plate,
+    UnitDefinition,
     Well,
 )
 from MTPHandler.molecule import Molecule, Protein
@@ -22,9 +23,10 @@ from MTPHandler.tools import (
     get_species_condition,
     handle_blank_status,
     measurement_is_blanked_for,
+    pubchem_request_molecule_name,
     well_contains_species,
 )
-from MTPHandler.units import UnitDefinition
+from MTPHandler.units import C
 from MTPHandler.visualize import visualize_plate
 
 ASSIGN_CASE = Literal["rows", "columns", "all", "all except"]
@@ -32,157 +34,212 @@ ASSIGN_CASE_VALUES: Tuple[ASSIGN_CASE, ...] = get_args(ASSIGN_CASE)
 
 
 class PlateManager(BaseModel):
-    plate: Plate = Field(..., description="Plate object")
-    molecules: list[Molecule] = Field(default=[], description="List of molecules")
-    proteins: list[Protein] = Field(default=[], description="List of proteins")
+    name: str = Field(
+        ...,
+        description="Name of the plate",
+    )
+    plate: Plate = Field(
+        ...,
+        description="Plate object",
+    )
+    molecules: list[Molecule] = Field(
+        default=[],
+        description="List of molecules",
+    )
+    proteins: list[Protein] = Field(
+        default=[],
+        description="List of proteins",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def give_name_to_plate(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "name" not in data or data["name"] is None:
+                data["name"] = "MTP assay"
+        return data
+
+    def define_molecule(
+        self,
+        id: str,
+        pubchem_cid: int,
+        name: str | None = None,
+        constant: bool = False,
+    ) -> Molecule:
+        """Defines a molecule which can be used to assign to wells on the plate.
+        If no name is provided, the molecule name is retrieved from the PubChem database.
+        If the molecule is not known in the PubChem database, please specify `pubchem_cid=-1`.
+
+        Args:
+            id (str): Internal identifier of the molecule such as `s0` or `ABTS`.
+            pubchem_cid (int): PubChem CID of the molecule.
+            name (str | None, optional): Name of the molecule. Defaults to None.
+            constant (bool, optional): Indicates whether the molecule concentration is constant throughout the experiment. Defaults to False.
+
+        Raises:
+            ValueError: If the PubChem CID is not an integer.
+            ValueError: If the name is not provided and the PubChem CID is not available.
+
+        Returns:
+            Molecule: Molecule object.
+        """
+
+        logger.debug(f"Defining molecule {id} with PubChem CID {pubchem_cid}")
+
+        if not isinstance(pubchem_cid, int):
+            raise ValueError("PubChem CID must be an integer.")
+
+        if name is None:
+            if pubchem_cid != -1:
+                name = pubchem_request_molecule_name(pubchem_cid)
+            else:
+                raise ValueError(
+                    "Name must be provided if PubChem CID is not available."
+                )
+
+        molecule = Molecule(
+            id=id,
+            pubchem_cid=pubchem_cid,
+            name=name,
+            constant=constant,
+        )
+
+        self._update_molecule(molecule)
+
+        return molecule
 
     # Adders for species, molecules and proteins
     def add_molecule(
         self,
-        id: str,
-        name: str,
-        ld_id: Optional[str] = None,
-    ) -> Species:
-        params = {
-            "ld_id": ld_id,
-            "id": id,
-            "name": name,
-        }
+        molecule: Molecule,
+        constant: bool | None = None,
+    ) -> None:
+        """Adds a molecule to the list of molecules. Allows to update the `constant` attribute of the molecule.
 
-        if not ld_id:
-            warnings.warn("""
-            No linked-data ID provided. Use UniProt, ChEBI or PubChem URL to uniquely identify the species.
-            """)
-            params.pop("ld_id")
-            unique_id = id
-        else:
-            unique_id = ld_id
+        Args:
+            molecule (Molecule): Molecule object to add to the list of molecules.
+            constant (bool | None, optional): Indicates whether the `constant` attribute of the molecule should be updated. Defaults to None.
+        """
+        if constant is not None:
+            molecule = molecule.model_copy(update={"constant": constant})
 
-        for species in self.plate.species:
-            if not isinstance(species, Species):
-                continue
+        self._update_molecule(molecule)
 
-            if species.id == unique_id or species.ld_id == unique_id:
-                species.__dict__.update(params)
-                return species
+    def _update_molecule(self, molecule) -> None:
+        """Updates the molecule if it already exists in the list of molecules.
+        Otherwise, the molecule is added to the list of species."""
+        for idx, mol in enumerate(self.molecules):
+            if mol.id == molecule.id:
+                self.molecules[idx] = molecule
+                assert self.molecules[idx] is molecule
+                return
 
-        species = self.plate.add_species_to_species(**params)
-        return species
+        self.molecules.append(molecule)
 
-    def add_molecule(
+    def define_protein(
         self,
         id: str,
         name: str,
-        smiles: Optional[str] = None,
-        inchi_key: Optional[str] = None,
-        ld_id: Optional[str] = None,
-    ) -> Molecule:
-        params = {
-            "ld_id": ld_id,
-            "id": id,
-            "name": name,
-            "smiles": smiles,
-            "inchi_key": inchi_key,
-        }
+        sequence: str | None = None,
+        constant: bool = True,
+    ) -> Protein:
+        """Defines a protein which can be used to assign to wells on the plate.
 
-        if not ld_id:
-            warnings.warn("""
-            No linked-data ID provided. Use ChEBI or PubChem URL to uniquely identify the molecule.
-            """)
-            params.pop("ld_id")
-            unique_id = id
-        else:
-            unique_id = ld_id
+        Args:
+            id (str): Internal identifier of the protein such as `p0`, `MAT_K78M` or `GFP`.
+            name (str): Name of the protein.
+            sequence (str | None, optional): Amino acid sequence of the protein. Defaults to None.
+            constant (bool, optional): Indicates whether the protein concentration is constant throughout the experiment. Defaults to True.
 
-        for molecule in self.plate.species:
-            if not isinstance(molecule, Molecule):
-                continue
+        Returns:
+            Protein: Protein object.
+        """
+        protein = Protein(
+            id=id,
+            name=name,
+            sequence=sequence,
+            constant=constant,
+        )
 
-            if molecule.id == unique_id or molecule.ld_id == unique_id:
-                molecule.__dict__.update(params)
-                return molecule
+        self._update_protein(protein)
 
-        molecule = self.plate.add_molecule_to_species(**params)
-        return molecule
+        return protein
 
     def add_protein(
         self,
-        id: str,
-        name: str,
-        ld_id: Optional[str] = None,
-        sequence: Optional[str] = None,
-        organism: Optional[str] = None,
-        organism_tax_id: Optional[int] = None,
-    ) -> Protein:
-        params = {
-            "ld_id": ld_id,
-            "id": id,
-            "name": name,
-            "sequence": sequence,
-            "organism": organism,
-            "organism_tax_id": organism_tax_id,
-        }
+        protein: Protein,
+        constant: bool | None = None,
+    ) -> None:
+        """Adds a protein to the list of proteins. Allows to update the `constant` attribute of the protein.
 
-        if not ld_id:
-            warnings.warn("""
-            No linked-data ID provided. Use UniProt URL to uniquely identify the protein.
-            """)
-            params.pop("ld_id")
-            unique_id = id
-        else:
-            unique_id = ld_id
+        Args:
+            protein (Protein): Protein object to add to the list of proteins.
+            constant (bool | None, optional): Indicates whether the `constant` attribute of the protein should be updated. Defaults to None.
+        """
+        if constant is not None:
+            protein = protein.model_copy(update={"constant": constant})
 
-        for protein in self.plate.species:
-            if not isinstance(protein, Protein):
-                continue
+        self._update_protein(protein)
 
-            if protein.id == unique_id or protein.ld_id == unique_id:
-                protein.__dict__.update(params)
-                return protein
+    def _update_protein(self, protein) -> None:
+        """Updates the protein if it already exists in the list of proteins."""
+        for idx, prot in enumerate(self.proteins):
+            if prot.id == protein.id:
+                self.proteins[idx] = protein
+                assert self.proteins[idx] is protein
+                return
 
-        print(params)
-        protein = self.plate.add_protein_to_species(**params)
-        return protein
+        self.proteins.append(protein)
 
     # Assign species and conditions to wells
-
-    def assign_species(
+    def assign_init_conditions(
         self,
-        species: Species | Molecule | Protein | str,
+        species: Molecule | Protein,
         init_conc: float | list[float],
         conc_unit: UnitDefinition,
         to: ASSIGN_CASE,
         ids: Optional[str | int | list[str] | list[int]] = None,
         contributes_to_signal: Optional[bool] = None,
+        silent: bool = False,
     ):
         """
-        Assigns a species to specific wells on the plate based on the provided criteria.
+        Assigns a `Molecule` or `Protein` to specific wells on the plate based on the provided criteria.
+        In this way the initial concentration of the species can be set for the respective wells in a row,
+        column, all wells or all wells except for the specified. During the assignment, either an array of
+        initial concentrations or a single initial concentration can be provided. If a single initial
+        concentration is provided, it is assigned to all wells of e.g., a row or column.
+        If an array of initial concentrations is provided, the length of the array must match the number of
+        wells in the row or column.
+
+        Tip:
+            For complex assignment scenarios, consider using the `assign_init_conditions_from_spreadsheet` function.
 
         Args:
-            species (Species | Molecule | Protein | str): The species to assign to the wells.
-            init_conc (Union[float, List[float]]): The initial concentration(s) of the species.
-            conc_unit (str): The unit of concentration.
-            to (Literal["all", "rows", "columns", "all except"]): The target location(s) for assigning the species.
-                This can be individual or multiple wells as well as individual or multiple rows or columns.
-            ids (Union[str, List[str], int, List[int]], optional): The ID(s) of the target wells, rows or columns.
+            species (Molecule | Protein): The species to assign to the wells.
+            init_conc (float | list[float]): The initial concentration(s) of the species.
+            conc_unit (UnitDefinition): The unit of concentration.
+            to (ASSIGN_CASE): The target location(s) for assigning the species. It should be one of the allowed cases.
+            ids (str | int | list[str] | list[int], optional): The ID(s) of the target wells, rows, or columns. Defaults to None.
             contributes_to_signal (bool, optional): Indicates if the assigned species contributes to the signal.
                 Defaults to None.
+            silent (bool, optional): If True, no output is printed. Defaults to False.
 
         Raises:
-            AttributeError: If the 'species' argument does not reference an `id` of a Species listed in `species`.
-            AttributeError: If the 'to' argument is not one of ["all", "rows", "columns", "all_except"].
+            AttributeError: If the species does not exist in the list of molecules or proteins.
+            AttributeError: If the 'to' argument is not a valid `ASSIGN_CASE`.
 
         Returns:
             None
         """
+
         # Handle species
         if isinstance(species, str):
             species = self.get_species(species)
-        elif isinstance(species, (Species, Molecule, Protein)):
+        elif isinstance(species, (Molecule, Protein)):
             pass
         else:
             raise AttributeError(
-                """Argument 'species' must reference an `id` of a Species listed in `species`."""
+                """Argument 'species' must reference an `id` of a molecule or protein from the list of molecules or proteins of the `MTPHandler`."""
             )
 
         if to not in ASSIGN_CASE_VALUES:
@@ -202,11 +259,12 @@ class PlateManager(BaseModel):
                 init_conc, (float, int)
             ), "Argument 'init_conc' must be a float or an integer."
 
-            self.assign_to_all(
+            self._assign_to_all(
                 species=species,
-                init_conc=init_conc,
+                init_conc=float(init_conc),
                 conc_unit=conc_unit,
                 contributes_to_signal=contributes_to_signal,
+                silent=silent,
             )
 
         elif to == "columns":
@@ -214,12 +272,13 @@ class PlateManager(BaseModel):
                 isinstance(ids, list) and all(isinstance(i, int) for i in ids)
             ), "Argument 'ids' must be a list of integers when 'to' is set to 'columns'."
 
-            self.assign_to_columns(
-                column_ids=ids,  # type: ignore
+            self._assign_to_columns(
+                column_ids=ids,
                 species=species,
                 init_concs=init_conc,
                 conc_unit=conc_unit,
                 contributes_to_signal=contributes_to_signal,
+                silent=silent,
             )
 
         elif to == "rows":
@@ -227,12 +286,13 @@ class PlateManager(BaseModel):
                 isinstance(i, str) for i in ids
             ), "Argument 'ids' must be a list of strings when 'to' is set to 'rows'."
 
-            self.assign_species_to_rows(
-                row_ids=ids,  # type: ignore
+            self._assign_species_to_rows(
+                row_ids=ids,
                 species=species,
                 init_concs=init_conc,
                 conc_unit=conc_unit,
                 contributes_to_signal=contributes_to_signal,
+                silent=silent,
             )
 
         else:
@@ -244,20 +304,22 @@ class PlateManager(BaseModel):
                 init_conc, float
             ), "Argument 'init_conc' must be a float when 'to' is set to 'all_except'."
 
-            self.assign_species_to_all_except(
-                well_ids=ids,  # type: ignore
+            self._assign_species_to_all_except(
+                well_ids=ids,
                 species=species,
                 init_conc=init_conc,
                 conc_unit=conc_unit,
                 contributes_to_signal=contributes_to_signal,
+                silent=silent,
             )
 
-    def assign_to_all(
+    def _assign_to_all(
         self,
-        species: Species | Molecule | Protein,
+        species: Molecule | Protein,
         init_conc: float,
         conc_unit: UnitDefinition,
         contributes_to_signal: bool | None,
+        silent: bool,
     ):
         for well in self.plate.wells:
             well.add_to_init_conditions(
@@ -268,18 +330,39 @@ class PlateManager(BaseModel):
 
             handle_blank_status(well, species.id, init_conc, contributes_to_signal)
 
-        print(
-            f"Assigned [bold magenta]{species.name}[/] ({species.id}) with"
-            f" {init_conc} {conc_unit} to all wells."
+        if not silent:
+            print(
+                f"Assigned [bold magenta]{species.name}[/] ({species.id}) with"
+                f" {init_conc} {conc_unit} to all wells."
+            )
+
+    def get_calibrator(
+        self,
+        molecule: Molecule,
+        cutoff: float | None = None,
+        wavelength: float | None = None,
+    ):
+        from MTPHandler.ioutils.calipytion import initialize_calibrator
+
+        if wavelength is None:
+            wavelength = self._handle_wavelength()
+
+        return initialize_calibrator(
+            plate=self.plate,
+            wavelength=wavelength,
+            molecule=molecule,
+            protein_ids=[protein.id for protein in self.proteins],
+            cutoff=cutoff,
         )
 
-    def assign_to_columns(
+    def _assign_to_columns(
         self,
         column_ids: list[int],
-        species: Species | Molecule | Protein,
+        species: Molecule | Protein,
         init_concs: list[float],
         conc_unit: UnitDefinition,
         contributes_to_signal: bool | None,
+        silent: bool,
     ):
         # Handle column_ids
         if not all([isinstance(column_id, int) for column_id in column_ids]):
@@ -315,18 +398,20 @@ class PlateManager(BaseModel):
 
                 handle_blank_status(well, species.id, init_conc, contributes_to_signal)
 
-        print(
-            f"Assigned [bold magenta]{species.name}[/] ({species.id}) with"
-            f" concentrations of {init_concs} {conc_unit} to columns {column_ids}."
-        )
+        if not silent:
+            print(
+                f"Assigned [bold magenta]{species.name}[/] ({species.id}) with"
+                f" concentrations of {init_concs} {conc_unit} to columns {column_ids}."
+            )
 
-    def assign_species_to_rows(
+    def _assign_species_to_rows(
         self,
         row_ids: list[str],
-        species: Species | Molecule | Protein,
+        species: Molecule | Protein,
         init_concs: list[float],
         conc_unit: UnitDefinition,
         contributes_to_signal: bool | None,
+        silent: bool,
     ):
         # Handle row_ids
 
@@ -357,18 +442,20 @@ class PlateManager(BaseModel):
 
                 handle_blank_status(well, species.id, init_conc, contributes_to_signal)
 
-        print(
-            f"Assigned [bold magenta]{species.name}[/] ({species.id}) with"
-            f" {init_concs} {conc_unit} to rows {row_ids}."
-        )
+        if not silent:
+            print(
+                f"Assigned [bold magenta]{species.name}[/] ({species.id}) with"
+                f" {init_concs} {conc_unit} to rows {row_ids}."
+            )
 
-    def assign_species_to_all_except(
+    def _assign_species_to_all_except(
         self,
         well_ids: list[str],
-        species: Species | Molecule | Protein,
+        species: Molecule | Protein,
         init_conc: float,
         conc_unit: UnitDefinition,
         contributes_to_signal: bool | None,
+        silent: bool,
     ):
         # validate all well_id exist
         for well_id in well_ids:
@@ -385,78 +472,161 @@ class PlateManager(BaseModel):
 
             handle_blank_status(well, species.id, init_conc, contributes_to_signal)
 
-        print(
-            f"Assigned [bold magenta]{species.name}[/] ({species.id}) with"
-            f" {init_conc} {conc_unit} to all wells except {well_ids}."
-        )
-
-    def assign_species_from_spreadsheet(
-        self,
-        species: Species | Molecule | Protein,
-        conc_unit: UnitDefinition,
-        path: str,
-        sheet_name: Optional[str] = None,
-        header: int = 0,
-        index: int = 0,
-        contributes_to_signal: Optional[bool] = None,
-    ):
-        """Allows to read in a spreadsheet harboring a plate map describing the
-        initial concentrations of a species in the wells of the plate.
-        The parser expects the first row to contain the row ids numbered from 1 to 12.
-        The first column should contain the column ids labeled from A to H.
-        If additional columns or rows are present, adjust the `header` and `index`
-        arguments accordingly.
-
-        Args:
-            species (Species): Species object to assign initial concentrations to.
-            conc_unit (str): Unit of the concentration.
-            path (str): Path to the spreadsheet.
-            sheet_name (str | None, optional): Name of the sheet containing the plate map.
-                Defaults to None.
-            header (int, optional): Number of columns before the header starts.
-                Defaults to 0.
-            index (int, optional): Number of columns before the index column starts.
-                Defaults to 0.
-            contributes_to_signal (bool | None, optional): Whether the species contributes
-                to the signal. Defaults to None.
-        """
-        df = pd.read_excel(path, sheet_name=sheet_name, header=header, index_col=index)
-
-        if isinstance(species, str):
-            species = self.get_species(species)
-
-        for well in self.plate.wells:
-            row = well.id[0]
-            column = int(well.id[1:])
-            init_conc = df.loc[row, column]  # type: ignore
-
-            if np.isnan(init_conc):
-                continue
-
-            well.add_to_init_conditions(
-                species_id=species.id,
-                init_conc=init_conc,
-                conc_unit=conc_unit,
+        if not silent:
+            print(
+                f"Assigned [bold magenta]{species.name}[/] ({species.id}) with"
+                f" {init_conc} {conc_unit} to all wells except {well_ids}."
             )
 
-            handle_blank_status(well, species.id, init_conc, contributes_to_signal)
+    def assign_init_conditions_from_spreadsheet(
+        self,
+        conc_unit: UnitDefinition,
+        path: str,
+        header: int = 0,
+        index: int = 0,
+        silent: bool = False,
+    ):
+        """Assign initial concentrations from an Excel spreadsheet to the wells on the plate.
 
-        print(
-            f"Assigned initial concentrations for [bold magenta]{species.name}[/]"
-            f" ({species.id}) from {path}."
-        )
+        Note:
+            This function goes through the sheets in an excel spreadsheet. If the sheet name
+            matches the id of a protein or molecule defined for the plate, the initial concentration
+            form the plate map in the excel spreadsheet is assigned to the respective well.
+
+            The excel spreadsheet must have the following structure:
+
+            - The first row must contain the column numbers from 1 to 12.
+            - The first column must contain the row letters from A to H.
+            - If a cell is left empty for a species, the species is not assigned to the well.
+            - If the initial concentration is `0`, the species is added to the well. This is useful for
+                specifying a product which is not present in the initial reaction mixture, but is formed
+                during the reaction.
+
+        Args:
+            conc_unit (UnitDefinition): The unit of concentration.
+            path (str): Path to the Excel spreadsheet.
+            header (int, optional): Row to use as the column names. Defaults to 0.
+            index (int, optional): Column to use as the row labels. Defaults to 0.
+            silent (bool, optional): If True, no output is printed. Defaults to False.
+        """
+        # get excel sheet names
+        count = 0
+        sheet_names = pd.ExcelFile(path).sheet_names
+
+        species_matches: set[str] = set()
+        for protein in self.proteins:
+            if protein.id.lower() in [sheet.lower() for sheet in sheet_names]:
+                species_matches.add(protein.id)
+        for molecule in self.molecules:
+            if molecule.id.lower() in [sheet.lower() for sheet in sheet_names]:
+                species_matches.add(molecule.id)
+
+        for species_id in species_matches:
+            df = pd.read_excel(
+                io=path, header=header, index_col=index, sheet_name=species_id
+            )
+            for well in self.plate.wells:
+                init_conc = df.iloc[well.y_pos, well.x_pos]
+
+                if np.isnan(init_conc):
+                    continue
+
+                well.add_to_init_conditions(
+                    species_id=species_id,
+                    init_conc=init_conc,
+                    conc_unit=conc_unit,
+                )
+                count += 1
+
+                handle_blank_status(
+                    well, species_id, init_conc, contributes_to_signal=None
+                )
+
+        if not silent:
+            print(
+                f"📍 Assigned {count} initial concentrations coditions for [bold magenta]{list(species_matches)}[/]"
+                f" from {path} to the plate."
+            )
+
+    def set_species_contribututes_to_signal(
+        self,
+        species: Molecule | Protein,
+        contributes_to_signal: bool,
+        wavelength: float | None = None,
+        silent: bool = False,
+    ):
+        """Set the contribution of a species to the signal in all wells.
+
+        Args:
+            species (Molecule | Protein): The species for which to set the contribution to the signal.
+            contributes_to_signal (bool): If True, the species contributes to the signal. If False, the species does not contribute to the signal.
+            wavelength (float | None, optional): The wavelength at which to set the contribution to the signal. Defaults to None.
+            silent (bool, optional): If True, no output is printed. Defaults to False.
+        """
+        if wavelength is None:
+            try:
+                wavelength = self._handle_wavelength()
+            except ValueError:
+                raise ValueError(
+                    "Multiple wavelengths were measured. Please specify one."
+                )
+
+        for well in self.plate.wells:
+            if not well_contains_species(well, species.id):
+                print("Species not found in well.")
+                continue
+
+            for measurement in well.measurements:
+                if measurement.wavelength != wavelength:
+                    continue
+
+                for state in measurement.blank_states:
+                    if state.species_id == species.id:
+                        state.contributes_to_signal = contributes_to_signal
+
+        if not silent:
+            print(
+                f"Set contribution to signal of [bold magenta]{species.name}[/] ({species.id}) at"
+                f" {wavelength} nm to {contributes_to_signal}."
+            )
 
     def get_well(self, id: str) -> Well:
+        """Get a well from the plate by its id.
+
+        Args:
+            id (str): The id of the well.
+
+        Raises:
+            ValueError: If the well with the given id is not found.
+
+        Returns:
+            Well: The well object.
+        """
+
         for well in self.plate.wells:
-            if well.id == id:
+            if well.id.lower() == id.lower():
                 return well
 
         raise ValueError(f"Well {id} not found")
 
-    def get_species(self, id: str) -> Species | Protein | Molecule:
-        for species in self.plate.species:
-            if species.id == id:
-                return species
+    def get_species(self, id: str) -> Protein | Molecule:
+        """Get a species from the list of molecules and proteins by its id.
+
+        Args:
+            id (str): The id of the species.
+
+        Raises:
+            ValueError: If the species with the given id is not found.
+
+        Returns:
+            Protein | Molecule: The species object.
+        """
+        for protein in self.proteins:
+            if protein.id == id:
+                return protein
+        for molecule in self.molecules:
+            if molecule.id == id:
+                return molecule
 
         raise ValueError(f"Species {id} not found")
 
@@ -464,80 +634,241 @@ class PlateManager(BaseModel):
         self,
         zoom: bool = False,
         wavelengths: list[float] = [],
-        static: bool = False,
+        darkmode: bool = False,
     ):
-        """Visualize the measured signal for each well on the plate."""
+        """Visualize the plate.
 
-        visualize_plate(self.plate, zoom=zoom, wavelengths=wavelengths, static=static)
+        Args:
+            zoom (bool, optional): If False, the scaling of the signal (y-axis) is the same for all wells.
+                If True, the scaling is adjusted for each well. Defaults to False.
+            wavelengths (list[float], optional): Only visualize the signal at the specified wavelengths.
+                If not specified, all wavelengths are visualized. Defaults to [].
+            darkmode (bool, optional): If True, the plot is displayed in dark mode. Defaults to False.
+        """
+
+        visualize_plate(
+            self.plate,
+            zoom=zoom,
+            wavelengths=wavelengths,
+            darkmode=darkmode,
+            name=self.name,
+        )
+
+    def _handle_wavelength(self) -> float:
+        """
+        If only one wavelength was measured, the wavelength is returned.
+        If multiple wavelengths were measured, an error is raised.
+        """
+
+        # check that all measurements in the wells have only one wavelength
+        wavelengths = set()
+        for well in self.plate.wells:
+            for meas in well.measurements:
+                wavelengths.add(meas.wavelength)
+
+        if len(wavelengths) > 1:
+            raise ValueError("Multiple wavelengths were measured. Please specify one.")
+
+        return wavelengths.pop()
+
+    def _find_blanking_wells(
+        self,
+        target: Molecule | Protein,
+        wavelength: float,
+    ) -> list[Well]:
+        wells = []
+        wavelength = self._handle_wavelength()
+
+        protein_ids = [protein.id for protein in self.proteins]
+        molecules_ids = [molecule.id for molecule in self.molecules]
+
+        # find wells that contain the target species with a concentration above zero
+        for well in self.plate.wells:
+            if not well_contains_species(well, target.id, conc_above_zero=True):
+                continue
+
+            # Molecule controls can not include proteins
+            if target.id in molecules_ids and any(
+                [
+                    well_contains_species(well, protein_id, conc_above_zero=True)
+                    for protein_id in protein_ids
+                ]
+            ):
+                continue
+
+            for measurement in well.measurements:
+                if measurement.wavelength != wavelength:
+                    continue
+
+                # sanity check, species should be present in blank states
+                assert target.id in [
+                    state.species_id for state in measurement.blank_states
+                ], f"Species {target.id} not found in well {well.id}."
+
+                # check is species contributes to signal (== is already blanked)
+                if measurement_is_blanked_for(measurement, target.id):
+                    wells.append(well)
+
+        return wells
+
+    def slice_data(
+        self,
+        start: float,
+        end: float,
+    ):
+        """Slices the time and absorption data of all wells in the plate
+        that only contains the data between the start and end time.
+
+        Args:
+            start (float): Start time of the slice.
+            end (float): End time of the slice.
+        """
+
+        for well in self.plate.wells:
+            for meas in well.measurements:
+                # find the index of the start and end time
+                start_idx = np.where(np.array(meas.time) >= start)[0][0]
+                end_idx = np.where(np.array(meas.time) <= end)[0][-1]
+
+                # slice the time and absorption data
+                meas.time = meas.time[start_idx:end_idx]
+                meas.absorption = meas.absorption[start_idx:end_idx]
 
     def blank_species(
         self,
-        species: Species,
-        wavelength: int,
+        species: Molecule | Protein,
+        wavelength: float | None = None,
+        silent: bool = False,
     ):
-        wells = []
-        blanking_wells = []
-        for well in self.plate.wells:
-            if not well_contains_species(well, species.id):
-                continue
+        """Blank the signal contribution of a species at a given wavelength.
+        Therefore, control wells of that species must be present on the plate.
 
-            if wavelength not in [
-                measurement.wavelength for measurement in well.measurements
-            ]:
-                continue
+        Args:
+            species (Molecule | Protein): The species to blank.
+            wavelength (float): The wavelength at which to blank the species.
+            silent (bool, optional): If True, no output is printed. Defaults to False.
 
-            measurement = get_measurement(well, wavelength)
+        Raises:
+            ValueError: If no wells are found to calculate the absorption contribution of the species.
+        """
 
-            if self._species_contibutes(measurement, species.id):
-                wells.append(well)
+        wavelength = self._handle_wavelength()
 
-            if measurement_is_blanked_for(measurement, species.id):
-                blanking_wells.append(well)
-
-        if len(wells) == 0:
+        blanking_wells = self._find_blanking_wells(
+            target=species, wavelength=wavelength
+        )
+        if not blanking_wells:
             print(
-                f"{species.name} ({species.id}) at {wavelength} nm does not contribute"
-                " to signal. Is the specified wavelength correct?print"
+                "No wells found to calculate the absorption contribution of the species."
             )
-
-        if len(blanking_wells) == 0:
-            raise ValueError(
-                "No wells found to calculate absorption contribution of"
-                f" {species.name} ({species.id}) at {wavelength} nm."
-            )
+            return
 
         # get mapping of concentration to blank wells
         conc_blank_mapping = self._get_conc_blank_mapping(
             wells=blanking_wells, species=species, wavelength=wavelength
         )
 
-        # apply to wells where species is present in respective concentration
-        blanked_wells = []
-        for well in wells:
-            init_conc = get_species_condition(well, species.id).init_conc
-            measurement = get_measurement(well, wavelength)
-            blank_state = self._get_blank_state(measurement, species.id)
+        self._apply_blank(
+            species=species,
+            conc_blank_mapping=conc_blank_mapping,
+            wavelength=wavelength,
+        )
 
-            if init_conc not in conc_blank_mapping:
-                print(
-                    f"Well {well.id} was not blanked for initial"
-                    f" {species.name} concentration"
-                    f" {init_conc}"
-                )
-                continue
+    def _apply_blank(
+        self,
+        species: Molecule | Protein,
+        conc_blank_mapping: dict[float, float],
+        wavelength: float,
+    ):
+        """Apply the blanking to the absorption data of a well.
 
-            if not blank_state.contributes_to_signal:
-                continue
+        Args:
+            species (Molecule | Protein): The species to blank.
+            conc_blank_mapping (dict[float, float]): Mapping of init concentration of the species to mean absorption.
+            wavelength (float): The wavelength at which to blank the species.
+        """
+        well_blanked_count = 0
 
-            measurement.absorption = [
-                absorption - conc_blank_mapping[init_conc]
-                for absorption in measurement.absorption
-            ]
+        for well_id, well in enumerate(self.plate.wells):
+            for meas_id, measurement in enumerate(well.measurements):
+                if measurement.wavelength != wavelength:
+                    continue
 
-            blank_state.contributes_to_signal = False
-            blanked_wells.append(well)
+                try:
+                    init_condition = get_species_condition(well, species.id)
+                except ValueError:
+                    continue
 
-        print(f"Blanked {len(blanked_wells)} wells containing {species.name}.\n")
+                for state_id, blank_state in enumerate(measurement.blank_states):
+                    if blank_state.species_id != species.id:
+                        continue
+
+                    if blank_state.contributes_to_signal:
+                        self.plate.wells[well_id].measurements[meas_id].absorption = [
+                            absorption - conc_blank_mapping[init_condition.init_conc]
+                            for absorption in measurement.absorption
+                        ]
+
+                        self.plate.wells[well_id].measurements[meas_id].blank_states[
+                            state_id
+                        ].contributes_to_signal = False
+
+                        well_blanked_count += 1
+
+        print(f"Blanked {well_blanked_count} wells containing {species.name}.\n")
+
+    def to_enzymeml(
+        self,
+        detected_molecule: Molecule,
+        well_ids: list[str] | None = None,
+        wells_with_protein_only: bool = True,
+        name: str | None = None,
+        to_concentration: bool = False,
+        extrapolate: bool = False,
+        wavelength: float | None = None,
+        silent: bool = False,
+    ) -> EnzymeMLDocument:
+        """Convert the plate to an EnzymeML document.
+
+
+        Args:
+            name (str | None, optional): Name of the EnzymeML document. Defaults to the name of the plate.
+            detected_molecule (Molecule): The molecule that was detected in the wells.
+            well_ids (list[str] | None, optional): List of well ids to include in the EnzymeML document.
+                If not provided, all wells are included. Defaults to None.
+            to_concentration (bool, optional): If True, the signal is converted to concentration. Therefore,
+                a calibrator must be defined for the respective molecule. Defaults to False.
+            extrapolate (bool, optional): If True, and `to_concentration` is True, measured absorption values
+                that are outside the range of the calibrator are extrapolated. Defaults to False.
+            wells_with_protein_only (bool, optional): If True, only wells with protein are included in the
+                EnzymeML document. This assumes that wells with a protein are catalyzed wells. Defaults to True.
+            wavelength (float | None, optional): If multiple wavelengths were measured, the wavelength for
+                which to convert the signal to concentration needs to be specified. Defaults to None.
+            silent (bool, optional): If True, no output is printed. Defaults to False.
+
+        Returns:
+            EnzymeMLDocument: [`pyenzyme`](https://github.com/EnzymeML/PyEnzyme) `EnzymeMLDocument` object.
+        """
+        from MTPHandler.ioutils.pyenzyme import Plate_to_EnzymeMLDocument
+
+        if name is None:
+            name = self.name
+
+        converter = Plate_to_EnzymeMLDocument(
+            name=name,
+            plate=self.plate,
+            well_ids=well_ids,
+            molecules=self.molecules,
+            detected_molecule=detected_molecule,
+            proteins=self.proteins,
+            to_concentration=to_concentration,
+            extrapolate=extrapolate,
+            wells_with_protein_only=wells_with_protein_only,
+            wavelength=wavelength,
+            silent=silent,
+        )
+
+        return converter.convert()
 
     def _well_id_exists(self, well_id: str) -> bool:
         """Check if a well with the given id exists in the plate."""
@@ -546,29 +877,49 @@ class PlateManager(BaseModel):
     def _get_conc_blank_mapping(
         self,
         wells: list[Well],
-        species: Species | Protein | Molecule,
+        species: Protein | Molecule,
         wavelength: float,
     ) -> dict[float, float]:
-        blank_measurement_mapping = defaultdict(list)
+        """Calculate the mean absorption of a species at different concentrations.
+
+        Args:
+            wells (list[Well]): List of wells to calculate the mean absorption for.
+            species (Protein | Molecule): The species for which to calculate the mean absorption.
+            wavelength (float): The wavelength at which to calculate the mean absorption.
+
+        Returns:
+            dict[float, float]: Mapping of concentration to mean absorption.
+        """
+        conc_to_absorptions = defaultdict(list)
+
+        # Collect all absorption data per concentration
         for well in wells:
             condition = get_species_condition(well, species.id)
-
-            blank_measurement_mapping[condition.init_conc].append(
-                get_measurement(well, wavelength).absorption
-            )
+            absorption = get_measurement(well, wavelength).absorption
+            conc_to_absorptions[condition.init_conc].append(absorption)
 
         conc_mean_blank_mapping = {}
-        for conc, absorptions in blank_measurement_mapping.items():
+
+        # Calculate mean absorption and standard deviation
+        for conc, absorptions in conc_to_absorptions.items():
             mean_absorption = np.nanmean(absorptions)
             std_absorption = np.nanstd(absorptions)
-            std_perc = abs(std_absorption / mean_absorption) * 100
+
+            # Handle case where mean_absorption is zero to avoid division by zero
+            if mean_absorption != 0:
+                std_perc = float(abs(std_absorption / mean_absorption) * 100)
+            else:
+                std_perc = 0.0
+
+            # Print formatted information
             print(
                 f"Mean absorption of [bold magenta]{species.name}[/] ({species.id}) at"
                 f" {conc} {condition.conc_unit.name}: {mean_absorption:.4f} ±"
                 f" {std_perc:.0f}%  calculated based on wells"
                 f" {[well.id for well in wells]}."
             )
-            conc_mean_blank_mapping[conc] = mean_absorption
+
+            conc_mean_blank_mapping[conc] = mean_absorption.tolist()
 
         return conc_mean_blank_mapping
 
@@ -599,36 +950,129 @@ class PlateManager(BaseModel):
         cls,
         path: str,
         ph: float | None = None,
-    ):
-        from MTPHandler.readers import read_spectra_max_190
+        name: str | None = None,
+    ) -> PlateManager:
+        """Read a `*.txt` file exported from a SpectraMax 190 software and create a PlateManager object.
 
-        return cls(plate=read_spectra_max_190(path, ph))
+        Args:
+            path (str): Path to the SpectraMax 190 file.
+            ph (float | None, optional): The pH value of the measurements. Defaults to None.
+            name (str | None, optional): Name of the plate. Defaults to None.
+
+        Returns:
+            PlateManager: PlateManager object.
+        """
+        from MTPHandler.readers import read_spectra_max_190 as reader
+
+        data: dict[str, Any] = {"plate": reader(path, ph)}
+
+        if name is not None:
+            data["name"] = name
+
+        return cls(**data)
+
+    @classmethod
+    def read_multiskan_spectrum_1500(
+        cls,
+        path: str,
+        time: list[float],
+        time_unit: UnitDefinition,
+        temperature: float,
+        temperature_unit: UnitDefinition = C,
+        ph: float | None = None,
+        name: str | None = None,
+    ) -> PlateManager:
+        """Read a `*.txt` file exported from a Multiskan Spectrum 1500 and create a PlateManager object.
+
+        Args:
+            name (str): Name of the plate.
+            path (str): Path to the Multiskan Spectrum 1500 file.
+            time (list[float]): List of time points.
+            time_unit (UnitDefinition): Unit of time.
+            temperature (float): Temperature of the measurements.
+            temperature_unit (UnitDefinition, optional): Unit of temperature. Defaults to C.
+            ph (float | None, optional): The pH value of the measurements. Defaults to None.
+
+        Returns:
+            _type_: _description_
+        """
+        from MTPHandler.readers import read_multiskan_spectrum_1500 as reader
+
+        data: dict[str, Any] = {
+            "plate": reader(
+                path=path,
+                time=time,
+                time_unit=time_unit,
+                temperature=temperature,
+                temperature_unit=temperature_unit,
+                ph=ph,
+            )
+        }
+
+        if name is not None:
+            data["name"] = name
+
+        return cls(**data)
 
     @classmethod
     def read_tecan_spark(
         cls,
         path: str,
         ph: float | None = None,
+        name: str | None = None,
     ) -> PlateManager:
         """Read a `*.xlsx` TECAN Spark file and create a PlateManager object.
 
         Args:
             path (str): Path to the TECAN Spark file.
             ph (float | None, optional): The pH value of the measurements. Defaults to None.
+            name (str | None, optional): Name of the plate. Defaults to None.
 
         Returns:
             PlateManager: PlateManager object.
         """
-        from MTPHandler.readers import read_tekan_spark
+        from MTPHandler.readers import read_tekan_spark as reader
 
-        return cls(plate=read_tekan_spark(path, ph))
+        data: dict[str, Any] = {"plate": reader(path, ph)}
+
+        if name is not None:
+            data["name"] = name
+
+        return cls(**data)
+
+    @classmethod
+    def read_biotek(
+        cls,
+        path: str,
+        ph: float | None = None,
+        name: str | None = None,
+    ) -> PlateManager:
+        """Read a `*.xlsx` file exported from a BioTek Epoch 2 software and create a PlateManager object.
+
+        Args:
+            path (str): Path to the BioTek Epoch 2 file.
+            ph (float | None, optional): The pH value of the measurements. Defaults to None.
+            name (str | None, optional): Name of the plate. Defaults to None.
+
+        Returns:
+            PlateManager: PlateManager object.
+        """
+        from MTPHandler.readers import read_biotek as reader
+
+        data: dict[str, Any] = {"plate": reader(path, ph)}
+
+        if name is not None:
+            data["name"] = name
+
+        return cls(**data)
 
     @classmethod
     def read_tekan_magellan(
         cls,
         path: str,
         wavelength: float,
-        ph: Optional[float] = None,
+        ph: float | None = None,
+        name: str | None = None,
     ) -> PlateManager:
         """Read a `*.xlsx` file exported from a TECAN Magellan software and create a PlateManager object.
 
@@ -636,34 +1080,54 @@ class PlateManager(BaseModel):
             path (str): Path to the Magellan file.
             wavelength (float): The wavelength of the measurements.
             ph (Optional[float], optional): The pH value of the measurements. Defaults to None.
+            name (Optional[str], optional): Name of the plate. Defaults to None.
 
         Returns:
             PlateManager: PlateManager object.
         """
         from MTPHandler.readers import read_tekan_magellan as reader
 
-        return cls(plate=reader(path, wavelength, ph))
+        data: dict[str, Any] = {"plate": reader(path, wavelength, ph)}
+
+        if name is not None:
+            data["name"] = name
+
+        return cls(**data)
 
     @classmethod
-    def read_multiskan(
-        cls, path: str, time: list[float], time_unit: UnitDefinition, temperature: float
+    def read_multiskan_sky(
+        cls,
+        path: str,
+        ph: float | None = None,
+        name: str | None = None,
     ) -> PlateManager:
-        from MTPHandler.readers import read_multiskan_spectrum
+        """Read a `*.xlsx` file exported from a Multiskan Sky and create a PlateManager object.
 
-        return cls(
-            plate=read_multiskan_spectrum(
-                path=path, time=time, time_unit=time_unit, temperature=temperature
-            )
-        )
+        Args:
+            path (str): Path to the Multiskan Sky file.
+            ph (float | None, optional): The pH value of the measurements. Defaults to None.
+            name (str | None, optional): Name of the plate. Defaults to None.
+
+        Returns:
+            PlateManager: _description_
+        """
+        from MTPHandler.readers import read_multiskan_sky as reader
+
+        data: dict[str, Any] = {"plate": reader(path, ph)}
+
+        if name is not None:
+            data["name"] = name
+
+        return cls(**data)
 
 
 if __name__ == "__main__":
-    path = (
-        "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/spectra_max_190.txt"
-    )
+    # path = (
+    #     "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/spectra_max_190.txt"
+    # )
 
-    pm = PlateManager.read_spectra_max_190(path, ph=6.9)
-    pm.visualize()
+    # pm = PlateManager.read_spectra_max_190(path, ph=6.9)
+    # pm.visualize()
 
     # pm
 
@@ -690,10 +1154,105 @@ if __name__ == "__main__":
 
     # plate.visualize()
 
+    # path = (
+    #     "/Users/max/Documents/training_course/jules/Spectramax190 molecular Devices.txt"
+    # )
+
+    # from MTPHandler.units import mM
+
+    # pm = PlateManager.read_spectra_max_190(path, ph=7)
+    # # pm.visualize()
+    # testo = pm.define_molecule("testo", 60857, "testosterone")
+    # mpi = pm.define_molecule("mpi", 60961, "methylparaben")
+
+    # pm.assign_species(
+    #     species=testo,
+    #     init_conc=0.1,
+    #     conc_unit=mM,
+    #     to="all",
+    # )
+
+    # path = (
+    #     "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/ BioTek_Epoch2.xlsx"
+    # )
+
+    # from MTPHandler.units import mM
+
+    # p = PlateManager.read_biotek(path, ph=7.4)
+    # p.visualize()
+
+    # testo = p.define_molecule("testo", 60857, "testosterone")
+    # aldolase = p.define_protein("aldolase", "Aldolase")
+
+    # p.assign_init_conditions(
+    #     species=testo,
+    #     init_conc=0.1,
+    #     conc_unit=mM,
+    #     to="all",
+    # )
+
+    # aldo = p.define_protein("aldolase", "Aldolase")
+    # p.assign_init_conditions(
+    #     species=aldo, init_conc=0.1, conc_unit=mM, to="all", contributes_to_signal=False
+    # )
+
+    # enz = p.to_enzymeml(name="Test EnzymeML", wells_with_protein_only=False)
+
+    # with open("enz.json", "w") as f:
+    #     f.write(enz.model_dump_json(indent=4))
+    # print(len(enz.measurements))
+
+    # from MTPHandler.units import C, min
+
+    # path = "docs/examples/data/multiskan_spectrum_1500.txt"
+
+    # ph = 7.0
+    # wavelength = 450.0
+
+    # time = np.arange(0, 15.5, 0.5).tolist()
+    # print(f"the thime is {time}")
+
+    # plate = PlateManager.read_multiskan_spectrum_1500(
+    #     path=path,
+    #     ph=ph,
+    #     time=time,
+    #     time_unit=min,
+    #     temperature=37.0,
+    #     temperature_unit=C,
+    # )
+    # plate.visualize()
+
     path = (
-        "/Users/max/Documents/training_course/jules/Spectramax190 molecular Devices.txt"
+        "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/Multiskan Sky.xlsx"
     )
 
-    pm = PlateManager.read_spectra_max_190(path, ph=7)
-    pm.visualize()
-    pprint(pm.plate.wells[0])
+    p = PlateManager.read_multiskan_sky(path, ph=None)
+    p.visualize(darkmode=True)
+    print(p)
+
+
+class BlankResult(BaseModel):
+    species_id: str = Field(
+        description="The id of the species for which the blank was calculated.",
+        default=None,
+    )
+    wavelength: float = Field(
+        description="The wavelength at which the blank was calculated.",
+        default=None,
+    )
+    control_well_ids: list[str] = Field(
+        description="The ids of the wells used to calculate the blank.",
+        default=[],
+    )
+    mean_contribution: float = Field(
+        description="The mean contribution of the species to the signal.",
+        default=None,
+    )
+    std_contribution: float = Field(
+        description="The standard deviation of the contribution of the species to the signal.",
+        default=None,
+    )
+    applied_to_well_ids: list[str] = Field(
+        description="The ids of the wells to which the blank was applied.",
+        default=[],
+    )

@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from typing import List, Optional
-
 import numpy as np
-from calipytion.model import Sample, SignalType, Standard, UnitDefinition
-from calipytion.tools.calibrator import Calibrator
+from calipytion import Calibrator
+from calipytion.model import Sample, Standard, UnitDefinition
 
-from MTPHandler.model import Molecule, Plate, Protein, Species, Well
+from MTPHandler.model import Plate, Well
+from MTPHandler.molecule import Molecule
 from MTPHandler.tools import (
     get_measurement,
     get_species_condition,
@@ -17,26 +16,39 @@ from MTPHandler.tools import (
 
 def _get_standard_wells(
     plate: Plate,
-    species: Species | Molecule | Protein,
+    protein_ids: list[str],
+    molecule: Molecule,
     wavelength: float,
-) -> List[Well]:
+) -> list[Well]:
     # Subset of wells, that contain specified species, do not contain a protein, and are blanked
-    protein_ids = [
-        species.id for species in plate.species if isinstance(species, Protein)
-    ]
 
+    # get wells with only one component, that does not contribute to the signal
+    buffer_blank_wells = []
     standard_wells = []
     for well in plate.wells:
-        if not well_contains_species(well, species.id):
+        measurement = get_measurement(well, wavelength)
+
+        # get all wells with one init condition that has a concentration grater than 0
+        int_concs_creater_than_zero = [
+            condition for condition in well.init_conditions if condition.init_conc > 0
+        ]
+
+        if len(int_concs_creater_than_zero) == 1:
+            buffer_blank_wells.append(well)
+            print("found buffer blank well", well.id)
+
+        if not well_contains_species(well, molecule.id, conc_above_zero=True):
             continue
 
         if any(
-            [well_contains_species(well, catalyst_id) for catalyst_id in protein_ids]
+            [
+                well_contains_species(well, catalyst_id, conc_above_zero=True)
+                for catalyst_id in protein_ids
+            ]
         ):
             continue
 
-        measurement = get_measurement(well, wavelength)
-        if measurement_is_blanked_for(measurement, species.id):
+        if measurement_is_blanked_for(measurement, molecule.id):
             standard_wells.append(well)
 
         # Add wells with zero concentration to standard wells
@@ -48,18 +60,21 @@ def _get_standard_wells(
         ):
             standard_wells.append(well)
 
-    return standard_wells
+    print("found standard wells", len(standard_wells))
+
+    return standard_wells + buffer_blank_wells
 
 
 def map_to_standard(
     plate: Plate,
-    species: Species | Molecule | Protein,
+    molecule: Molecule,
+    protein_ids: list[str],
     wavelength: float,
-    signal_type: SignalType = SignalType.ABSORBANCE,
 ) -> Standard:
     standard_wells = _get_standard_wells(
         plate=plate,
-        species=species,
+        protein_ids=protein_ids,
+        molecule=molecule,
         wavelength=wavelength,
     )
 
@@ -67,7 +82,7 @@ def map_to_standard(
     samples = []
     phs = []
     for well in standard_wells:
-        condition = get_species_condition(well, species.id)
+        condition = get_species_condition(well, molecule.id)
         measurement = get_measurement(well, wavelength)
 
         samples.append(
@@ -83,24 +98,19 @@ def map_to_standard(
     # Check if all samples have the same pH
     if not all([ph == phs[0] for ph in phs]):
         raise ValueError(
-            f"Samples of standard {species.name} have different pH values: {phs}"
+            f"Samples of standard {molecule.name} have different pH values: {phs}"
         )
     ph = phs[0]
-
-    if species.ld_id:
-        species_id = species.ld_id
-    else:
-        species_id = species.id
 
     temp_unit = UnitDefinition(**plate.temperature_unit.model_dump())
 
     # Create standard
     return Standard(
-        molecule_id=species_id,
-        molecule_symbol=species.id,
-        molecule_name=species.name,
+        molecule_id=molecule.id,
+        molecule_symbol=molecule.id,
+        pubchem_cid=molecule.pubchem_cid,
+        molecule_name=molecule.name,
         wavelength=wavelength,
-        signal_type=signal_type,
         samples=samples,
         ph=ph,
         temperature=plate.temperatures[0],
@@ -111,35 +121,26 @@ def map_to_standard(
 def initialize_calibrator(
     plate: Plate,
     wavelength: float,
-    species: Species | Molecule | Protein,
-    signal_type: SignalType = SignalType.ABSORBANCE,
-    cutoff: Optional[float] = None,
+    molecule: Molecule,
+    protein_ids: list[str],
+    cutoff: float | None = None,
 ) -> Calibrator:
     """
     Initialize a calibrator for a given species.
 
-    Parameters
-    ----------
-    plate : Plate
-        The plate containing the wells.
-    wavelength : float
-        The wavelength of the measurements.
-    species : Species | Molecule | Protein
-        The species to calibrate.
-    signal_type : SignalType, optional
-        The type of signal to calibrate, by default SignalType.ABSORBANCE.
-
-    Returns
-    -------
-    Calibrator
-        The initialized calibrator for creating a calibration curve.
-
+    Args:
+        plate (Plate): Plate with the wells.
+        wavelength (float): Wavelength of the measurements.
+        molecule (Molecule): Molecule to calibrate.
+        protein_ids (list[str]): IDs of the proteins that catalyze the reaction.
+        cutoff (float | None): Cutoff for the calibration. Calibration samples with
+            a signal above the cutoff are ignored.
     """
     standard = map_to_standard(
         plate=plate,
-        species=species,
+        protein_ids=protein_ids,
+        molecule=molecule,
         wavelength=wavelength,
-        signal_type=signal_type,
     )
 
     return Calibrator.from_standard(standard, cutoff=cutoff)

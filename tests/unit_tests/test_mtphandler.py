@@ -201,7 +201,7 @@ def test_assing_to_all_wells(setup_handler):
     )
     for well in plate.wells:
         assert well.measurements[0].blank_states[0].species_id == species.id
-        assert well.measurements[0].blank_states[0].contributes_to_signal == True
+        assert well.measurements[0].blank_states[0].contributes_to_signal
 
         assert well.init_conditions[0].species_id == species.id
         assert well.init_conditions[0].init_conc == 1.2
@@ -212,7 +212,7 @@ def test_assing_to_all_wells(setup_handler):
 
     for well in plate.wells:
         assert well.measurements[0].blank_states[1].species_id == species2.id
-        assert well.measurements[0].blank_states[1].contributes_to_signal == False
+        assert not well.measurements[0].blank_states[1].contributes_to_signal
 
         assert well.init_conditions[1].species_id == species2.id
         assert well.init_conditions[1].init_conc == 0

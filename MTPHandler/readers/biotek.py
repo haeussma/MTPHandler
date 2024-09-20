@@ -1,37 +1,71 @@
 from __future__ import annotations
 
 import re
-from datetime import datetime, time
-from typing import TYPE_CHECKING
+from datetime import datetime, timedelta
 
+import numpy as np
 import pandas as pd
-from typing_extensions import Optional
 
+from MTPHandler.model import Plate
 from MTPHandler.readers.utils import id_to_xy
+from MTPHandler.tools import get_well
+from MTPHandler.units import C, minute
 
-if TYPE_CHECKING:
-    from MTPHandler.core.plate import Plate
+PATTERN_WAVELENGTH = r"Wavelengths:\s+(\d{1,4})([\s,;]+\d{1,4})*"
+
+
+def extract_integers(s: str) -> list[int]:
+    # Find all sequences of digits in the string
+    matches = re.findall(r"\d+", s)
+    # Convert the matched strings to integers
+    return [int(match) for match in matches]
+
+
+def parse_measurement_interval(s: str) -> float:
+    # Flexible regex pattern to match time formats
+    time_pattern = r"(\d{1,4}):(\d{1,2}):(\d{1,2})"
+
+    interval_match = re.search(r"Interval\s+" + time_pattern, s, re.IGNORECASE)
+
+    if not interval_match:
+        raise ValueError("Measurement interval not found.")
+
+    interval = timedelta(
+        hours=int(interval_match.group(1)),
+        minutes=int(interval_match.group(2)),
+        seconds=int(interval_match.group(3)),
+    )
+
+    # interval in minutes
+    return interval.total_seconds() / 60
 
 
 def read_biotek(
-    cls: Plate,
     path: str,
-    ph: float | None = None,
+    ph: float | None,
 ) -> Plate:
     df = pd.read_excel(path)
 
     date = get_row_by_value(df, "Date")[-1]
     time = get_row_by_value(df, "Time")[-1]
-    timestamp = datetime.combine(date, time)
-
-    wavelength_cell = df.iloc[19, 1]
-    wavelengths = re.findall(r"\d+", wavelength_cell)
-    wavelengths = list(map(int, wavelengths))
+    timestamp = datetime.combine(date, time.time()).isoformat()
 
     row_index_int_map = df.iloc[:, 0].apply(lambda cell: isinstance(cell, int))
     data_block_starts = [
         index for index, value in enumerate(row_index_int_map) if value
     ]
+
+    wavelengths_cell = str(df.iloc[19, 1])
+    wavelengths = extract_integers(wavelengths_cell)
+
+    measurement_int_cell = str(df.iloc[15, 1])
+    measurement_interval = parse_measurement_interval(measurement_int_cell)
+
+    plate = Plate(
+        date_measured=timestamp,
+        time_unit=minute,
+        temperature_unit=C,
+    )
 
     for row_index, (block_start, wavelength) in enumerate(
         zip(data_block_starts, wavelengths)
@@ -53,46 +87,38 @@ def read_biotek(
         block.columns = column_names
         block = block[1:].reset_index(drop=True)
 
-        times = block.pop("Time").values
-        cleaned_time = [normalize_datetime_to_reference(t) for t in times]
-
-        # relative time
-        start_time = cleaned_time[0]
-        relative_time = [
-            float((t - start_time).total_seconds() / 60) for t in cleaned_time
-        ]
-
         # Temperature
         temperature = block.pop(column_names[1]).values
-
-        if row_index == 0:
-            plate = cls(
-                date_measured=timestamp,
-                n_rows=8,
-                n_cols=12,
-                times=relative_time,
-                time_unit="min",
-                temperatures=temperature,
-                temperature_unit="°C",
-            )
 
         for column_name in column_names[2:]:
             x, y = id_to_xy(column_name)
 
             try:
-                well = plate.get_well(column_name)
+                well = get_well(plate, column_name)
             except ValueError:
                 well = plate.add_to_wells(id=column_name, x_pos=x, y_pos=y, ph=ph)
 
-            assert len(block[column_name].values.tolist()) == len(
-                relative_time
-            ), f"Length of data and time does not match for well {column_name}"
+            data = block[column_name].values.tolist()
+            time = np.arange(
+                0, len(data) * measurement_interval, measurement_interval
+            ).tolist()
 
             well.add_to_measurements(
                 wavelength=wavelength,
-                wavelength_unit="nm",
-                absorption=block[column_name].values.tolist(),
-                time=relative_time,
+                absorption=data,
+                time=time,
+                time_unit=minute,
+            )
+
+            plate.temperatures = temperature.tolist()
+            plate.times = time
+
+    # assert that all plate -> well -> measurement -> absorption have the same length
+    for well in plate.wells:
+        for measurement in well.measurements:
+            assert len(measurement.absorption) == len(measurement.time), (
+                f"Absorption and time data for well {well.id} and wavelength "
+                f"{measurement.wavelength} do not have the same length."
             )
 
     return plate
@@ -105,26 +131,9 @@ def get_row_by_value(df: pd.DataFrame, value: str) -> list:
     return row_df.loc[0].values.tolist()
 
 
-def normalize_datetime_to_reference(dt, reference_date=datetime(1899, 12, 31)):
-    # Use the reference date for year and month, keep day, hour, minute, second, and microsecond
-    if isinstance(dt, time):
-        normalized_dt = datetime(
-            reference_date.year,
-            reference_date.month,
-            reference_date.day,
-            dt.hour,
-            dt.minute,
-            dt.second,
-        )
-        return normalized_dt
-
-    else:
-        return dt
-
-
 if __name__ == "__main__":
-    from MTPHandler.core import Plate
+    path = (
+        "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/ BioTek_Epoch2.xlsx"
+    )
 
-    path = "/Users/max/Documents/GitHub/MTPHandler/tests/data/ BioTek_Epoch2.xlsx"
-
-    print(read_biotek(Plate, path))
+    print(read_biotek(path, ph=7.4))

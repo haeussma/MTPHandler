@@ -71,16 +71,16 @@ Description of a photometric measurement of a single well and wavelength on the 
 - __wavelength__
     - Type: float
     - Description: Wavelength of the measurement
-- absorption
+- __absorption__
     - Type: float[]
     - Description: Absorption of the species
-- time
+- __time__
     - Type: float[]
     - Description: Time of the measurement
-- time_unit
+- __time_unit__
     - Type: UnitDefinition
     - Description: Unit of the time
-- blank_states
+- __blank_states__
     - Type: BlankState[]
     - Description: List of blank states, referring to the blank state of the species of the well
 

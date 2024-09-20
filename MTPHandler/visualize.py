@@ -9,11 +9,26 @@ from MTPHandler.model import Plate
 
 def visualize_plate(
     plate: Plate,
+    name: str,
     zoom: bool = False,
     wavelengths: list[float] = [],
     static: bool = False,
+    darkmode: bool = False,
 ):
     """Visualize a plate with all its wells and measurements."""
+
+    if darkmode:
+        theme = "plotly_dark"
+        plot_bgcolor = "#1e1e1e"  # Dark background color for subplots
+        paper_bgcolor = "#1e1e1e"
+        gridcolor = plot_bgcolor  # Grid color for dark mode
+        font_color = "#e5e5e5"  # Lighter text for dark mode
+    else:
+        theme = "plotly_white"
+        plot_bgcolor = "white"  # Light background for subplots
+        paper_bgcolor = "white"
+        gridcolor = plot_bgcolor  # Light grid color for white mode
+        font_color = "#000000"
 
     if zoom:
         shared_yaxes = False
@@ -54,16 +69,26 @@ def visualize_plate(
                 row=well.y_pos + 1,
             )
 
-    fig.update_xaxes(showticklabels=False)
-    fig.update_yaxes(showticklabels=False)
+    # Update x and y axes for dark mode or light mode
+    fig.update_xaxes(
+        showticklabels=False, gridcolor=gridcolor, zeroline=False, showline=False
+    )
+    fig.update_yaxes(
+        showticklabels=False, gridcolor=gridcolor, zeroline=False, showline=False
+    )
 
+    # Update subplot backgrounds and layout
     fig.update_layout(
-        plot_bgcolor="white",
+        plot_bgcolor=plot_bgcolor,
+        paper_bgcolor=paper_bgcolor,
+        font=dict(color=font_color),
         hovermode="x",
         title=dict(
-            text=f"{plate.temperatures[0]} {plate.temperature_unit.name}",
+            text=name,
+            font=dict(color=font_color),
         ),
         margin=dict(l=20, r=20, t=100, b=20),
+        template=theme,
     )
 
     if static:

@@ -1,17 +1,23 @@
-site_name: MTPHandler
+site_name: MTPHandler Documentation
 site_url: https://fairchemistry.github.io/MTPHandler/
 repo_url: https://github.com/FAIRChemistry/MTPHandler
 repo_name: FAIRChemistry/MTPHandler
+site_author: Max Häußler
 
 nav:
   - Home: index.md
   - Usage: usage.md
+  - API Reference:
+    - Plate Manager: api_reference/plate_manager.md
+    - Plate: api_reference/plate.md
   #- Getting Started: getting_started.md
   #- Examples: examples.md
 
 plugins:
   - plotly
   - mkdocstrings
+  - mkdocs-jupyter
+  - search
 
 theme:
   name: material
@@ -42,6 +48,8 @@ theme:
 
 
 markdown_extensions:
+  - admonition
+  - pymdownx.details
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span

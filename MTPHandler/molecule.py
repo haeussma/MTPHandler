@@ -1,8 +1,9 @@
+import re
+
 from calipytion.model import Standard
 from calipytion.model import UnitDefinition as CalUnit
 from calipytion.tools.calibrator import Calibrator
 from calipytion.units import C
-from loguru import logger
 from pydantic import BaseModel, ConfigDict, Field
 
 from MTPHandler.model import UnitDefinition
@@ -23,21 +24,12 @@ class Molecule(BaseModel):
     name: str = Field(
         description="Name of the molecule",
     )
-    init_conc: float | None = Field(
-        description="Initial concentration of the molecule at t=0", default=None
-    )
-    conc_unit: UnitDefinition | None = Field(
-        description="Unit of the concentration", default=None
-    )
-    wavelength: float | None = Field(
-        description="Wavelength at which the molecule was detected", default=None
-    )
     standard: Standard | None = Field(
         description="Standard instance associated with the molecule", default=None
     )
     constant: bool = Field(
         description="Boolean indicating whether the molecule concentration is constant throughout the experiment",
-        default=True,
+        default=False,
     )
 
     # @model_validator(mode="before")
@@ -59,6 +51,19 @@ class Molecule(BaseModel):
     #         The retention time of the standard and the molecule must be the same.
     #         """
 
+    @property
+    def ld_id_url(self) -> str | None:
+        """Returns the URL of the PubChem page of the molecule based on the PubChem CID
+
+        Returns:
+            str | None: URL of the PubChem page of the molecule if the PubChem CID is defined, None otherwise.
+        """
+
+        if self.pubchem_cid == -1:
+            return None
+
+        return f"https://pubchem.ncbi.nlm.nih.gov/compound/{self.pubchem_cid}"
+
     @classmethod
     def from_standard(
         cls, standard: Standard, init_conc: float, conc_unit: UnitDefinition
@@ -74,8 +79,6 @@ class Molecule(BaseModel):
             id=standard.molecule_id,
             pubchem_cid=standard.pubchem_cid,
             name=standard.molecule_name,
-            init_conc=init_conc,
-            conc_unit=conc_unit,
             standard=standard,
         )
 
@@ -95,7 +98,6 @@ class Molecule(BaseModel):
             molecule_id=self.id,
             pubchem_cid=self.pubchem_cid,
             molecule_name=self.name,
-            wavelength=self.wavelength,
             concentrations=concs,
             conc_unit=CalUnit(**conc_unit.model_dump()),
             signals=areas,
@@ -120,25 +122,6 @@ class Molecule(BaseModel):
             temp_unit=CalUnit(**temp_unit.model_dump()),
         )
 
-        # check if the `conc` attribute of the molecule is defined and if, it must have the same baseunit names as the calibration unit
-        if self.conc_unit:
-            try:
-                for idx, unit in enumerate(self.conc_unit.base_units):
-                    assert (
-                        unit.kind == conc_unit.base_units[idx].kind
-                        and unit.exponent == conc_unit.base_units[idx].exponent
-                    ), """
-                    Units dont match.
-                    """
-            except AssertionError:
-                logger.warning(
-                    f"The concentration unit of the molecule {self.name} does not match the calibration unit defined in its standard. Conc unit of the molecule was set to {conc_unit}."
-                )
-                self.conc_unit = conc_unit
-                self.init_conc = None
-        else:
-            self.conc_unit = conc_unit
-
         self.standard = standard
 
         return standard
@@ -156,25 +139,28 @@ class Protein(BaseModel):
     name: str = Field(
         description="Name of the protein",
     )
-    init_conc: float = Field(
-        description="Initial concentration of the protein at t=0",
-    )
-    conc_unit: UnitDefinition = Field(
-        description="Unit of the concentration",
-    )
     sequence: str | None = Field(
         description="Amino acid sequence of the protein",
-        default=None,
-    )
-    organism: str | None = Field(
-        description="Organism from which the protein originates",
-        default=None,
-    )
-    organism_tax_id: str | None = Field(
-        description="Taxonomic ID of the organism",
         default=None,
     )
     constant: bool = Field(
         description="Boolean indicating whether the protein concentration is constant",
         default=True,
     )
+
+    @property
+    def ld_id_url(self) -> str | None:
+        """Returns the URL of the UniProt page of the protein based on the protein ID
+
+        Returns:
+            str | None: URL of the UniProt page of the protein if the protein ID is defined, None otherwise.
+        """
+
+        uniprot_pattern = (
+            r"[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}"
+        )
+
+        if re.fullmatch(uniprot_pattern, self.id) is None:
+            return None
+        else:
+            return f"https://www.uniprot.org/uniprotkb/{self.id}/entry"

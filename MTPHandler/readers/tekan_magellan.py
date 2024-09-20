@@ -4,7 +4,6 @@ import math
 import re
 from collections import defaultdict
 from datetime import datetime
-from typing import Optional
 
 import pandas as pd
 
@@ -16,7 +15,7 @@ from MTPHandler.units import C, minute, nm
 def read_tekan_magellan(
     path: str,
     wavelength: float,
-    ph: Optional[float] = None,
+    ph: float | None,
 ) -> Plate:
     df = pd.read_excel(path, header=None)
 
@@ -74,7 +73,7 @@ def read_tekan_magellan(
             raise ValueError("Well ID not found in the data.")
 
         well = plate.add_to_wells(
-            ph=ph if ph else None,
+            ph=ph,
             id=well_id,
             x_pos=x_pos,
             y_pos=y_pos,

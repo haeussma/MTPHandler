@@ -2,23 +2,21 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
-from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
 
-from MTPHandler.model import Plate
+from MTPHandler.model import Plate, UnitDefinition
 from MTPHandler.units import C, nm
-from MTPHandler.units.units import UnitDefinition
 
 
-def read_multiskan_spectrum(
+def read_multiskan_spectrum_1500(
     path: str,
     time: list[float],
     time_unit: UnitDefinition,
-    ph: Optional[float] = None,
-    temperature: Optional[float] = None,
-    temperature_unit: Optional[UnitDefinition] = C,
+    temperature_unit: UnitDefinition,
+    ph: float | None = None,
+    temperature: float | None = None,
 ) -> Plate:
     # Extract temperature from path
     if not temperature:
@@ -30,6 +28,9 @@ def read_multiskan_spectrum(
 
     if not temperature_unit:
         temperature_unit = C
+
+    if isinstance(time, np.ndarray):
+        time = time.tolist()
 
     # Extract pH from path
     if not ph:
@@ -44,9 +45,6 @@ def read_multiskan_spectrum(
 
     # Extract plate dimensions and number of measured timepoints
     n_rows, n_columns, n_timepoints = next(iter(data_dict.values())).shape
-
-    if isinstance(time, list):
-        time = np.array(time)
 
     if len(time) != n_timepoints:
         raise ValueError(
@@ -79,7 +77,7 @@ def read_multiskan_spectrum(
                 well.add_to_measurements(
                     wavelength=wavelength,
                     wavelength_unit=nm,
-                    absorption=column.tolist(),
+                    absorption=column,
                     time=time,
                     time_unit=time_unit,
                 )
@@ -87,7 +85,7 @@ def read_multiskan_spectrum(
     return plate
 
 
-def extract_data(df: pd.DataFrame) -> Dict[int, List[List[float]]]:
+def extract_data(df: pd.DataFrame) -> dict[int, list[list[float]]]:
     # Get slices of the data corresponding each iteration of measurement
     wavelength_df_dict = _get_plate_dfs(df)
 
@@ -107,7 +105,7 @@ def extract_data(df: pd.DataFrame) -> Dict[int, List[List[float]]]:
     return wavelength_data_dict
 
 
-def _get_plate_dfs(df: pd.DataFrame) -> Dict[int, List[pd.DataFrame]]:
+def _get_plate_dfs(df: pd.DataFrame) -> dict[int, list[pd.DataFrame]]:
     wavelength_slices_dict = defaultdict(list)
 
     # Get data by wavelength
@@ -142,7 +140,7 @@ def _segment_dataframe(df: pd.DataFrame, key: str):
     return (df.loc[slc] for slc in list_of_slices)
 
 
-def _list_to_slices(_list: List[int]) -> List[slice]:
+def _list_to_slices(_list: list[int]) -> list[slice]:
     slices = []
     for idx, element in enumerate(_list):
         try:
@@ -155,7 +153,7 @@ def _list_to_slices(_list: List[int]) -> List[slice]:
             end_data_slice = None
             slices.append(slice(start_data_slice, end_data_slice))
 
-            return slices
+    return slices
 
 
 def _get_wavelengths(row: pd.Series):
@@ -180,7 +178,7 @@ if __name__ == "__main__":
     from MTPHandler.model import Plate
     from MTPHandler.units import C, min
 
-    path = "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/multiskan_spectrum_1500.txt"
+    path = "docs/examples/data/multiskan_spectrum_1500.txt"
 
     ph = 7.0
     wavelength = 450.0
@@ -189,11 +187,12 @@ if __name__ == "__main__":
     print(f"the thime is {time}")
 
     pprint(
-        read_multiskan_spectrum(
+        read_multiskan_spectrum_1500(
             path=path,
             ph=ph,
             time=time,
             time_unit=min,
             temperature=37.0,
+            temperature_unit=C,
         )
     )

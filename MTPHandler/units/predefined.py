@@ -154,8 +154,6 @@ C = UnitDefinition(base_units=[Unit.celsius()])._get_name()
 
 K.ld_id = ONTOMAPS["temperature"]["K"]
 kelvin.ld_id = ONTOMAPS["temperature"]["K"]
-celsius.ld_id = ONTOMAPS["temperature"]["C"]
-C.ld_id = ONTOMAPS["temperature"]["C"]
 
 # Length
 
