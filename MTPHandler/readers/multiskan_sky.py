@@ -4,7 +4,7 @@ import pandas as pd
 
 from MTPHandler.model import Plate, Well
 from MTPHandler.readers.utils import id_to_xy
-from MTPHandler.units import C, minute
+from MTPHandler.units import C, second
 
 
 def read_multiskan_sky(
@@ -91,7 +91,7 @@ def df_to_wells(df: pd.DataFrame, ph: float | None) -> pd.DataFrame:
                 wavelength=wavelength,
                 absorption=df_wavelength["Raw absorbance"].tolist(),
                 time=df_wavelength["Measurement time(s)"] / 60,
-                time_unit=minute,
+                time_unit=second,
             )
 
         wells.append(well)

@@ -7,7 +7,7 @@ from loguru import logger
 
 from MTPHandler.model import Plate, Well
 from MTPHandler.readers.utils import id_to_xy, xy_to_id
-from MTPHandler.units import C, minute
+from MTPHandler.units import C, second
 
 
 class WrongParserError(Exception):
@@ -117,12 +117,12 @@ def read_spectra_max_190(path, ph: float | None) -> Plate:
                 wavelength=wavelength,
                 absorption=df[column].values.tolist(),
                 time=time,
-                time_unit=minute,
+                time_unit=second,
             )
             wells.append(well)
 
         plate = Plate(
-            time_unit=minute,
+            time_unit=second,
             temperatures=temperatures,
             temperature_unit=C,
             wells=wells,
@@ -168,13 +168,13 @@ def map_to_plate(
                 wavelength=wavelength,
                 absorption=data_matrix[column_id, row_id].tolist(),
                 time=times,
-                time_unit=minute,
+                time_unit=second,
             )
             wells.append(well)
 
     # Create plate
     plate = Plate(
-        time_unit=minute,
+        time_unit=second,
         temperatures=temperatures,
         temperature_unit=C,
         wells=wells,

@@ -7,7 +7,7 @@ from typing_extensions import Optional
 
 from MTPHandler.model import Plate
 from MTPHandler.readers.utils import id_to_xy
-from MTPHandler.units import C, minute
+from MTPHandler.units import C, second
 
 
 def read_tekan_spark(
@@ -44,7 +44,7 @@ def read_tekan_spark(
         date_measured=str(time_measured),
         temperatures=temp_series.values.tolist(),
         temperature_unit=C,
-        time_unit=minute,
+        time_unit=second,
         times=time_series.values.tolist(),
     )
 
@@ -62,7 +62,7 @@ def read_tekan_spark(
             wavelength_unit="nm",
             absorption=data_df[column].values.tolist(),
             time=time_series.values.tolist(),
-            time_unit=minute,
+            time_unit=second,
         )
 
     return plate

@@ -9,7 +9,7 @@ import pandas as pd
 from MTPHandler.model import Plate
 from MTPHandler.readers.utils import id_to_xy
 from MTPHandler.tools import get_well
-from MTPHandler.units import C, minute
+from MTPHandler.units import C, second
 
 PATTERN_WAVELENGTH = r"Wavelengths:\s+(\d{1,4})([\s,;]+\d{1,4})*"
 
@@ -63,7 +63,7 @@ def read_biotek(
 
     plate = Plate(
         date_measured=timestamp,
-        time_unit=minute,
+        time_unit=second,
         temperature_unit=C,
     )
 
@@ -107,7 +107,7 @@ def read_biotek(
                 wavelength=wavelength,
                 absorption=data,
                 time=time,
-                time_unit=minute,
+                time_unit=second,
             )
 
             plate.temperatures = temperature.tolist()
