@@ -1,0 +1,40 @@
+name: Coverage Badge
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install genbadge[coverage]
+
+      - name: Run tests and generate coverage report
+        run: |
+          coverage run -m pytest
+          coverage xml -o reports/coverage/coverage.xml
+
+      - name: Generate coverage badge
+        run: genbadge coverage -i reports/coverage/coverage.xml -o coverage-badge.svg
+
+      - name: Upload coverage badge to repo
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-badge
+          path: coverage-badge.svg
