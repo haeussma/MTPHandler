@@ -29,8 +29,8 @@ jobs:
 
       - name: Run tests and generate coverage report
         run: |
-          coverage run -m pytest
-          coverage xml -o reports/coverage/coverage.xml
+          coverage xml
+          genbadge coverage
 
       - name: Generate coverage badge
         run: genbadge coverage -i reports/coverage/coverage.xml -o coverage-badge.svg
