@@ -127,7 +127,7 @@ nl.ld_id = ONTOMAPS["volume"]["nl"]
 second = UnitDefinition(base_units=[Unit.second()])._get_name()
 s = UnitDefinition(base_units=[Unit.second()])._get_name()
 second = UnitDefinition(base_units=[Unit.minute()])._get_name()
-min = UnitDefinition(base_units=[Unit.minute()])._get_name()
+minute = UnitDefinition(base_units=[Unit.minute()])._get_name()
 hour = UnitDefinition(base_units=[Unit.hour()])._get_name()
 h = UnitDefinition(base_units=[Unit.hour()])._get_name()
 day = UnitDefinition(base_units=[Unit.day()])._get_name()
@@ -137,7 +137,7 @@ d = UnitDefinition(base_units=[Unit.day()])._get_name()
 s.ld_id = ONTOMAPS["time"]["s"]
 second.ld_id = ONTOMAPS["time"]["s"]
 second.ld_id = ONTOMAPS["time"]["min"]
-min.ld_id = ONTOMAPS["time"]["min"]
+minute.ld_id = ONTOMAPS["time"]["min"]
 hour.ld_id = ONTOMAPS["time"]["hour"]
 h.ld_id = ONTOMAPS["time"]["hour"]
 day.ld_id = ONTOMAPS["time"]["day"]

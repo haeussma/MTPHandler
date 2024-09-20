@@ -16,6 +16,9 @@ def read_tekan_spark(
 ) -> Plate:
     df = pd.read_excel(path)
 
+    if not df.iloc[1, 0] == "Device: Spark":
+        raise ValueError("The file does not seem to be a Tekan Spark file.")
+
     cycle_no_row_index = df[df.iloc[:, 0].str.contains("Cycle Nr.", na=False)].index[0]
     meta_df = df.iloc[:cycle_no_row_index, :]
     data_df = df.iloc[cycle_no_row_index:, :].reset_index(drop=True)
