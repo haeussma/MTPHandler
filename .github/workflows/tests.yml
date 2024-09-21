@@ -27,8 +27,4 @@ jobs:
 
       - name: Run tests with pytest
         run: |
-<<<<<<< HEAD
           poetry run pytest --nbval --nbval-lax
-=======
-          poetry run pytest
->>>>>>> main

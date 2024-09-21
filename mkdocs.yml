@@ -7,23 +7,15 @@ site_author: Max Häußler
 nav:
   - Home: index.md
   - Usage: usage.md
-<<<<<<< HEAD
   - API Reference:
     - Plate Manager: api_reference/plate_manager.md
     - Plate: api_reference/plate.md
-=======
->>>>>>> main
-  #- Getting Started: getting_started.md
-  #- Examples: examples.md
 
 plugins:
   - plotly
   - mkdocstrings
-<<<<<<< HEAD
   - mkdocs-jupyter
   - search
-=======
->>>>>>> main
 
 theme:
   icon:
