@@ -1,13 +1,13 @@
-# MTPHandler - _🚧 currently unstable 🚧_
+# MTPHandler
 
 [![Documentation](https://img.shields.io/badge/Documentation-Online-blue.svg)](https://fairchemistry.github.io/MTPHandler/)
 [![Tests](https://github.com/FAIRChemistry/MTPHandler/actions/workflows/tests.yml/badge.svg)](https://github.com/FAIRChemistry/MTPHandler/actions/workflows/tests.yml)
-[![PyPI version](https://badge.fury.io/py/MTPHandler.svg)](https://badge.fury.io/py/MTPHandler)
+[![PyPI version](https://badge.fury.io/py/mtphandler.svg)](https://badge.fury.io/py/mtphandler)
 
 
 ## ℹ️ Overview
 
-MTPHandler is a tool for managing and processing data from microtiter plates. It allows to directly read in the output files of various photometers, enabling low friction data processing. The tool facilitates a workflow for reading in raw data, assigning molecules with their respective concentration and and unit to wells. Furthermore, wells for creating a standard curve can be automatically detected and applied to different calibration models, which can be used to calculate the concentration of unknown samples. Finally, the plate data can be transformed into time-course concentration data in the EnzymeML format for subsequent analysis of the concentration data.
+`mtphandler` is a tool for managing and processing data from microtiter plates. It allows to directly read in the output files of various photometers, enabling low friction data processing. The tool facilitates a workflow for reading in raw data, assigning molecules with their respective concentration and and unit to wells. Furthermore, wells for creating a standard curve can be automatically detected and applied to different calibration models, which can be used to calculate the concentration of unknown samples. Finally, the plate data can be transformed into time-course concentration data in the EnzymeML format for subsequent analysis of the concentration data.
 
 ``` mermaid
 graph LR
@@ -65,13 +65,14 @@ The following table lists the currently supported plate readers output files:
 
 ## 📦 Installation
 
-Install `MTPHandler` via pip:
+Install `MTPHandler` from PyPI:
 
 ```bash
 pip install MTPHandler # 🚧 not released yet
 ```
 or from source:
-
 ```bash
 pip install git+https://github.com/FAIRChemistry/MTPHandler.git
 ```
+
+Please refer to the [documentation](https://fairchemistry.github.io/MTPHandler/) for more information on how to use the package.
