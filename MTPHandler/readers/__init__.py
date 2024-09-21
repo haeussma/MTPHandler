@@ -1,5 +1,0 @@
-from .multiskan_spectrum_parser import read_multiskan_spectrum
-from .spectra_max_190 import read_spectra_max_190
-from .spectramax_parser import read_spectramax
-from .tekan_magellan import read_tekan_magellan
-from .tekan_spark import read_tekan_spark
