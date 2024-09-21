@@ -71,6 +71,7 @@ Description of a photometric measurement of a single well and wavelength on the 
 - __wavelength__
     - Type: float
     - Description: Wavelength of the measurement
+<<<<<<< HEAD
 - __absorption__
     - Type: float[]
     - Description: Absorption of the species
@@ -78,6 +79,15 @@ Description of a photometric measurement of a single well and wavelength on the 
     - Type: float[]
     - Description: Time of the measurement
 - __time_unit__
+=======
+- absorption
+    - Type: float[]
+    - Description: Absorption of the species
+- time
+    - Type: float[]
+    - Description: Time of the measurement
+- time_unit
+>>>>>>> main
     - Type: UnitDefinition
     - Description: Unit of the time
 - __blank_states__

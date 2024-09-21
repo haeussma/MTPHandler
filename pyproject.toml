@@ -1,12 +1,22 @@
 [tool.poetry]
+<<<<<<< HEAD
 name = "mtphandler"
 version = "0.2.5"
+=======
+name = "MTPHandler"
+version = "0.2.4"
+>>>>>>> main
 description = "Tool to work with microtiter plate data."
 authors = ["haeussma <83341109+haeussma@users.noreply.github.com>"]
 license = "MIT License"
 readme = "README.md"
+<<<<<<< HEAD
 packages = [{ include = "mtphandler" }]
 include = ["mtphandler/units/ontomaps.toml"]
+=======
+packages = [{ include = "MTPHandler" }]
+include = ["MTPHandler/units/ontomaps.toml"]
+>>>>>>> main
 
 
 [tool.poetry.dependencies]
@@ -31,7 +41,10 @@ nbval = "^0.11.0"
 mkdocs-jupyter = "^0.25.0"
 mkdocs-plotly-plugin = "^0.1.3"
 notebook = "<7"
+<<<<<<< HEAD
 jupyter-contrib-nbextensions = "^0.7.0"
+=======
+>>>>>>> main
 
 [build-system]
 requires = ["poetry-core"]

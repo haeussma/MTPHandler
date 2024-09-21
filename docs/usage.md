@@ -1,5 +1,6 @@
 # Usage
 
+<<<<<<< HEAD
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/FAIRChemistry/MTPHandler/blob/main/docs/examples/SAHH_kinetics.ipynb)
 
 The following example demonstrates, how the `PlateManager` can be used to process the data from a 96-well plate reader. The workflow consists of the following steps:
@@ -545,3 +546,6 @@ With the following code snippet the generated `EnzymeMLDocument` can be saved as
         with open("data/enzymeml_TmSAHH_SAH.json", "r") as file:
             loaded_enzymeml = EnzymeMLDocument(**json.load(file))
         ```
+=======
+## 🚧 in the making...
+>>>>>>> main

@@ -2,16 +2,27 @@
 
 ## ℹ️ Overview
 
+<<<<<<< HEAD
 `mtphandler` is a tool for managing and processing data from microtiter plates. It allows to directly read in the output files of various photometers, enabling low friction data processing. The tool facilitates a workflow for reading in reading in raw data, assigning molecules with their respective concentration and and unit to wells. Furthermore, wells for creating a standard curve can be automatically detected and applied to different calibration models, which can be used to calculate the concentration of unknown samples. Finally, the plate data can be transformed into time-course concentration data in the EnzymeML format for subsequent analysis of the concentration data.
+=======
+MTPHandler is a tool for managing and processing data from microtiter plates. It allows to directly read in the output files of various photometers, enabling low friction data processing. The tool facilitates a workflow for reading in reading in raw data, assigning molecules with their respective concentration and and unit to wells. Furthermore, wells for creating a standard curve can be automatically detected and applied to different calibration models, which can be used to calculate the concentration of unknown samples. Finally, the plate data can be transformed into time-course concentration data in the EnzymeML format for subsequent analysis of the concentration data.
+>>>>>>> main
 
 ``` mermaid
 graph LR
   AP[🧪 Plate Reader] --> A[📄 Output File];
   style AP fill:transparent,stroke:#000,stroke-width:2px;
+<<<<<<< HEAD
 A -->|read| B{mtphandler}
   style B stroke-width:4px
   subgraph in Jupyter Notebook
     subgraph with mtphandler
+=======
+A -->|read| B{MTPHandler}
+  style B stroke-width:4px
+  subgraph in Jupyter Notebook
+    subgraph with MTPHandler
+>>>>>>> main
         B --> B1[Enrich Data with Metadata]
         B1 --> B2[Blank Data]
         B2 --> B3[Create and Apply Calibration Models]
@@ -60,10 +71,17 @@ The following table lists the currently supported plate readers output files:
 
 ## 📦 Installation
 
+<<<<<<< HEAD
 Install `mtphandler` via pip:
 
 ```bash
 pip install mtphandler # 🚧 not released yet
+=======
+Install `MTPHandler` via pip:
+
+```bash
+pip install MTPHandler # 🚧 not released yet
+>>>>>>> main
 ```
 or from source:
 
