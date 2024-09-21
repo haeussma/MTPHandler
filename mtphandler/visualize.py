@@ -94,6 +94,8 @@ def visualize_plate(
     if static:
         fig.show("png")
 
+    fig.write_json("plate_visualization.json")
+
     fig.show()
 
 

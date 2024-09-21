@@ -136,6 +136,10 @@ class Protein(BaseModel):
     id: str = Field(
         description="ID of the Protein",
     )
+    uniprot_id: str | None = Field(
+        description="UniProt ID of the protein",
+        default=None,
+    )
     name: str = Field(
         description="Name of the protein",
     )

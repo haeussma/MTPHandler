@@ -20,6 +20,8 @@ plugins:
   - search
 
 theme:
+  icon:
+    annotation: material/star-four-points-circle
   name: material
   logo: 'images/MTPHandler_logo.png'
   features:
@@ -65,6 +67,8 @@ markdown_extensions:
             class: mkdocs-plotly
             format: !!python/name:mkdocs_plotly_plugin.fences.fence_plotly
   - tables
+  - pymdownx.tabbed:
+      alternate_style: true
   - attr_list
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji

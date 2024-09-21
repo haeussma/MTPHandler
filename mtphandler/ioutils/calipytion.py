@@ -19,7 +19,20 @@ def _get_standard_wells(
     protein_ids: list[str],
     molecule: Molecule,
     wavelength: float,
+    silent: bool = False,
 ) -> list[Well]:
+    """Goes through the wells and finds suitable standard wells.
+
+    Args:
+        plate (Plate): Plate with the wells.
+        protein_ids (list[str]): IDs of the proteins that catalyze the reaction.
+        molecule (Molecule): Molecule to calibrate.
+        wavelength (float): Wavelength of the measurements.
+        silent (bool, optional): If True, no print statements are shown. Defaults to False.
+
+    Returns:
+        list[Well]: List of wells that can be used as standards
+    """
     # Subset of wells, that contain specified species, do not contain a protein, and are blanked
 
     # get wells with only one component, that does not contribute to the signal
@@ -35,7 +48,6 @@ def _get_standard_wells(
 
         if len(int_concs_creater_than_zero) == 1:
             buffer_blank_wells.append(well)
-            print("found buffer blank well", well.id)
 
         if not well_contains_species(well, molecule.id, conc_above_zero=True):
             continue
@@ -60,7 +72,10 @@ def _get_standard_wells(
         ):
             standard_wells.append(well)
 
-    print("found standard wells", len(standard_wells))
+    if not silent:
+        print(
+            f"🔎 Found {len(standard_wells)} wells containing {molecule.name} ({molecule.id})."
+        )
 
     return standard_wells + buffer_blank_wells
 

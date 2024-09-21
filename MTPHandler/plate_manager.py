@@ -5,6 +5,7 @@ from typing import Any, Literal, Optional, Tuple, get_args
 
 import numpy as np
 import pandas as pd
+from calipytion import Calibrator
 from loguru import logger
 from pydantic import BaseModel, Field, model_validator
 from pyenzyme import EnzymeMLDocument
@@ -140,6 +141,7 @@ class PlateManager(BaseModel):
         self,
         id: str,
         name: str,
+        uniprot_id: str | None = None,
         sequence: str | None = None,
         constant: bool = True,
     ) -> Protein:
@@ -148,6 +150,7 @@ class PlateManager(BaseModel):
         Args:
             id (str): Internal identifier of the protein such as `p0`, `MAT_K78M` or `GFP`.
             name (str): Name of the protein.
+            uniprot_id (str | None, optional): UniProt ID of the protein. Defaults to None.
             sequence (str | None, optional): Amino acid sequence of the protein. Defaults to None.
             constant (bool, optional): Indicates whether the protein concentration is constant throughout the experiment. Defaults to True.
 
@@ -157,6 +160,7 @@ class PlateManager(BaseModel):
         protein = Protein(
             id=id,
             name=name,
+            uniprot_id=uniprot_id,
             sequence=sequence,
             constant=constant,
         )
@@ -341,7 +345,22 @@ class PlateManager(BaseModel):
         molecule: Molecule,
         cutoff: float | None = None,
         wavelength: float | None = None,
-    ):
+    ) -> Calibrator:
+        """Initialize a CaliPytion `Calibrator` for a molecule on the plate.
+        The calibrator allows eighter to proceed with predefined suitable calibration models or
+        to define and fit custom models. For more information on the CaliPytion, please refer to the
+        (documentation)[https://fairchemistry.github.io/CaliPytion/usage/]
+
+        Args:
+            molecule (Molecule): The molecule for which to initialize the calibrator.
+            cutoff (float | None, optional): The cutoff value for the calibration. Absorption values
+                above the cutoff are not considered for the calibration. Defaults to None.
+            wavelength (float | None, optional): The wavelength at which to initialize the calibrator.
+                If only one wavelength was measured, the wavelength is automatically set. Defaults to None.
+
+        Returns:
+            Calibrator: Calibrator object.
+        """
         from mtphandler.ioutils.calipytion import initialize_calibrator
 
         if wavelength is None:
@@ -544,11 +563,11 @@ class PlateManager(BaseModel):
 
         if not silent:
             print(
-                f"📍 Assigned {count} initial concentrations coditions for [bold magenta]{list(species_matches)}[/]"
+                f"📍 Assigned {count} initial concentration coditions for [bold magenta]{list(species_matches)}[/]"
                 f" from {path} to the plate."
             )
 
-    def set_species_contribututes_to_signal(
+    def set_absorption_contribution(
         self,
         species: Molecule | Protein,
         contributes_to_signal: bool,
@@ -573,7 +592,6 @@ class PlateManager(BaseModel):
 
         for well in self.plate.wells:
             if not well_contains_species(well, species.id):
-                print("Species not found in well.")
                 continue
 
             for measurement in well.measurements:
@@ -586,7 +604,7 @@ class PlateManager(BaseModel):
 
         if not silent:
             print(
-                f"Set contribution to signal of [bold magenta]{species.name}[/] ({species.id}) at"
+                f"Set signal contribution of [bold magenta]{species.name}[/] ({species.id}) at"
                 f" {wavelength} nm to {contributes_to_signal}."
             )
 
@@ -821,7 +839,7 @@ class PlateManager(BaseModel):
         self,
         detected_molecule: Molecule,
         well_ids: list[str] | None = None,
-        wells_with_protein_only: bool = True,
+        catalyzed_only: bool = True,
         name: str | None = None,
         to_concentration: bool = False,
         extrapolate: bool = False,
@@ -840,8 +858,8 @@ class PlateManager(BaseModel):
                 a calibrator must be defined for the respective molecule. Defaults to False.
             extrapolate (bool, optional): If True, and `to_concentration` is True, measured absorption values
                 that are outside the range of the calibrator are extrapolated. Defaults to False.
-            wells_with_protein_only (bool, optional): If True, only wells with protein are included in the
-                EnzymeML document. This assumes that wells with a protein are catalyzed wells. Defaults to True.
+            catalyzed_only (bool, optional): If True, only wells that contain the detected molecule and a
+                protein are included in the EnzymeML document. Defaults to True.
             wavelength (float | None, optional): If multiple wavelengths were measured, the wavelength for
                 which to convert the signal to concentration needs to be specified. Defaults to None.
             silent (bool, optional): If True, no output is printed. Defaults to False.
@@ -863,7 +881,7 @@ class PlateManager(BaseModel):
             proteins=self.proteins,
             to_concentration=to_concentration,
             extrapolate=extrapolate,
-            wells_with_protein_only=wells_with_protein_only,
+            catalyzed_only=catalyzed_only,
             wavelength=wavelength,
             silent=silent,
         )

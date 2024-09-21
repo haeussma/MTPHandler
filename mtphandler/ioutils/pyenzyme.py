@@ -31,7 +31,7 @@ class Plate_to_EnzymeMLDocument:
         detected_molecule: Molecule,
         proteins: list[Protein],
         wavelength: float | None,
-        wells_with_protein_only: bool,
+        catalyzed_only: bool,
         to_concentration: bool,
         extrapolate: bool,
         silent: bool,
@@ -44,7 +44,7 @@ class Plate_to_EnzymeMLDocument:
         self.proteins = proteins
         self.wavelength = wavelength
         self.calibrator_dict: dict[str, Calibrator] = {}
-        self.wells_with_protein_only = wells_with_protein_only
+        self.catalyzed_only = catalyzed_only
         self.to_concentration = to_concentration
         self.extrapolate = extrapolate
         self.silent = silent
@@ -66,13 +66,19 @@ class Plate_to_EnzymeMLDocument:
         enzml_doc = pe.EnzymeMLDocument(name=self.name)
         logger.debug(f"Initialized EnzymeMLDocument with name {self.name}")
 
+        dummy_vessel = self._get_dummy_vessel()
+        enzml_doc.vessels = [dummy_vessel]
+
         # Add proteins to EnzymeML document
-        enzml_doc.proteins = [self.map_protein(protein) for protein in self.proteins]
+        enzml_doc.proteins = [
+            self.map_protein(protein, dummy_vessel.id) for protein in self.proteins
+        ]
         logger.debug(f"Added {len(self.proteins)} proteins to EnzymeMLDocument")
 
         # Add small molecules to EnzymeML document
         enzml_doc.small_molecules = [
-            self.map_small_molecule(molecule) for molecule in self.molecules
+            self.map_small_molecule(molecule, dummy_vessel.id)
+            for molecule in self.molecules
         ]
         logger.debug(f"Added {len(self.molecules)} small molecules to EnzymeMLDocument")
 
@@ -130,9 +136,12 @@ class Plate_to_EnzymeMLDocument:
                 continue
 
             # Skip wells without a protein if the flag is set
-            if self.wells_with_protein_only:
+            if self.catalyzed_only:
                 if not self.is_catalyzed(
-                    well, photo_measurement, {p.id for p in self.proteins}
+                    well,
+                    photo_measurement,
+                    {p.id for p in self.proteins},
+                    self.detected_molecule.id,
                 ):
                     continue
 
@@ -247,6 +256,17 @@ class Plate_to_EnzymeMLDocument:
 
         species_data.initial = species_data.data[0]
 
+    @staticmethod
+    def _get_dummy_vessel():
+        from pyenzyme.units import dimensionless
+
+        return pe.Vessel(
+            id="v1",
+            name="microtiter plate",
+            volume=0,
+            unit=dimensionless,
+        )
+
     @property
     def temperature(self) -> float:
         return np.mean(self.plate.temperatures).tolist()
@@ -285,6 +305,7 @@ class Plate_to_EnzymeMLDocument:
         well: Well,
         photo_measurement: PhotometricMeasurement,
         protein_ids: set[str],
+        target_species: str,
     ) -> bool:
         """
         Checks if a well contains a catalyst and another species.
@@ -292,6 +313,7 @@ class Plate_to_EnzymeMLDocument:
         Args:
             well (Well): `Well` object
             protein_ids (list[str]): List of protein ids
+            target_species (str): Species ID of the target species which should be detected.
 
         Returns:
             bool: True if the well contains a catalyst and another species, False otherwise
@@ -308,8 +330,14 @@ class Plate_to_EnzymeMLDocument:
                 if state.contributes_to_signal:
                     protein_contributes = True
 
-        if contains_protein and not protein_contributes:
-            logger.debug(f"Well {well.id} contains a catalyst.")
+        # check if the target species is present
+        target_species_present = False
+        for state in photo_measurement.blank_states:
+            if state.species_id == target_species:
+                target_species_present = True
+
+        if contains_protein and not protein_contributes and target_species_present:
+            logger.debug(f"Well {well.id} is catalyzed.")
             return True
 
         return False
@@ -328,7 +356,7 @@ class Plate_to_EnzymeMLDocument:
             )
 
     @staticmethod
-    def map_protein(protein: Protein) -> pe.Protein:
+    def map_protein(protein: Protein, vessel_id: str) -> pe.Protein:
         if protein.ld_id_url:
             return pe.Protein(
                 id=protein.id,
@@ -336,6 +364,7 @@ class Plate_to_EnzymeMLDocument:
                 name=protein.name,
                 constant=protein.constant,
                 sequence=protein.sequence,
+                vessel_id=vessel_id,
             )
         else:
             return pe.Protein(
@@ -343,20 +372,25 @@ class Plate_to_EnzymeMLDocument:
                 name=protein.name,
                 constant=protein.constant,
                 sequence=protein.sequence,
+                vessel_id=vessel_id,
             )
 
     @staticmethod
-    def map_small_molecule(molecule: Molecule) -> pe.SmallMolecule:
+    def map_small_molecule(molecule: Molecule, vessel_id: str) -> pe.SmallMolecule:
         if molecule.ld_id_url:
             return pe.SmallMolecule(
                 id=molecule.id,
                 ld_id=molecule.ld_id_url,
                 name=molecule.name,
                 constant=molecule.constant,
+                vessel_id=vessel_id,
             )
         else:
             return pe.SmallMolecule(
-                id=molecule.id, name=molecule.name, constant=molecule.constant
+                vessel_id=vessel_id,
+                id=molecule.id,
+                name=molecule.name,
+                constant=molecule.constant,
             )
 
     def _handle_wavelength(self):
