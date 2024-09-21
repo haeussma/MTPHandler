@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import pandas as pd
 
-from MTPHandler.model import Plate, Well
-from MTPHandler.readers.utils import id_to_xy
-from MTPHandler.units import C, second
+from mtphandler.model import Plate, Well
+from mtphandler.readers.utils import id_to_xy
+from mtphandler.units import C, second
 
 
 def read_multiskan_sky(

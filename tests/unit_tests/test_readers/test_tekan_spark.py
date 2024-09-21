@@ -1,8 +1,8 @@
 import pytest
 
-from MTPHandler.model import Plate
-from MTPHandler.readers import read_tekan_spark
-from MTPHandler.units import C
+from mtphandler.model import Plate
+from mtphandler.readers import read_tekan_spark
+from mtphandler.units import C
 
 ph = 6.9
 

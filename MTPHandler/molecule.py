@@ -6,7 +6,7 @@ from calipytion.tools.calibrator import Calibrator
 from calipytion.units import C
 from pydantic import BaseModel, ConfigDict, Field
 
-from MTPHandler.model import UnitDefinition
+from mtphandler.model import UnitDefinition
 
 
 class Molecule(BaseModel):

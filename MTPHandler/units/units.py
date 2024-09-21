@@ -3,13 +3,13 @@ from functools import partial
 
 from pydantic import model_validator
 
-from MTPHandler.model import (
+from mtphandler.model import (
     BaseUnit as _BaseUnit,
 )
-from MTPHandler.model import (
+from mtphandler.model import (
     UnitDefinition as _UnitDefinition,
 )
-from MTPHandler.model import (
+from mtphandler.model import (
     UnitType,
 )
 

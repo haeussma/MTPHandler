@@ -5,9 +5,9 @@ from datetime import datetime
 import pandas as pd
 from typing_extensions import Optional
 
-from MTPHandler.model import Plate
-from MTPHandler.readers.utils import id_to_xy
-from MTPHandler.units import C, second
+from mtphandler.model import Plate
+from mtphandler.readers.utils import id_to_xy
+from mtphandler.units import C, second
 
 
 def read_tekan_spark(
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     from devtools import pprint
 
     path = "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/tekan_spark.xlsx"
-    from MTPHandler.model import Plate
+    from mtphandler.model import Plate
 
     p = read_tekan_spark(path, 7.4)
 

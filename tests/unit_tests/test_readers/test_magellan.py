@@ -1,6 +1,6 @@
-from MTPHandler.model import Plate
-from MTPHandler.readers import read_tekan_magellan
-from MTPHandler.units import second
+from mtphandler.model import Plate
+from mtphandler.readers import read_tekan_magellan
+from mtphandler.units import second
 
 
 def test_magellan():

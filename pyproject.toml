@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "MTPHandler"
+name = "mtphandler"
 version = "0.2.4"
 description = "Tool to work with microtiter plate data."
 authors = ["haeussma <83341109+haeussma@users.noreply.github.com>"]
 license = "MIT License"
 readme = "README.md"
-packages = [{ include = "MTPHandler" }]
-include = ["MTPHandler/units/ontomaps.toml"]
+packages = [{ include = "mtphandler" }]
+include = ["mtphandler/units/ontomaps.toml"]
 
 
 [tool.poetry.dependencies]

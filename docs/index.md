@@ -2,16 +2,16 @@
 
 ## ℹ️ Overview
 
-MTPHandler is a tool for managing and processing data from microtiter plates. It allows to directly read in the output files of various photometers, enabling low friction data processing. The tool facilitates a workflow for reading in reading in raw data, assigning molecules with their respective concentration and and unit to wells. Furthermore, wells for creating a standard curve can be automatically detected and applied to different calibration models, which can be used to calculate the concentration of unknown samples. Finally, the plate data can be transformed into time-course concentration data in the EnzymeML format for subsequent analysis of the concentration data.
+`mtphandler` is a tool for managing and processing data from microtiter plates. It allows to directly read in the output files of various photometers, enabling low friction data processing. The tool facilitates a workflow for reading in reading in raw data, assigning molecules with their respective concentration and and unit to wells. Furthermore, wells for creating a standard curve can be automatically detected and applied to different calibration models, which can be used to calculate the concentration of unknown samples. Finally, the plate data can be transformed into time-course concentration data in the EnzymeML format for subsequent analysis of the concentration data.
 
 ``` mermaid
 graph LR
   AP[🧪 Plate Reader] --> A[📄 Output File];
   style AP fill:transparent,stroke:#000,stroke-width:2px;
-A -->|read| B{MTPHandler}
+A -->|read| B{mtphandler}
   style B stroke-width:4px
   subgraph in Jupyter Notebook
-    subgraph with MTPHandler
+    subgraph with mtphandler
         B --> B1[Enrich Data with Metadata]
         B1 --> B2[Blank Data]
         B2 --> B3[Create and Apply Calibration Models]
@@ -60,10 +60,10 @@ The following table lists the currently supported plate readers output files:
 
 ## 📦 Installation
 
-Install `MTPHandler` via pip:
+Install `mtphandler` via pip:
 
 ```bash
-pip install MTPHandler # 🚧 not released yet
+pip install mtphandler # 🚧 not released yet
 ```
 or from source:
 

@@ -1,4 +1,4 @@
-from MTPHandler.model import Well
+from mtphandler.model import Well
 
 # regex patterns
 WELL_ID_PATTERN = r"[A-H][0-9]{1,2}"

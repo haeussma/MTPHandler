@@ -1,10 +1,10 @@
 import numpy as np
 import pytest
 
-from MTPHandler import PlateManager
-from MTPHandler.model import Plate
-from MTPHandler.molecule import Molecule
-from MTPHandler.units import C, mmol, s, ul
+from mtphandler import PlateManager
+from mtphandler.model import Plate
+from mtphandler.molecule import Molecule
+from mtphandler.units import C, mmol, s, ul
 
 
 # create an artificaial plate with some wells and species

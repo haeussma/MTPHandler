@@ -1,8 +1,8 @@
 import numpy as np
 
-from MTPHandler.model import Plate
-from MTPHandler.readers import read_multiskan_spectrum_1500
-from MTPHandler.units import C, minute
+from mtphandler.model import Plate
+from mtphandler.readers import read_multiskan_spectrum_1500
+from mtphandler.units import C, minute
 
 time = np.linspace(0, 15, 31).tolist()
 

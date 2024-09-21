@@ -7,8 +7,8 @@ import numpy as np
 import pandas as pd
 from pyenzyme.model import UnitDefinition
 
-from MTPHandler.model import Plate, Well
-from MTPHandler.units import C, nm
+from mtphandler.model import Plate, Well
+from mtphandler.units import C, nm
 
 
 def read_spectramax(
@@ -120,7 +120,7 @@ def _coordinates_to_id(x: int, y: int) -> str:
 
 
 if __name__ == "__main__":
-    from MTPHandler.units import s
+    from mtphandler.units import s
 
     path = "tests/data/ABTS_EnzymeML_340nm_420nm_2.5x_pH3_25deg.txt"
 

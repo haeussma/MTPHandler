@@ -4,7 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from MTPHandler.model import Plate
+from mtphandler.model import Plate
 
 
 def visualize_plate(

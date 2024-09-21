@@ -6,8 +6,8 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 
-from MTPHandler.model import Plate, UnitDefinition
-from MTPHandler.units import C, nm
+from mtphandler.model import Plate, UnitDefinition
+from mtphandler.units import C, nm
 
 
 def read_multiskan_spectrum_1500(
@@ -175,8 +175,8 @@ if __name__ == "__main__":
     import numpy as np
     from devtools import pprint
 
-    from MTPHandler.model import Plate
-    from MTPHandler.units import C, min
+    from mtphandler.model import Plate
+    from mtphandler.units import C, min
 
     path = "docs/examples/data/multiskan_spectrum_1500.txt"
 

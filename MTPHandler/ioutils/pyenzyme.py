@@ -5,8 +5,8 @@ from loguru import logger
 from pyenzyme.model import DataTypes
 from pyenzyme.model import UnitDefinition as EnzML_UnitDef
 
-from MTPHandler.model import InitCondition, PhotometricMeasurement, Plate, Well
-from MTPHandler.molecule import Molecule, Protein
+from mtphandler.model import InitCondition, PhotometricMeasurement, Plate, Well
+from mtphandler.molecule import Molecule, Protein
 
 
 class Plate_to_EnzymeMLDocument:

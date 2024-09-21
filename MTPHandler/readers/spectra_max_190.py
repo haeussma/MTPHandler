@@ -5,9 +5,9 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
-from MTPHandler.model import Plate, Well
-from MTPHandler.readers.utils import id_to_xy, xy_to_id
-from MTPHandler.units import C, second
+from mtphandler.model import Plate, Well
+from mtphandler.readers.utils import id_to_xy, xy_to_id
+from mtphandler.units import C, second
 
 
 class WrongParserError(Exception):

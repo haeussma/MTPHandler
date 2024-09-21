@@ -10,15 +10,15 @@ from pydantic import BaseModel, Field, model_validator
 from pyenzyme import EnzymeMLDocument
 from rich import print
 
-from MTPHandler.model import (
+from mtphandler.model import (
     BlankState,
     PhotometricMeasurement,
     Plate,
     UnitDefinition,
     Well,
 )
-from MTPHandler.molecule import Molecule, Protein
-from MTPHandler.tools import (
+from mtphandler.molecule import Molecule, Protein
+from mtphandler.tools import (
     get_measurement,
     get_species_condition,
     handle_blank_status,
@@ -26,8 +26,8 @@ from MTPHandler.tools import (
     pubchem_request_molecule_name,
     well_contains_species,
 )
-from MTPHandler.units import C
-from MTPHandler.visualize import visualize_plate
+from mtphandler.units import C
+from mtphandler.visualize import visualize_plate
 
 ASSIGN_CASE = Literal["rows", "columns", "all", "all except"]
 ASSIGN_CASE_VALUES: Tuple[ASSIGN_CASE, ...] = get_args(ASSIGN_CASE)
@@ -342,7 +342,7 @@ class PlateManager(BaseModel):
         cutoff: float | None = None,
         wavelength: float | None = None,
     ):
-        from MTPHandler.ioutils.calipytion import initialize_calibrator
+        from mtphandler.ioutils.calipytion import initialize_calibrator
 
         if wavelength is None:
             wavelength = self._handle_wavelength()
@@ -849,7 +849,7 @@ class PlateManager(BaseModel):
         Returns:
             EnzymeMLDocument: [`pyenzyme`](https://github.com/EnzymeML/PyEnzyme) `EnzymeMLDocument` object.
         """
-        from MTPHandler.ioutils.pyenzyme import Plate_to_EnzymeMLDocument
+        from mtphandler.ioutils.pyenzyme import Plate_to_EnzymeMLDocument
 
         if name is None:
             name = self.name
@@ -962,7 +962,7 @@ class PlateManager(BaseModel):
         Returns:
             PlateManager: PlateManager object.
         """
-        from MTPHandler.readers import read_spectra_max_190 as reader
+        from mtphandler.readers import read_spectra_max_190 as reader
 
         data: dict[str, Any] = {"plate": reader(path, ph)}
 
@@ -996,7 +996,7 @@ class PlateManager(BaseModel):
         Returns:
             _type_: _description_
         """
-        from MTPHandler.readers import read_multiskan_spectrum_1500 as reader
+        from mtphandler.readers import read_multiskan_spectrum_1500 as reader
 
         data: dict[str, Any] = {
             "plate": reader(
@@ -1031,7 +1031,7 @@ class PlateManager(BaseModel):
         Returns:
             PlateManager: PlateManager object.
         """
-        from MTPHandler.readers import read_tekan_spark as reader
+        from mtphandler.readers import read_tekan_spark as reader
 
         data: dict[str, Any] = {"plate": reader(path, ph)}
 
@@ -1057,7 +1057,7 @@ class PlateManager(BaseModel):
         Returns:
             PlateManager: PlateManager object.
         """
-        from MTPHandler.readers import read_biotek as reader
+        from mtphandler.readers import read_biotek as reader
 
         data: dict[str, Any] = {"plate": reader(path, ph)}
 
@@ -1085,7 +1085,7 @@ class PlateManager(BaseModel):
         Returns:
             PlateManager: PlateManager object.
         """
-        from MTPHandler.readers import read_tekan_magellan as reader
+        from mtphandler.readers import read_tekan_magellan as reader
 
         data: dict[str, Any] = {"plate": reader(path, wavelength, ph)}
 
@@ -1111,7 +1111,7 @@ class PlateManager(BaseModel):
         Returns:
             PlateManager: _description_
         """
-        from MTPHandler.readers import read_multiskan_sky as reader
+        from mtphandler.readers import read_multiskan_sky as reader
 
         data: dict[str, Any] = {"plate": reader(path, ph)}
 
@@ -1140,7 +1140,7 @@ if __name__ == "__main__":
     # print(h1.measurements[0].absorption[-1])
 
     # path = "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/tekan_spark.xlsx"
-    # from MTPHandler.model import Plate
+    # from mtphandler.model import Plate
 
     # p = PlateManager.read_tecan_spark(path, 7.4)
 
@@ -1158,7 +1158,7 @@ if __name__ == "__main__":
     #     "/Users/max/Documents/training_course/jules/Spectramax190 molecular Devices.txt"
     # )
 
-    # from MTPHandler.units import mM
+    # from mtphandler.units import mM
 
     # pm = PlateManager.read_spectra_max_190(path, ph=7)
     # # pm.visualize()
@@ -1176,7 +1176,7 @@ if __name__ == "__main__":
     #     "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/ BioTek_Epoch2.xlsx"
     # )
 
-    # from MTPHandler.units import mM
+    # from mtphandler.units import mM
 
     # p = PlateManager.read_biotek(path, ph=7.4)
     # p.visualize()
@@ -1202,7 +1202,7 @@ if __name__ == "__main__":
     #     f.write(enz.model_dump_json(indent=4))
     # print(len(enz.measurements))
 
-    # from MTPHandler.units import C, min
+    # from mtphandler.units import C, min
 
     # path = "docs/examples/data/multiskan_spectrum_1500.txt"
 

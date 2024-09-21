@@ -4,9 +4,9 @@ import numpy as np
 from calipytion import Calibrator
 from calipytion.model import Sample, Standard, UnitDefinition
 
-from MTPHandler.model import Plate, Well
-from MTPHandler.molecule import Molecule
-from MTPHandler.tools import (
+from mtphandler.model import Plate, Well
+from mtphandler.molecule import Molecule
+from mtphandler.tools import (
     get_measurement,
     get_species_condition,
     measurement_is_blanked_for,

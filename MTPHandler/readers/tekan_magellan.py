@@ -7,9 +7,9 @@ from datetime import datetime
 
 import pandas as pd
 
-from MTPHandler.model import Plate
-from MTPHandler.readers.utils import WELL_ID_PATTERN, id_to_xy
-from MTPHandler.units import C, second
+from mtphandler.model import Plate
+from mtphandler.readers.utils import WELL_ID_PATTERN, id_to_xy
+from mtphandler.units import C, second
 
 
 def read_tekan_magellan(

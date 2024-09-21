@@ -1,8 +1,8 @@
 import pytest
 
-from MTPHandler.model import Plate
-from MTPHandler.readers import read_multiskan_sky
-from MTPHandler.units import C, minute
+from mtphandler.model import Plate
+from mtphandler.readers import read_multiskan_sky
+from mtphandler.units import C, minute
 
 ph = 6.9
 

@@ -3,7 +3,7 @@ import importlib.resources as pkg_resources
 import httpx
 import toml
 
-from MTPHandler.model import InitCondition, PhotometricMeasurement, Plate, Well
+from mtphandler.model import InitCondition, PhotometricMeasurement, Plate, Well
 
 
 def read_static_file(path, filename: str):

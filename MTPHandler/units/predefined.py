@@ -1,12 +1,12 @@
-from MTPHandler.model import UnitType
-from MTPHandler.tools import read_static_file
+from mtphandler.model import UnitType
+from mtphandler.tools import read_static_file
 
 from .units import BaseUnit, Prefix, UnitDefinition
 
 BaseUnit.model_rebuild()
 UnitDefinition.model_rebuild()
 
-ONTOMAPS = read_static_file("MTPHandler.units", "ontomaps.toml")
+ONTOMAPS = read_static_file("mtphandler.units", "ontomaps.toml")
 
 
 class Unit:

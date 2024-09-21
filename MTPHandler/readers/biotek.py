@@ -6,10 +6,10 @@ from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 
-from MTPHandler.model import Plate
-from MTPHandler.readers.utils import id_to_xy
-from MTPHandler.tools import get_well
-from MTPHandler.units import C, second
+from mtphandler.model import Plate
+from mtphandler.readers.utils import id_to_xy
+from mtphandler.tools import get_well
+from mtphandler.units import C, second
 
 PATTERN_WAVELENGTH = r"Wavelengths:\s+(\d{1,4})([\s,;]+\d{1,4})*"
 
