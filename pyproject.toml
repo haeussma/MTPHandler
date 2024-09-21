@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mtphandler"
-version = "0.2.4"
+version = "0.2.5"
 description = "Tool to work with microtiter plate data."
 authors = ["haeussma <83341109+haeussma@users.noreply.github.com>"]
 license = "MIT License"
