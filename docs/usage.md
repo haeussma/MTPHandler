@@ -525,6 +525,8 @@ To quickly inspect the generated `EnzymeMLDocument`, the data can be visualized 
     plt.legend(title="Measurement ID")
     plt.show()
     ```
+    
+    ![EnzymeMLDocument Visualization](images/enzymeml_plot.png)
 
 ### Serialize the EnzymeML Document
 
