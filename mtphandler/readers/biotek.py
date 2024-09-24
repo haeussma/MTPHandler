@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import numpy as np
 import pandas as pd
@@ -48,7 +48,8 @@ def read_biotek(
 
     date = get_row_by_value(df, "Date")[-1]
     time = get_row_by_value(df, "Time")[-1]
-    timestamp = datetime.combine(date, time.time()).isoformat()
+    timestamp = str(date)
+    # timestamp = str(datetime.combine(date, time).isoformat())
 
     row_index_int_map = df.iloc[:, 0].apply(lambda cell: isinstance(cell, int))
     data_block_starts = [
@@ -59,6 +60,10 @@ def read_biotek(
     wavelengths = extract_integers(wavelengths_cell)
 
     measurement_int_cell = str(df.iloc[15, 1])
+    if "add final component" in measurement_int_cell.lower():
+        measurement_int_cell = str(df.iloc[16, 1])
+    print(measurement_int_cell)
+
     measurement_interval = parse_measurement_interval(measurement_int_cell)
 
     plate = Plate(
@@ -132,8 +137,6 @@ def get_row_by_value(df: pd.DataFrame, value: str) -> list:
 
 
 if __name__ == "__main__":
-    path = (
-        "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/ BioTek_Epoch2.xlsx"
-    )
+    path = "docs/examples/data/20240719_biotek_FDH.V9_0.02enzyme_kinetics.xlsx"
 
     print(read_biotek(path, ph=7.4))
