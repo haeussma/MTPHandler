@@ -695,7 +695,9 @@ class PlateManager(BaseModel):
         wavelength: float,
     ) -> list[Well]:
         wells = []
-        wavelength = self._handle_wavelength()
+
+        if wavelength is None:
+            wavelength = self._handle_wavelength()
 
         protein_ids = [protein.id for protein in self.proteins]
         molecules_ids = [molecule.id for molecule in self.molecules]
