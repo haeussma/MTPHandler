@@ -162,6 +162,7 @@ class Plate_to_EnzymeMLDocument:
                 id=well.id,
                 name="photometric measurement",
                 ph=well.ph,
+                group_id="",
                 temperature=self.temperature,
                 temperature_unit=EnzML_UnitDef(
                     **self.plate.temperature_unit.model_dump()
