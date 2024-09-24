@@ -5,7 +5,13 @@ from loguru import logger
 from pyenzyme.model import DataTypes
 from pyenzyme.model import UnitDefinition as EnzML_UnitDef
 
-from mtphandler.model import InitCondition, PhotometricMeasurement, Plate, Well
+from mtphandler.model import (
+    InitCondition,
+    PhotometricMeasurement,
+    Plate,
+    UnitDefinition,
+    Well,
+)
 from mtphandler.molecule import Molecule, Protein
 
 
@@ -131,6 +137,8 @@ class Plate_to_EnzymeMLDocument:
                 None,
             )
 
+            time_unit = well.measurements[0].time_unit
+
             # Skip wells without a measurement at the specified wavelength
             if not photo_measurement:
                 continue
@@ -176,7 +184,7 @@ class Plate_to_EnzymeMLDocument:
             )
 
             # Add species data to the measurement based on the initial conditions of the well
-            self.add_to_species_data(enzml_meas, well.init_conditions)
+            self.add_to_species_data(enzml_meas, well.init_conditions, time_unit)
 
             # Add absorption data to the species data of the measurement
             self.add_absorption_data(
@@ -344,7 +352,9 @@ class Plate_to_EnzymeMLDocument:
 
     @staticmethod
     def add_to_species_data(
-        measurement: pe.Measurement, init_conditions: list[InitCondition]
+        measurement: pe.Measurement,
+        init_conditions: list[InitCondition],
+        time_unit: UnitDefinition,
     ):
         for condition in init_conditions:
             measurement.add_to_species_data(
@@ -352,8 +362,10 @@ class Plate_to_EnzymeMLDocument:
                 initial=condition.init_conc,
                 prepared=condition.init_conc,
                 data_unit=EnzML_UnitDef(**condition.conc_unit.model_dump()),
+                time_unit=EnzML_UnitDef(**time_unit.model_dump()),
                 data_type=DataTypes.CONCENTRATION,
             )
+            print(f"added temp unit {time_unit.name}")
 
     @staticmethod
     def map_protein(protein: Protein, vessel_id: str) -> pe.Protein:
