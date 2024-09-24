@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mtphandler"
-version = "0.2.9"
+version = "0.2.10"
 description = "Tool to work with microtiter plate data."
 authors = ["haeussma <83341109+haeussma@users.noreply.github.com>"]
 license = "MIT License"
@@ -17,7 +17,6 @@ plotly = "^5.18.0"
 pandas = { version = ">=2.0,<2.2.2", extras = ["excel"] } # Due to Colab
 pyenzyme = { git = "https://github.com/EnzymeML/PyEnzyme.git", branch = "v2-migration" }
 calipytion = { git = "https://github.com/FAIRChemistry/CaliPytion.git"}
-ipython = "^8.21.0"
 rich = "^13.7.1"
 httpx = "^0.27.2"
 
