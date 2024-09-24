@@ -60,7 +60,8 @@ class Plate_to_EnzymeMLDocument:
             self._init_calibrators()
 
         # Check if a wavelength was specified, otherwise set it to the only wavelength measured
-        self._handle_wavelength()
+        if self.wavelength is None:
+            self._handle_wavelength()
 
     def convert(self):
         """
