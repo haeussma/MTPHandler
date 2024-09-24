@@ -770,7 +770,8 @@ class PlateManager(BaseModel):
             ValueError: If no wells are found to calculate the absorption contribution of the species.
         """
 
-        wavelength = self._handle_wavelength()
+        if wavelength is None:
+            wavelength = self._handle_wavelength()
 
         blanking_wells = self._find_blanking_wells(
             target=species, wavelength=wavelength
