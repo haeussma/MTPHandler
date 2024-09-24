@@ -18,7 +18,7 @@
                         "exponent": 1,
                         "multiplier": null,
                         "scale": 1.0,
-                        "ld_id": "enzml:BaseUnit/4de76360-6ee2-4a03-a28d-4924ae5a4cd3",
+                        "ld_id": "enzml:BaseUnit/c36ea9fc-22f9-4b82-97ec-83e6f6e6ada8",
                         "ld_type": [
                             "enzml:BaseUnit"
                         ],
@@ -29,7 +29,7 @@
                         }
                     }
                 ],
-                "ld_id": "enzml:UnitDefinition/176aabe7-4917-490a-9acf-71146dd4a0c3",
+                "ld_id": "enzml:UnitDefinition/9c9dd970-8a1e-4c6e-ba3d-70bc20f1a034",
                 "ld_type": [
                     "OBO:UO_0000000"
                 ],
@@ -40,7 +40,7 @@
                 }
             },
             "constant": true,
-            "ld_id": "enzml:Vessel/b621f29a-362d-4fdc-9cee-678aa8bbb8e9",
+            "ld_id": "enzml:Vessel/0acd2a10-938c-4a7d-9d50-bf1b24be025c",
             "ld_type": [
                 "enzml:Vessel",
                 "OBO:OBI_0400081"
@@ -69,7 +69,7 @@
             "organism": null,
             "organism_tax_id": null,
             "references": [],
-            "ld_id": "enzml:Protein/e6af5b67-c24c-4c4a-97fd-61ec9fc55ae1",
+            "ld_id": "enzml:Protein/f467fa4d-51ea-46c3-8a04-7d01f309544f",
             "ld_type": [
                 "enzml:Protein",
                 "schema:Protein"
@@ -107,7 +107,7 @@
             "organism": null,
             "organism_tax_id": null,
             "references": [],
-            "ld_id": "enzml:Protein/91bbcb6b-a676-4978-ba76-3d94fa990aed",
+            "ld_id": "enzml:Protein/ff8cc01e-0707-486b-a9e1-eb8327d4b473",
             "ld_type": [
                 "enzml:Protein",
                 "schema:Protein"
@@ -145,7 +145,7 @@
             "organism": null,
             "organism_tax_id": null,
             "references": [],
-            "ld_id": "enzml:Protein/640feabd-3f7a-4f5c-af08-2f97434f37ff",
+            "ld_id": "enzml:Protein/a1487a12-05be-4ab7-a6f9-6d01dae6e07c",
             "ld_type": [
                 "enzml:Protein",
                 "schema:Protein"
@@ -183,7 +183,7 @@
             "organism": null,
             "organism_tax_id": null,
             "references": [],
-            "ld_id": "enzml:Protein/cde80b4e-8912-4c15-825d-dbecb4bb1527",
+            "ld_id": "enzml:Protein/33d3d393-a69f-4828-aed7-9bb5246feafe",
             "ld_type": [
                 "enzml:Protein",
                 "schema:Protein"
@@ -223,7 +223,7 @@
             "inchi": null,
             "inchikey": null,
             "references": [],
-            "ld_id": "enzml:SmallMolecule/4a893df6-fbc3-409d-97cf-f030a26664d2",
+            "ld_id": "enzml:SmallMolecule/f0b34861-6750-4bcd-a31d-655eec2b1d13",
             "ld_type": [
                 "enzml:SmallMolecule"
             ],
@@ -414,92 +414,6 @@
             "name": "photometric measurement",
             "species_data": [
                 {
-                    "species_id": "BUFFER",
-                    "initial": 50.0,
-                    "data_unit": {
-                        "id": null,
-                        "name": "umol / l",
-                        "base_units": [
-                            {
-                                "kind": "mole",
-                                "exponent": 1,
-                                "multiplier": null,
-                                "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            },
-                            {
-                                "kind": "litre",
-                                "exponent": -1,
-                                "multiplier": null,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000064",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
-                    "prepared": 50.0,
-                    "data": [],
-                    "time": [],
-                    "time_unit": {
-                        "id": null,
-                        "name": "s",
-                        "base_units": [
-                            {
-                                "kind": "second",
-                                "exponent": 1,
-                                "multiplier": 60.0,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000031",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/4884d2d8-f60b-40cd-b63e-f29fc4e7a19a",
-                    "ld_type": [
-                        "enzml:MeasurementData"
-                    ],
-                    "ld_context": {
-                        "enzml": "http://www.enzymeml.org/v2/",
-                        "schema": "https://schema.org/",
-                        "OBO": "http://purl.obolibrary.org/obo/",
-                        "species_id": {
-                            "@type": "@id"
-                        }
-                    }
-                },
-                {
                     "species_id": "TNB",
                     "initial": -1.7261984578282223,
                     "data_unit": {
@@ -511,7 +425,7 @@
                                 "exponent": 1,
                                 "multiplier": null,
                                 "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -524,7 +438,7 @@
                                 "exponent": -1,
                                 "multiplier": null,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -1998,7 +1912,7 @@
                                 "exponent": 1,
                                 "multiplier": 60.0,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -2016,230 +1930,7 @@
                         }
                     },
                     "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/21ee7697-db11-454f-8970-fb4084280393",
-                    "ld_type": [
-                        "enzml:MeasurementData"
-                    ],
-                    "ld_context": {
-                        "enzml": "http://www.enzymeml.org/v2/",
-                        "schema": "https://schema.org/",
-                        "OBO": "http://purl.obolibrary.org/obo/",
-                        "species_id": {
-                            "@type": "@id"
-                        }
-                    }
-                },
-                {
-                    "species_id": "TmSAHH",
-                    "initial": 5.0,
-                    "data_unit": {
-                        "id": null,
-                        "name": "umol / l",
-                        "base_units": [
-                            {
-                                "kind": "mole",
-                                "exponent": 1,
-                                "multiplier": null,
-                                "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            },
-                            {
-                                "kind": "litre",
-                                "exponent": -1,
-                                "multiplier": null,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000064",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
-                    "prepared": 5.0,
-                    "data": [],
-                    "time": [],
-                    "time_unit": {
-                        "id": null,
-                        "name": "s",
-                        "base_units": [
-                            {
-                                "kind": "second",
-                                "exponent": 1,
-                                "multiplier": 60.0,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000031",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/2092609e-1f8c-4be4-85e1-6945c450eb08",
-                    "ld_type": [
-                        "enzml:MeasurementData"
-                    ],
-                    "ld_context": {
-                        "enzml": "http://www.enzymeml.org/v2/",
-                        "schema": "https://schema.org/",
-                        "OBO": "http://purl.obolibrary.org/obo/",
-                        "species_id": {
-                            "@type": "@id"
-                        }
-                    }
-                }
-            ],
-            "group_id": "",
-            "ph": 7.4,
-            "temperature": 37.04466019417476,
-            "temperature_unit": {
-                "id": null,
-                "name": "Celsius",
-                "base_units": [
-                    {
-                        "kind": "celsius",
-                        "exponent": 1,
-                        "multiplier": null,
-                        "scale": 1.0,
-                        "ld_id": "md:BaseUnit/8610f7fd-46de-4f7c-be1d-7e6758cf172c",
-                        "ld_type": [
-                            "md:BaseUnit"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    }
-                ],
-                "ld_id": "md:UnitDefinition/3c7b9a21-259d-4af5-adff-4698f34b3675",
-                "ld_type": [
-                    "OBO:UO_0000000"
-                ],
-                "ld_context": {
-                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                }
-            },
-            "ld_id": "enzml:Measurement/64334a9c-e4d9-44d6-bd16-bfb3125abb13",
-            "ld_type": [
-                "enzml:Measurement"
-            ],
-            "ld_context": {
-                "enzml": "http://www.enzymeml.org/v2/",
-                "schema": "https://schema.org/",
-                "OBO": "http://purl.obolibrary.org/obo/",
-                "id": {
-                    "@id": "schema:identifier",
-                    "@type": "@id"
-                },
-                "group_id": {
-                    "@type": "@id"
-                }
-            }
-        },
-        {
-            "id": "F8",
-            "name": "photometric measurement",
-            "species_data": [
-                {
-                    "species_id": "Hyc",
-                    "initial": 0.0,
-                    "data_unit": {
-                        "id": null,
-                        "name": "umol / l",
-                        "base_units": [
-                            {
-                                "kind": "mole",
-                                "exponent": 1,
-                                "multiplier": null,
-                                "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            },
-                            {
-                                "kind": "litre",
-                                "exponent": -1,
-                                "multiplier": null,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000064",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
-                    "prepared": 0.0,
-                    "data": [],
-                    "time": [],
-                    "time_unit": {
-                        "id": null,
-                        "name": "s",
-                        "base_units": [
-                            {
-                                "kind": "second",
-                                "exponent": 1,
-                                "multiplier": 60.0,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000031",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/6a2c12b1-d445-4566-a039-fb90b9412cd4",
+                    "ld_id": "enzml:MeasurementData/34d828ce-ff20-439a-a191-f4cb795e1767",
                     "ld_type": [
                         "enzml:MeasurementData"
                     ],
@@ -2264,7 +1955,7 @@
                                 "exponent": 1,
                                 "multiplier": null,
                                 "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -2277,7 +1968,7 @@
                                 "exponent": -1,
                                 "multiplier": null,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -2307,7 +1998,7 @@
                                 "exponent": 1,
                                 "multiplier": 60.0,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -2325,7 +2016,7 @@
                         }
                     },
                     "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/c9c2f045-78a4-42fc-a5d3-0ba4008dda54",
+                    "ld_id": "enzml:MeasurementData/96461cc4-6722-4c2e-9db7-eedc8e0c77f2",
                     "ld_type": [
                         "enzml:MeasurementData"
                     ],
@@ -2339,8 +2030,8 @@
                     }
                 },
                 {
-                    "species_id": "DTNB",
-                    "initial": 500.0,
+                    "species_id": "TmSAHH",
+                    "initial": 5.0,
                     "data_unit": {
                         "id": null,
                         "name": "umol / l",
@@ -2350,7 +2041,7 @@
                                 "exponent": 1,
                                 "multiplier": null,
                                 "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -2363,7 +2054,7 @@
                                 "exponent": -1,
                                 "multiplier": null,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -2381,7 +2072,7 @@
                         }
                     },
                     "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
-                    "prepared": 500.0,
+                    "prepared": 5.0,
                     "data": [],
                     "time": [],
                     "time_unit": {
@@ -2393,7 +2084,7 @@
                                 "exponent": 1,
                                 "multiplier": 60.0,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -2411,7 +2102,7 @@
                         }
                     },
                     "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/462ada34-453a-45ad-ac6e-c2f3d10d7f01",
+                    "ld_id": "enzml:MeasurementData/d342cd43-95ca-4f80-883d-492db52674d9",
                     "ld_type": [
                         "enzml:MeasurementData"
                     ],
@@ -2423,7 +2114,58 @@
                             "@type": "@id"
                         }
                     }
+                }
+            ],
+            "group_id": "",
+            "ph": 7.4,
+            "temperature": 37.04466019417476,
+            "temperature_unit": {
+                "id": null,
+                "name": "Celsius",
+                "base_units": [
+                    {
+                        "kind": "celsius",
+                        "exponent": 1,
+                        "multiplier": null,
+                        "scale": 1.0,
+                        "ld_id": "md:BaseUnit/1d0db1f3-e710-4e7f-9588-94a7c7bd2e23",
+                        "ld_type": [
+                            "md:BaseUnit"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    }
+                ],
+                "ld_id": "md:UnitDefinition/27947bba-ded5-48fd-b462-f1435ed4c1ea",
+                "ld_type": [
+                    "OBO:UO_0000000"
+                ],
+                "ld_context": {
+                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                }
+            },
+            "ld_id": "enzml:Measurement/6b7d99cc-4e31-42d1-b8d3-2b041cedc33a",
+            "ld_type": [
+                "enzml:Measurement"
+            ],
+            "ld_context": {
+                "enzml": "http://www.enzymeml.org/v2/",
+                "schema": "https://schema.org/",
+                "OBO": "http://purl.obolibrary.org/obo/",
+                "id": {
+                    "@id": "schema:identifier",
+                    "@type": "@id"
                 },
+                "group_id": {
+                    "@type": "@id"
+                }
+            }
+        },
+        {
+            "id": "F8",
+            "name": "photometric measurement",
+            "species_data": [
                 {
                     "species_id": "TNB",
                     "initial": 8.834770961985788,
@@ -2436,7 +2178,7 @@
                                 "exponent": 1,
                                 "multiplier": null,
                                 "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -2449,7 +2191,7 @@
                                 "exponent": -1,
                                 "multiplier": null,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -3923,7 +3665,7 @@
                                 "exponent": 1,
                                 "multiplier": 60.0,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -3941,7 +3683,7 @@
                         }
                     },
                     "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/16262698-8b76-4ce9-972d-8ccc9979b2ea",
+                    "ld_id": "enzml:MeasurementData/5d97e2b4-e717-4aa9-a337-25d8ccf6b8e4",
                     "ld_type": [
                         "enzml:MeasurementData"
                     ],
@@ -3954,229 +3696,6 @@
                         }
                     }
                 },
-                {
-                    "species_id": "SAH",
-                    "initial": 200.0,
-                    "data_unit": {
-                        "id": null,
-                        "name": "umol / l",
-                        "base_units": [
-                            {
-                                "kind": "mole",
-                                "exponent": 1,
-                                "multiplier": null,
-                                "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            },
-                            {
-                                "kind": "litre",
-                                "exponent": -1,
-                                "multiplier": null,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000064",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
-                    "prepared": 200.0,
-                    "data": [],
-                    "time": [],
-                    "time_unit": {
-                        "id": null,
-                        "name": "s",
-                        "base_units": [
-                            {
-                                "kind": "second",
-                                "exponent": 1,
-                                "multiplier": 60.0,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000031",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/0103454f-95e9-4f28-a436-c852a66e3f64",
-                    "ld_type": [
-                        "enzml:MeasurementData"
-                    ],
-                    "ld_context": {
-                        "enzml": "http://www.enzymeml.org/v2/",
-                        "schema": "https://schema.org/",
-                        "OBO": "http://purl.obolibrary.org/obo/",
-                        "species_id": {
-                            "@type": "@id"
-                        }
-                    }
-                },
-                {
-                    "species_id": "TmSAHH",
-                    "initial": 5.0,
-                    "data_unit": {
-                        "id": null,
-                        "name": "umol / l",
-                        "base_units": [
-                            {
-                                "kind": "mole",
-                                "exponent": 1,
-                                "multiplier": null,
-                                "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            },
-                            {
-                                "kind": "litre",
-                                "exponent": -1,
-                                "multiplier": null,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000064",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
-                    "prepared": 5.0,
-                    "data": [],
-                    "time": [],
-                    "time_unit": {
-                        "id": null,
-                        "name": "s",
-                        "base_units": [
-                            {
-                                "kind": "second",
-                                "exponent": 1,
-                                "multiplier": 60.0,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000031",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/8daad601-7785-402c-9887-b7603953c4fd",
-                    "ld_type": [
-                        "enzml:MeasurementData"
-                    ],
-                    "ld_context": {
-                        "enzml": "http://www.enzymeml.org/v2/",
-                        "schema": "https://schema.org/",
-                        "OBO": "http://purl.obolibrary.org/obo/",
-                        "species_id": {
-                            "@type": "@id"
-                        }
-                    }
-                }
-            ],
-            "group_id": "",
-            "ph": 7.4,
-            "temperature": 37.04466019417476,
-            "temperature_unit": {
-                "id": null,
-                "name": "Celsius",
-                "base_units": [
-                    {
-                        "kind": "celsius",
-                        "exponent": 1,
-                        "multiplier": null,
-                        "scale": 1.0,
-                        "ld_id": "md:BaseUnit/8610f7fd-46de-4f7c-be1d-7e6758cf172c",
-                        "ld_type": [
-                            "md:BaseUnit"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    }
-                ],
-                "ld_id": "md:UnitDefinition/3c7b9a21-259d-4af5-adff-4698f34b3675",
-                "ld_type": [
-                    "OBO:UO_0000000"
-                ],
-                "ld_context": {
-                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                }
-            },
-            "ld_id": "enzml:Measurement/0ed92fd2-fc4e-4bee-a036-9c4ddee42f61",
-            "ld_type": [
-                "enzml:Measurement"
-            ],
-            "ld_context": {
-                "enzml": "http://www.enzymeml.org/v2/",
-                "schema": "https://schema.org/",
-                "OBO": "http://purl.obolibrary.org/obo/",
-                "id": {
-                    "@id": "schema:identifier",
-                    "@type": "@id"
-                },
-                "group_id": {
-                    "@type": "@id"
-                }
-            }
-        },
-        {
-            "id": "E9",
-            "name": "photometric measurement",
-            "species_data": [
                 {
                     "species_id": "BUFFER",
                     "initial": 50.0,
@@ -4189,7 +3708,7 @@
                                 "exponent": 1,
                                 "multiplier": null,
                                 "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -4202,7 +3721,7 @@
                                 "exponent": -1,
                                 "multiplier": null,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -4232,7 +3751,7 @@
                                 "exponent": 1,
                                 "multiplier": 60.0,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -4250,7 +3769,7 @@
                         }
                     },
                     "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/9ba2cc83-dd96-4386-af7c-2c2bb449956e",
+                    "ld_id": "enzml:MeasurementData/ffdb3cea-6b6a-4696-b832-627191de6e1f",
                     "ld_type": [
                         "enzml:MeasurementData"
                     ],
@@ -4264,8 +3783,8 @@
                     }
                 },
                 {
-                    "species_id": "TNB",
-                    "initial": -3.3409170817272256,
+                    "species_id": "SAH",
+                    "initial": 200.0,
                     "data_unit": {
                         "id": null,
                         "name": "umol / l",
@@ -4275,7 +3794,7 @@
                                 "exponent": 1,
                                 "multiplier": null,
                                 "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -4288,7 +3807,402 @@
                                 "exponent": -1,
                                 "multiplier": null,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000064",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
+                    "prepared": 200.0,
+                    "data": [],
+                    "time": [],
+                    "time_unit": {
+                        "id": null,
+                        "name": "s",
+                        "base_units": [
+                            {
+                                "kind": "second",
+                                "exponent": 1,
+                                "multiplier": 60.0,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000031",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "is_simulated": false,
+                    "ld_id": "enzml:MeasurementData/09484879-2cad-48af-b12d-a935cfab4f0b",
+                    "ld_type": [
+                        "enzml:MeasurementData"
+                    ],
+                    "ld_context": {
+                        "enzml": "http://www.enzymeml.org/v2/",
+                        "schema": "https://schema.org/",
+                        "OBO": "http://purl.obolibrary.org/obo/",
+                        "species_id": {
+                            "@type": "@id"
+                        }
+                    }
+                },
+                {
+                    "species_id": "Hyc",
+                    "initial": 0.0,
+                    "data_unit": {
+                        "id": null,
+                        "name": "umol / l",
+                        "base_units": [
+                            {
+                                "kind": "mole",
+                                "exponent": 1,
+                                "multiplier": null,
+                                "scale": -6.0,
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            },
+                            {
+                                "kind": "litre",
+                                "exponent": -1,
+                                "multiplier": null,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000064",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
+                    "prepared": 0.0,
+                    "data": [],
+                    "time": [],
+                    "time_unit": {
+                        "id": null,
+                        "name": "s",
+                        "base_units": [
+                            {
+                                "kind": "second",
+                                "exponent": 1,
+                                "multiplier": 60.0,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000031",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "is_simulated": false,
+                    "ld_id": "enzml:MeasurementData/91a653ba-4026-4fb9-9171-e182741921b0",
+                    "ld_type": [
+                        "enzml:MeasurementData"
+                    ],
+                    "ld_context": {
+                        "enzml": "http://www.enzymeml.org/v2/",
+                        "schema": "https://schema.org/",
+                        "OBO": "http://purl.obolibrary.org/obo/",
+                        "species_id": {
+                            "@type": "@id"
+                        }
+                    }
+                },
+                {
+                    "species_id": "TmSAHH",
+                    "initial": 5.0,
+                    "data_unit": {
+                        "id": null,
+                        "name": "umol / l",
+                        "base_units": [
+                            {
+                                "kind": "mole",
+                                "exponent": 1,
+                                "multiplier": null,
+                                "scale": -6.0,
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            },
+                            {
+                                "kind": "litre",
+                                "exponent": -1,
+                                "multiplier": null,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000064",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
+                    "prepared": 5.0,
+                    "data": [],
+                    "time": [],
+                    "time_unit": {
+                        "id": null,
+                        "name": "s",
+                        "base_units": [
+                            {
+                                "kind": "second",
+                                "exponent": 1,
+                                "multiplier": 60.0,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000031",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "is_simulated": false,
+                    "ld_id": "enzml:MeasurementData/0409dcf1-cf05-4376-a733-6d62a84f5b04",
+                    "ld_type": [
+                        "enzml:MeasurementData"
+                    ],
+                    "ld_context": {
+                        "enzml": "http://www.enzymeml.org/v2/",
+                        "schema": "https://schema.org/",
+                        "OBO": "http://purl.obolibrary.org/obo/",
+                        "species_id": {
+                            "@type": "@id"
+                        }
+                    }
+                },
+                {
+                    "species_id": "DTNB",
+                    "initial": 500.0,
+                    "data_unit": {
+                        "id": null,
+                        "name": "umol / l",
+                        "base_units": [
+                            {
+                                "kind": "mole",
+                                "exponent": 1,
+                                "multiplier": null,
+                                "scale": -6.0,
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            },
+                            {
+                                "kind": "litre",
+                                "exponent": -1,
+                                "multiplier": null,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000064",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
+                    "prepared": 500.0,
+                    "data": [],
+                    "time": [],
+                    "time_unit": {
+                        "id": null,
+                        "name": "s",
+                        "base_units": [
+                            {
+                                "kind": "second",
+                                "exponent": 1,
+                                "multiplier": 60.0,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000031",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "is_simulated": false,
+                    "ld_id": "enzml:MeasurementData/558e85ec-08d5-4567-8c62-42a50076bd01",
+                    "ld_type": [
+                        "enzml:MeasurementData"
+                    ],
+                    "ld_context": {
+                        "enzml": "http://www.enzymeml.org/v2/",
+                        "schema": "https://schema.org/",
+                        "OBO": "http://purl.obolibrary.org/obo/",
+                        "species_id": {
+                            "@type": "@id"
+                        }
+                    }
+                }
+            ],
+            "group_id": "",
+            "ph": 7.4,
+            "temperature": 37.04466019417476,
+            "temperature_unit": {
+                "id": null,
+                "name": "Celsius",
+                "base_units": [
+                    {
+                        "kind": "celsius",
+                        "exponent": 1,
+                        "multiplier": null,
+                        "scale": 1.0,
+                        "ld_id": "md:BaseUnit/1d0db1f3-e710-4e7f-9588-94a7c7bd2e23",
+                        "ld_type": [
+                            "md:BaseUnit"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    }
+                ],
+                "ld_id": "md:UnitDefinition/27947bba-ded5-48fd-b462-f1435ed4c1ea",
+                "ld_type": [
+                    "OBO:UO_0000000"
+                ],
+                "ld_context": {
+                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                }
+            },
+            "ld_id": "enzml:Measurement/b5c04d53-d0cc-4241-af6e-4b7fab1f38a7",
+            "ld_type": [
+                "enzml:Measurement"
+            ],
+            "ld_context": {
+                "enzml": "http://www.enzymeml.org/v2/",
+                "schema": "https://schema.org/",
+                "OBO": "http://purl.obolibrary.org/obo/",
+                "id": {
+                    "@id": "schema:identifier",
+                    "@type": "@id"
+                },
+                "group_id": {
+                    "@type": "@id"
+                }
+            }
+        },
+        {
+            "id": "E9",
+            "name": "photometric measurement",
+            "species_data": [
+                {
+                    "species_id": "TNB",
+                    "initial": -3.3409170817272256,
+                    "data_unit": {
+                        "id": null,
+                        "name": "umol / l",
+                        "base_units": [
+                            {
+                                "kind": "mole",
+                                "exponent": 1,
+                                "multiplier": null,
+                                "scale": -6.0,
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            },
+                            {
+                                "kind": "litre",
+                                "exponent": -1,
+                                "multiplier": null,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -5762,7 +5676,7 @@
                                 "exponent": 1,
                                 "multiplier": 60.0,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -5780,230 +5694,7 @@
                         }
                     },
                     "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/e7fdae19-f4a7-4352-8845-b19274f085b6",
-                    "ld_type": [
-                        "enzml:MeasurementData"
-                    ],
-                    "ld_context": {
-                        "enzml": "http://www.enzymeml.org/v2/",
-                        "schema": "https://schema.org/",
-                        "OBO": "http://purl.obolibrary.org/obo/",
-                        "species_id": {
-                            "@type": "@id"
-                        }
-                    }
-                },
-                {
-                    "species_id": "TmSAHH",
-                    "initial": 5.0,
-                    "data_unit": {
-                        "id": null,
-                        "name": "umol / l",
-                        "base_units": [
-                            {
-                                "kind": "mole",
-                                "exponent": 1,
-                                "multiplier": null,
-                                "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            },
-                            {
-                                "kind": "litre",
-                                "exponent": -1,
-                                "multiplier": null,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000064",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
-                    "prepared": 5.0,
-                    "data": [],
-                    "time": [],
-                    "time_unit": {
-                        "id": null,
-                        "name": "s",
-                        "base_units": [
-                            {
-                                "kind": "second",
-                                "exponent": 1,
-                                "multiplier": 60.0,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000031",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/b7662ff2-0483-4961-b93d-8223f3555494",
-                    "ld_type": [
-                        "enzml:MeasurementData"
-                    ],
-                    "ld_context": {
-                        "enzml": "http://www.enzymeml.org/v2/",
-                        "schema": "https://schema.org/",
-                        "OBO": "http://purl.obolibrary.org/obo/",
-                        "species_id": {
-                            "@type": "@id"
-                        }
-                    }
-                }
-            ],
-            "group_id": "",
-            "ph": 7.4,
-            "temperature": 37.04466019417476,
-            "temperature_unit": {
-                "id": null,
-                "name": "Celsius",
-                "base_units": [
-                    {
-                        "kind": "celsius",
-                        "exponent": 1,
-                        "multiplier": null,
-                        "scale": 1.0,
-                        "ld_id": "md:BaseUnit/8610f7fd-46de-4f7c-be1d-7e6758cf172c",
-                        "ld_type": [
-                            "md:BaseUnit"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    }
-                ],
-                "ld_id": "md:UnitDefinition/3c7b9a21-259d-4af5-adff-4698f34b3675",
-                "ld_type": [
-                    "OBO:UO_0000000"
-                ],
-                "ld_context": {
-                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                }
-            },
-            "ld_id": "enzml:Measurement/1299df24-8064-49db-a484-d983500225d8",
-            "ld_type": [
-                "enzml:Measurement"
-            ],
-            "ld_context": {
-                "enzml": "http://www.enzymeml.org/v2/",
-                "schema": "https://schema.org/",
-                "OBO": "http://purl.obolibrary.org/obo/",
-                "id": {
-                    "@id": "schema:identifier",
-                    "@type": "@id"
-                },
-                "group_id": {
-                    "@type": "@id"
-                }
-            }
-        },
-        {
-            "id": "F9",
-            "name": "photometric measurement",
-            "species_data": [
-                {
-                    "species_id": "Hyc",
-                    "initial": 0.0,
-                    "data_unit": {
-                        "id": null,
-                        "name": "umol / l",
-                        "base_units": [
-                            {
-                                "kind": "mole",
-                                "exponent": 1,
-                                "multiplier": null,
-                                "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            },
-                            {
-                                "kind": "litre",
-                                "exponent": -1,
-                                "multiplier": null,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000064",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
-                    "prepared": 0.0,
-                    "data": [],
-                    "time": [],
-                    "time_unit": {
-                        "id": null,
-                        "name": "s",
-                        "base_units": [
-                            {
-                                "kind": "second",
-                                "exponent": 1,
-                                "multiplier": 60.0,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000031",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/aa683248-4d03-4bfc-88e1-3cdded393160",
+                    "ld_id": "enzml:MeasurementData/55d5eee9-1b32-4343-a398-189b33c6b374",
                     "ld_type": [
                         "enzml:MeasurementData"
                     ],
@@ -6028,7 +5719,7 @@
                                 "exponent": 1,
                                 "multiplier": null,
                                 "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -6041,7 +5732,7 @@
                                 "exponent": -1,
                                 "multiplier": null,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -6071,7 +5762,7 @@
                                 "exponent": 1,
                                 "multiplier": 60.0,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -6089,7 +5780,7 @@
                         }
                     },
                     "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/3c566f67-3a23-4d74-a6e8-42337b9aca50",
+                    "ld_id": "enzml:MeasurementData/5e73ac06-63a3-4397-a238-fb91bfa589c3",
                     "ld_type": [
                         "enzml:MeasurementData"
                     ],
@@ -6103,8 +5794,8 @@
                     }
                 },
                 {
-                    "species_id": "DTNB",
-                    "initial": 500.0,
+                    "species_id": "TmSAHH",
+                    "initial": 5.0,
                     "data_unit": {
                         "id": null,
                         "name": "umol / l",
@@ -6114,7 +5805,7 @@
                                 "exponent": 1,
                                 "multiplier": null,
                                 "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -6127,7 +5818,7 @@
                                 "exponent": -1,
                                 "multiplier": null,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -6145,7 +5836,7 @@
                         }
                     },
                     "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
-                    "prepared": 500.0,
+                    "prepared": 5.0,
                     "data": [],
                     "time": [],
                     "time_unit": {
@@ -6157,7 +5848,7 @@
                                 "exponent": 1,
                                 "multiplier": 60.0,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -6175,7 +5866,7 @@
                         }
                     },
                     "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/7b0301f1-690b-44bf-928a-8ea1bf573183",
+                    "ld_id": "enzml:MeasurementData/cdd8b1a3-7f77-464b-a7ed-e0059dc54b0d",
                     "ld_type": [
                         "enzml:MeasurementData"
                     ],
@@ -6187,7 +5878,58 @@
                             "@type": "@id"
                         }
                     }
+                }
+            ],
+            "group_id": "",
+            "ph": 7.4,
+            "temperature": 37.04466019417476,
+            "temperature_unit": {
+                "id": null,
+                "name": "Celsius",
+                "base_units": [
+                    {
+                        "kind": "celsius",
+                        "exponent": 1,
+                        "multiplier": null,
+                        "scale": 1.0,
+                        "ld_id": "md:BaseUnit/1d0db1f3-e710-4e7f-9588-94a7c7bd2e23",
+                        "ld_type": [
+                            "md:BaseUnit"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    }
+                ],
+                "ld_id": "md:UnitDefinition/27947bba-ded5-48fd-b462-f1435ed4c1ea",
+                "ld_type": [
+                    "OBO:UO_0000000"
+                ],
+                "ld_context": {
+                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                }
+            },
+            "ld_id": "enzml:Measurement/a96ba7d3-59fb-43cc-8d6d-b5b2fde7ac47",
+            "ld_type": [
+                "enzml:Measurement"
+            ],
+            "ld_context": {
+                "enzml": "http://www.enzymeml.org/v2/",
+                "schema": "https://schema.org/",
+                "OBO": "http://purl.obolibrary.org/obo/",
+                "id": {
+                    "@id": "schema:identifier",
+                    "@type": "@id"
                 },
+                "group_id": {
+                    "@type": "@id"
+                }
+            }
+        },
+        {
+            "id": "F9",
+            "name": "photometric measurement",
+            "species_data": [
                 {
                     "species_id": "TNB",
                     "initial": 9.217423885717439,
@@ -6200,7 +5942,7 @@
                                 "exponent": 1,
                                 "multiplier": null,
                                 "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -6213,7 +5955,7 @@
                                 "exponent": -1,
                                 "multiplier": null,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -7687,7 +7429,7 @@
                                 "exponent": 1,
                                 "multiplier": 60.0,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -7705,7 +7447,7 @@
                         }
                     },
                     "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/05d8763d-dd41-49a5-b9e9-0a2ab44fdec6",
+                    "ld_id": "enzml:MeasurementData/9f50f1a0-ef69-4550-b8a8-ce26e849e379",
                     "ld_type": [
                         "enzml:MeasurementData"
                     ],
@@ -7718,229 +7460,6 @@
                         }
                     }
                 },
-                {
-                    "species_id": "SAH",
-                    "initial": 200.0,
-                    "data_unit": {
-                        "id": null,
-                        "name": "umol / l",
-                        "base_units": [
-                            {
-                                "kind": "mole",
-                                "exponent": 1,
-                                "multiplier": null,
-                                "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            },
-                            {
-                                "kind": "litre",
-                                "exponent": -1,
-                                "multiplier": null,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000064",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
-                    "prepared": 200.0,
-                    "data": [],
-                    "time": [],
-                    "time_unit": {
-                        "id": null,
-                        "name": "s",
-                        "base_units": [
-                            {
-                                "kind": "second",
-                                "exponent": 1,
-                                "multiplier": 60.0,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000031",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/1643c810-c46b-4931-a0e1-0bc70f0c2f72",
-                    "ld_type": [
-                        "enzml:MeasurementData"
-                    ],
-                    "ld_context": {
-                        "enzml": "http://www.enzymeml.org/v2/",
-                        "schema": "https://schema.org/",
-                        "OBO": "http://purl.obolibrary.org/obo/",
-                        "species_id": {
-                            "@type": "@id"
-                        }
-                    }
-                },
-                {
-                    "species_id": "TmSAHH",
-                    "initial": 5.0,
-                    "data_unit": {
-                        "id": null,
-                        "name": "umol / l",
-                        "base_units": [
-                            {
-                                "kind": "mole",
-                                "exponent": 1,
-                                "multiplier": null,
-                                "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            },
-                            {
-                                "kind": "litre",
-                                "exponent": -1,
-                                "multiplier": null,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000064",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
-                    "prepared": 5.0,
-                    "data": [],
-                    "time": [],
-                    "time_unit": {
-                        "id": null,
-                        "name": "s",
-                        "base_units": [
-                            {
-                                "kind": "second",
-                                "exponent": 1,
-                                "multiplier": 60.0,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000031",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/031369ed-5372-4909-9cb4-cb2b4c537594",
-                    "ld_type": [
-                        "enzml:MeasurementData"
-                    ],
-                    "ld_context": {
-                        "enzml": "http://www.enzymeml.org/v2/",
-                        "schema": "https://schema.org/",
-                        "OBO": "http://purl.obolibrary.org/obo/",
-                        "species_id": {
-                            "@type": "@id"
-                        }
-                    }
-                }
-            ],
-            "group_id": "",
-            "ph": 7.4,
-            "temperature": 37.04466019417476,
-            "temperature_unit": {
-                "id": null,
-                "name": "Celsius",
-                "base_units": [
-                    {
-                        "kind": "celsius",
-                        "exponent": 1,
-                        "multiplier": null,
-                        "scale": 1.0,
-                        "ld_id": "md:BaseUnit/8610f7fd-46de-4f7c-be1d-7e6758cf172c",
-                        "ld_type": [
-                            "md:BaseUnit"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    }
-                ],
-                "ld_id": "md:UnitDefinition/3c7b9a21-259d-4af5-adff-4698f34b3675",
-                "ld_type": [
-                    "OBO:UO_0000000"
-                ],
-                "ld_context": {
-                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                }
-            },
-            "ld_id": "enzml:Measurement/110cb7ba-0296-48e5-b912-c3cb0e5f1744",
-            "ld_type": [
-                "enzml:Measurement"
-            ],
-            "ld_context": {
-                "enzml": "http://www.enzymeml.org/v2/",
-                "schema": "https://schema.org/",
-                "OBO": "http://purl.obolibrary.org/obo/",
-                "id": {
-                    "@id": "schema:identifier",
-                    "@type": "@id"
-                },
-                "group_id": {
-                    "@type": "@id"
-                }
-            }
-        },
-        {
-            "id": "E10",
-            "name": "photometric measurement",
-            "species_data": [
                 {
                     "species_id": "BUFFER",
                     "initial": 50.0,
@@ -7953,7 +7472,7 @@
                                 "exponent": 1,
                                 "multiplier": null,
                                 "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -7966,7 +7485,7 @@
                                 "exponent": -1,
                                 "multiplier": null,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -7996,7 +7515,7 @@
                                 "exponent": 1,
                                 "multiplier": 60.0,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -8014,7 +7533,7 @@
                         }
                     },
                     "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/7638efd3-e6f9-41b2-9e65-135c0c6daf92",
+                    "ld_id": "enzml:MeasurementData/ad11c961-b851-4d08-986a-033957b8cb7f",
                     "ld_type": [
                         "enzml:MeasurementData"
                     ],
@@ -8028,8 +7547,8 @@
                     }
                 },
                 {
-                    "species_id": "TNB",
-                    "initial": -0.8822001512575587,
+                    "species_id": "SAH",
+                    "initial": 200.0,
                     "data_unit": {
                         "id": null,
                         "name": "umol / l",
@@ -8039,7 +7558,7 @@
                                 "exponent": 1,
                                 "multiplier": null,
                                 "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -8052,7 +7571,402 @@
                                 "exponent": -1,
                                 "multiplier": null,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000064",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
+                    "prepared": 200.0,
+                    "data": [],
+                    "time": [],
+                    "time_unit": {
+                        "id": null,
+                        "name": "s",
+                        "base_units": [
+                            {
+                                "kind": "second",
+                                "exponent": 1,
+                                "multiplier": 60.0,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000031",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "is_simulated": false,
+                    "ld_id": "enzml:MeasurementData/04bbcf98-2930-4d1b-aa50-eacb63181909",
+                    "ld_type": [
+                        "enzml:MeasurementData"
+                    ],
+                    "ld_context": {
+                        "enzml": "http://www.enzymeml.org/v2/",
+                        "schema": "https://schema.org/",
+                        "OBO": "http://purl.obolibrary.org/obo/",
+                        "species_id": {
+                            "@type": "@id"
+                        }
+                    }
+                },
+                {
+                    "species_id": "Hyc",
+                    "initial": 0.0,
+                    "data_unit": {
+                        "id": null,
+                        "name": "umol / l",
+                        "base_units": [
+                            {
+                                "kind": "mole",
+                                "exponent": 1,
+                                "multiplier": null,
+                                "scale": -6.0,
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            },
+                            {
+                                "kind": "litre",
+                                "exponent": -1,
+                                "multiplier": null,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000064",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
+                    "prepared": 0.0,
+                    "data": [],
+                    "time": [],
+                    "time_unit": {
+                        "id": null,
+                        "name": "s",
+                        "base_units": [
+                            {
+                                "kind": "second",
+                                "exponent": 1,
+                                "multiplier": 60.0,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000031",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "is_simulated": false,
+                    "ld_id": "enzml:MeasurementData/643f58f9-9b2c-4080-b051-12d079a1e5c7",
+                    "ld_type": [
+                        "enzml:MeasurementData"
+                    ],
+                    "ld_context": {
+                        "enzml": "http://www.enzymeml.org/v2/",
+                        "schema": "https://schema.org/",
+                        "OBO": "http://purl.obolibrary.org/obo/",
+                        "species_id": {
+                            "@type": "@id"
+                        }
+                    }
+                },
+                {
+                    "species_id": "TmSAHH",
+                    "initial": 5.0,
+                    "data_unit": {
+                        "id": null,
+                        "name": "umol / l",
+                        "base_units": [
+                            {
+                                "kind": "mole",
+                                "exponent": 1,
+                                "multiplier": null,
+                                "scale": -6.0,
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            },
+                            {
+                                "kind": "litre",
+                                "exponent": -1,
+                                "multiplier": null,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000064",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
+                    "prepared": 5.0,
+                    "data": [],
+                    "time": [],
+                    "time_unit": {
+                        "id": null,
+                        "name": "s",
+                        "base_units": [
+                            {
+                                "kind": "second",
+                                "exponent": 1,
+                                "multiplier": 60.0,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000031",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "is_simulated": false,
+                    "ld_id": "enzml:MeasurementData/8d020a19-2f0f-4298-bebd-0af0c259e460",
+                    "ld_type": [
+                        "enzml:MeasurementData"
+                    ],
+                    "ld_context": {
+                        "enzml": "http://www.enzymeml.org/v2/",
+                        "schema": "https://schema.org/",
+                        "OBO": "http://purl.obolibrary.org/obo/",
+                        "species_id": {
+                            "@type": "@id"
+                        }
+                    }
+                },
+                {
+                    "species_id": "DTNB",
+                    "initial": 500.0,
+                    "data_unit": {
+                        "id": null,
+                        "name": "umol / l",
+                        "base_units": [
+                            {
+                                "kind": "mole",
+                                "exponent": 1,
+                                "multiplier": null,
+                                "scale": -6.0,
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            },
+                            {
+                                "kind": "litre",
+                                "exponent": -1,
+                                "multiplier": null,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000064",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
+                    "prepared": 500.0,
+                    "data": [],
+                    "time": [],
+                    "time_unit": {
+                        "id": null,
+                        "name": "s",
+                        "base_units": [
+                            {
+                                "kind": "second",
+                                "exponent": 1,
+                                "multiplier": 60.0,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000031",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "is_simulated": false,
+                    "ld_id": "enzml:MeasurementData/356f1d17-bf97-4f42-8111-e50c2e6028b9",
+                    "ld_type": [
+                        "enzml:MeasurementData"
+                    ],
+                    "ld_context": {
+                        "enzml": "http://www.enzymeml.org/v2/",
+                        "schema": "https://schema.org/",
+                        "OBO": "http://purl.obolibrary.org/obo/",
+                        "species_id": {
+                            "@type": "@id"
+                        }
+                    }
+                }
+            ],
+            "group_id": "",
+            "ph": 7.4,
+            "temperature": 37.04466019417476,
+            "temperature_unit": {
+                "id": null,
+                "name": "Celsius",
+                "base_units": [
+                    {
+                        "kind": "celsius",
+                        "exponent": 1,
+                        "multiplier": null,
+                        "scale": 1.0,
+                        "ld_id": "md:BaseUnit/1d0db1f3-e710-4e7f-9588-94a7c7bd2e23",
+                        "ld_type": [
+                            "md:BaseUnit"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    }
+                ],
+                "ld_id": "md:UnitDefinition/27947bba-ded5-48fd-b462-f1435ed4c1ea",
+                "ld_type": [
+                    "OBO:UO_0000000"
+                ],
+                "ld_context": {
+                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                }
+            },
+            "ld_id": "enzml:Measurement/9a5c0187-29fb-45f0-a145-8a12b5d0a1b6",
+            "ld_type": [
+                "enzml:Measurement"
+            ],
+            "ld_context": {
+                "enzml": "http://www.enzymeml.org/v2/",
+                "schema": "https://schema.org/",
+                "OBO": "http://purl.obolibrary.org/obo/",
+                "id": {
+                    "@id": "schema:identifier",
+                    "@type": "@id"
+                },
+                "group_id": {
+                    "@type": "@id"
+                }
+            }
+        },
+        {
+            "id": "E10",
+            "name": "photometric measurement",
+            "species_data": [
+                {
+                    "species_id": "TNB",
+                    "initial": -0.8822001512575587,
+                    "data_unit": {
+                        "id": null,
+                        "name": "umol / l",
+                        "base_units": [
+                            {
+                                "kind": "mole",
+                                "exponent": 1,
+                                "multiplier": null,
+                                "scale": -6.0,
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            },
+                            {
+                                "kind": "litre",
+                                "exponent": -1,
+                                "multiplier": null,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -9526,7 +9440,7 @@
                                 "exponent": 1,
                                 "multiplier": 60.0,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -9544,230 +9458,7 @@
                         }
                     },
                     "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/91a74733-2b40-4f5e-b9c9-60455d505129",
-                    "ld_type": [
-                        "enzml:MeasurementData"
-                    ],
-                    "ld_context": {
-                        "enzml": "http://www.enzymeml.org/v2/",
-                        "schema": "https://schema.org/",
-                        "OBO": "http://purl.obolibrary.org/obo/",
-                        "species_id": {
-                            "@type": "@id"
-                        }
-                    }
-                },
-                {
-                    "species_id": "TmSAHH",
-                    "initial": 5.0,
-                    "data_unit": {
-                        "id": null,
-                        "name": "umol / l",
-                        "base_units": [
-                            {
-                                "kind": "mole",
-                                "exponent": 1,
-                                "multiplier": null,
-                                "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            },
-                            {
-                                "kind": "litre",
-                                "exponent": -1,
-                                "multiplier": null,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000064",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
-                    "prepared": 5.0,
-                    "data": [],
-                    "time": [],
-                    "time_unit": {
-                        "id": null,
-                        "name": "s",
-                        "base_units": [
-                            {
-                                "kind": "second",
-                                "exponent": 1,
-                                "multiplier": 60.0,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000031",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/fd87bb46-fe17-4d57-9732-6f86796b46a1",
-                    "ld_type": [
-                        "enzml:MeasurementData"
-                    ],
-                    "ld_context": {
-                        "enzml": "http://www.enzymeml.org/v2/",
-                        "schema": "https://schema.org/",
-                        "OBO": "http://purl.obolibrary.org/obo/",
-                        "species_id": {
-                            "@type": "@id"
-                        }
-                    }
-                }
-            ],
-            "group_id": "",
-            "ph": 7.4,
-            "temperature": 37.04466019417476,
-            "temperature_unit": {
-                "id": null,
-                "name": "Celsius",
-                "base_units": [
-                    {
-                        "kind": "celsius",
-                        "exponent": 1,
-                        "multiplier": null,
-                        "scale": 1.0,
-                        "ld_id": "md:BaseUnit/8610f7fd-46de-4f7c-be1d-7e6758cf172c",
-                        "ld_type": [
-                            "md:BaseUnit"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    }
-                ],
-                "ld_id": "md:UnitDefinition/3c7b9a21-259d-4af5-adff-4698f34b3675",
-                "ld_type": [
-                    "OBO:UO_0000000"
-                ],
-                "ld_context": {
-                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                }
-            },
-            "ld_id": "enzml:Measurement/39d853a5-838a-4abd-a627-4eed41cc5f29",
-            "ld_type": [
-                "enzml:Measurement"
-            ],
-            "ld_context": {
-                "enzml": "http://www.enzymeml.org/v2/",
-                "schema": "https://schema.org/",
-                "OBO": "http://purl.obolibrary.org/obo/",
-                "id": {
-                    "@id": "schema:identifier",
-                    "@type": "@id"
-                },
-                "group_id": {
-                    "@type": "@id"
-                }
-            }
-        },
-        {
-            "id": "F10",
-            "name": "photometric measurement",
-            "species_data": [
-                {
-                    "species_id": "Hyc",
-                    "initial": 0.0,
-                    "data_unit": {
-                        "id": null,
-                        "name": "umol / l",
-                        "base_units": [
-                            {
-                                "kind": "mole",
-                                "exponent": 1,
-                                "multiplier": null,
-                                "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            },
-                            {
-                                "kind": "litre",
-                                "exponent": -1,
-                                "multiplier": null,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000064",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
-                    "prepared": 0.0,
-                    "data": [],
-                    "time": [],
-                    "time_unit": {
-                        "id": null,
-                        "name": "s",
-                        "base_units": [
-                            {
-                                "kind": "second",
-                                "exponent": 1,
-                                "multiplier": 60.0,
-                                "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
-                                "ld_type": [
-                                    "md:BaseUnit"
-                                ],
-                                "ld_context": {
-                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
-                                }
-                            }
-                        ],
-                        "ld_id": "OBO:UO_0000031",
-                        "ld_type": [
-                            "OBO:UO_0000000"
-                        ],
-                        "ld_context": {
-                            "md": "https://github.com/FAIRChemistry/MTPHandler"
-                        }
-                    },
-                    "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/f48195eb-5f8c-4c2d-9c9c-a9e059873a39",
+                    "ld_id": "enzml:MeasurementData/ed00ac6e-04e0-48ed-8d5b-26b91502113a",
                     "ld_type": [
                         "enzml:MeasurementData"
                     ],
@@ -9792,7 +9483,7 @@
                                 "exponent": 1,
                                 "multiplier": null,
                                 "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -9805,7 +9496,7 @@
                                 "exponent": -1,
                                 "multiplier": null,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -9835,7 +9526,7 @@
                                 "exponent": 1,
                                 "multiplier": 60.0,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -9853,7 +9544,7 @@
                         }
                     },
                     "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/40b165ef-eb64-4907-82ff-27761f478249",
+                    "ld_id": "enzml:MeasurementData/b431d869-f64b-43b3-9725-5da64ad2de52",
                     "ld_type": [
                         "enzml:MeasurementData"
                     ],
@@ -9867,8 +9558,8 @@
                     }
                 },
                 {
-                    "species_id": "DTNB",
-                    "initial": 500.0,
+                    "species_id": "TmSAHH",
+                    "initial": 5.0,
                     "data_unit": {
                         "id": null,
                         "name": "umol / l",
@@ -9878,7 +9569,7 @@
                                 "exponent": 1,
                                 "multiplier": null,
                                 "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -9891,7 +9582,7 @@
                                 "exponent": -1,
                                 "multiplier": null,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -9909,7 +9600,7 @@
                         }
                     },
                     "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
-                    "prepared": 500.0,
+                    "prepared": 5.0,
                     "data": [],
                     "time": [],
                     "time_unit": {
@@ -9921,7 +9612,7 @@
                                 "exponent": 1,
                                 "multiplier": 60.0,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -9939,7 +9630,7 @@
                         }
                     },
                     "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/7a4b98f7-a475-4f06-aa57-9899a580a6b1",
+                    "ld_id": "enzml:MeasurementData/f20e6a58-ad0c-45ec-b22e-eaca38807df9",
                     "ld_type": [
                         "enzml:MeasurementData"
                     ],
@@ -9951,7 +9642,58 @@
                             "@type": "@id"
                         }
                     }
+                }
+            ],
+            "group_id": "",
+            "ph": 7.4,
+            "temperature": 37.04466019417476,
+            "temperature_unit": {
+                "id": null,
+                "name": "Celsius",
+                "base_units": [
+                    {
+                        "kind": "celsius",
+                        "exponent": 1,
+                        "multiplier": null,
+                        "scale": 1.0,
+                        "ld_id": "md:BaseUnit/1d0db1f3-e710-4e7f-9588-94a7c7bd2e23",
+                        "ld_type": [
+                            "md:BaseUnit"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    }
+                ],
+                "ld_id": "md:UnitDefinition/27947bba-ded5-48fd-b462-f1435ed4c1ea",
+                "ld_type": [
+                    "OBO:UO_0000000"
+                ],
+                "ld_context": {
+                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                }
+            },
+            "ld_id": "enzml:Measurement/f528c39e-1721-43da-a9a9-6da7e512f089",
+            "ld_type": [
+                "enzml:Measurement"
+            ],
+            "ld_context": {
+                "enzml": "http://www.enzymeml.org/v2/",
+                "schema": "https://schema.org/",
+                "OBO": "http://purl.obolibrary.org/obo/",
+                "id": {
+                    "@id": "schema:identifier",
+                    "@type": "@id"
                 },
+                "group_id": {
+                    "@type": "@id"
+                }
+            }
+        },
+        {
+            "id": "F10",
+            "name": "photometric measurement",
+            "species_data": [
                 {
                     "species_id": "TNB",
                     "initial": 11.57044736143496,
@@ -9964,7 +9706,7 @@
                                 "exponent": 1,
                                 "multiplier": null,
                                 "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -9977,7 +9719,7 @@
                                 "exponent": -1,
                                 "multiplier": null,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -11451,7 +11193,7 @@
                                 "exponent": 1,
                                 "multiplier": 60.0,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -11469,7 +11211,93 @@
                         }
                     },
                     "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/7f28c81b-4930-45e4-9342-24d096d87bae",
+                    "ld_id": "enzml:MeasurementData/30a33ebf-2fe4-4a13-9bf5-8311772e01a6",
+                    "ld_type": [
+                        "enzml:MeasurementData"
+                    ],
+                    "ld_context": {
+                        "enzml": "http://www.enzymeml.org/v2/",
+                        "schema": "https://schema.org/",
+                        "OBO": "http://purl.obolibrary.org/obo/",
+                        "species_id": {
+                            "@type": "@id"
+                        }
+                    }
+                },
+                {
+                    "species_id": "BUFFER",
+                    "initial": 50.0,
+                    "data_unit": {
+                        "id": null,
+                        "name": "umol / l",
+                        "base_units": [
+                            {
+                                "kind": "mole",
+                                "exponent": 1,
+                                "multiplier": null,
+                                "scale": -6.0,
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            },
+                            {
+                                "kind": "litre",
+                                "exponent": -1,
+                                "multiplier": null,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000064",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
+                    "prepared": 50.0,
+                    "data": [],
+                    "time": [],
+                    "time_unit": {
+                        "id": null,
+                        "name": "s",
+                        "base_units": [
+                            {
+                                "kind": "second",
+                                "exponent": 1,
+                                "multiplier": 60.0,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000031",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "is_simulated": false,
+                    "ld_id": "enzml:MeasurementData/078deffe-0081-4903-b905-2573078ea2b6",
                     "ld_type": [
                         "enzml:MeasurementData"
                     ],
@@ -11494,7 +11322,7 @@
                                 "exponent": 1,
                                 "multiplier": null,
                                 "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -11507,7 +11335,7 @@
                                 "exponent": -1,
                                 "multiplier": null,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -11537,7 +11365,7 @@
                                 "exponent": 1,
                                 "multiplier": 60.0,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -11555,7 +11383,93 @@
                         }
                     },
                     "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/e59ceccf-b7e7-4019-81f5-4d21907997eb",
+                    "ld_id": "enzml:MeasurementData/7f6ef9ce-abdd-434c-b77f-e1dcf85280d1",
+                    "ld_type": [
+                        "enzml:MeasurementData"
+                    ],
+                    "ld_context": {
+                        "enzml": "http://www.enzymeml.org/v2/",
+                        "schema": "https://schema.org/",
+                        "OBO": "http://purl.obolibrary.org/obo/",
+                        "species_id": {
+                            "@type": "@id"
+                        }
+                    }
+                },
+                {
+                    "species_id": "Hyc",
+                    "initial": 0.0,
+                    "data_unit": {
+                        "id": null,
+                        "name": "umol / l",
+                        "base_units": [
+                            {
+                                "kind": "mole",
+                                "exponent": 1,
+                                "multiplier": null,
+                                "scale": -6.0,
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            },
+                            {
+                                "kind": "litre",
+                                "exponent": -1,
+                                "multiplier": null,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000064",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
+                    "prepared": 0.0,
+                    "data": [],
+                    "time": [],
+                    "time_unit": {
+                        "id": null,
+                        "name": "s",
+                        "base_units": [
+                            {
+                                "kind": "second",
+                                "exponent": 1,
+                                "multiplier": 60.0,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000031",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "is_simulated": false,
+                    "ld_id": "enzml:MeasurementData/75af28c3-30d1-4dd2-b331-49a8d3bfcc3a",
                     "ld_type": [
                         "enzml:MeasurementData"
                     ],
@@ -11580,7 +11494,7 @@
                                 "exponent": 1,
                                 "multiplier": null,
                                 "scale": -6.0,
-                                "ld_id": "md:BaseUnit/013ee527-1153-4a04-ad9d-f393b8c2af13",
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -11593,7 +11507,7 @@
                                 "exponent": -1,
                                 "multiplier": null,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/ab37bbb4-838a-466a-a173-2c91916d872c",
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -11623,7 +11537,7 @@
                                 "exponent": 1,
                                 "multiplier": 60.0,
                                 "scale": 1.0,
-                                "ld_id": "md:BaseUnit/7959a27e-4921-4f80-96ee-976d303e027c",
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
                                 "ld_type": [
                                     "md:BaseUnit"
                                 ],
@@ -11641,7 +11555,93 @@
                         }
                     },
                     "is_simulated": false,
-                    "ld_id": "enzml:MeasurementData/e87e0b33-8fa6-4e2a-92cb-020227f7a9cc",
+                    "ld_id": "enzml:MeasurementData/b5a43b8d-9490-46a5-ac22-16499492f033",
+                    "ld_type": [
+                        "enzml:MeasurementData"
+                    ],
+                    "ld_context": {
+                        "enzml": "http://www.enzymeml.org/v2/",
+                        "schema": "https://schema.org/",
+                        "OBO": "http://purl.obolibrary.org/obo/",
+                        "species_id": {
+                            "@type": "@id"
+                        }
+                    }
+                },
+                {
+                    "species_id": "DTNB",
+                    "initial": 500.0,
+                    "data_unit": {
+                        "id": null,
+                        "name": "umol / l",
+                        "base_units": [
+                            {
+                                "kind": "mole",
+                                "exponent": 1,
+                                "multiplier": null,
+                                "scale": -6.0,
+                                "ld_id": "md:BaseUnit/aa08d1df-5c22-464c-8df7-856ed81066e1",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            },
+                            {
+                                "kind": "litre",
+                                "exponent": -1,
+                                "multiplier": null,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/85011e73-bd9c-4a7c-ba4e-3c8b9c42c69d",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000064",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "data_type": "http://purl.obolibrary.org/obo/PATO_0000033",
+                    "prepared": 500.0,
+                    "data": [],
+                    "time": [],
+                    "time_unit": {
+                        "id": null,
+                        "name": "s",
+                        "base_units": [
+                            {
+                                "kind": "second",
+                                "exponent": 1,
+                                "multiplier": 60.0,
+                                "scale": 1.0,
+                                "ld_id": "md:BaseUnit/67e18611-cc6f-4a44-9870-e8d71ab0cb2c",
+                                "ld_type": [
+                                    "md:BaseUnit"
+                                ],
+                                "ld_context": {
+                                    "md": "https://github.com/FAIRChemistry/MTPHandler"
+                                }
+                            }
+                        ],
+                        "ld_id": "OBO:UO_0000031",
+                        "ld_type": [
+                            "OBO:UO_0000000"
+                        ],
+                        "ld_context": {
+                            "md": "https://github.com/FAIRChemistry/MTPHandler"
+                        }
+                    },
+                    "is_simulated": false,
+                    "ld_id": "enzml:MeasurementData/063914fa-8fae-4714-9ff0-386807fef770",
                     "ld_type": [
                         "enzml:MeasurementData"
                     ],
@@ -11667,7 +11667,7 @@
                         "exponent": 1,
                         "multiplier": null,
                         "scale": 1.0,
-                        "ld_id": "md:BaseUnit/8610f7fd-46de-4f7c-be1d-7e6758cf172c",
+                        "ld_id": "md:BaseUnit/1d0db1f3-e710-4e7f-9588-94a7c7bd2e23",
                         "ld_type": [
                             "md:BaseUnit"
                         ],
@@ -11676,7 +11676,7 @@
                         }
                     }
                 ],
-                "ld_id": "md:UnitDefinition/3c7b9a21-259d-4af5-adff-4698f34b3675",
+                "ld_id": "md:UnitDefinition/27947bba-ded5-48fd-b462-f1435ed4c1ea",
                 "ld_type": [
                     "OBO:UO_0000000"
                 ],
@@ -11684,7 +11684,7 @@
                     "md": "https://github.com/FAIRChemistry/MTPHandler"
                 }
             },
-            "ld_id": "enzml:Measurement/c57e71f7-b04a-449a-a7e3-d414bbbc9972",
+            "ld_id": "enzml:Measurement/697b7552-c35d-4905-b8bd-b2c4464a1a82",
             "ld_type": [
                 "enzml:Measurement"
             ],
@@ -11704,7 +11704,7 @@
     ],
     "equations": [],
     "parameters": [],
-    "ld_id": "enzml:EnzymeMLDocument/bc4be727-5f75-402a-a752-0ffd2a88bd3b",
+    "ld_id": "enzml:EnzymeMLDocument/a958a6b6-6257-408e-b1b4-4d8d617141cd",
     "ld_type": [
         "enzml:EnzymeMLDocument"
     ],

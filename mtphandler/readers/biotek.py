@@ -57,12 +57,14 @@ def read_biotek(
     ]
 
     wavelengths_cell = str(df.iloc[19, 1])
+    if "Absorbance Endpoint" in wavelengths_cell:
+        wavelengths_cell = str(df.iloc[20, 1])
+
     wavelengths = extract_integers(wavelengths_cell)
 
     measurement_int_cell = str(df.iloc[15, 1])
     if "add final component" in measurement_int_cell.lower():
         measurement_int_cell = str(df.iloc[16, 1])
-    print(measurement_int_cell)
 
     measurement_interval = parse_measurement_interval(measurement_int_cell)
 
@@ -137,6 +139,9 @@ def get_row_by_value(df: pd.DataFrame, value: str) -> list:
 
 
 if __name__ == "__main__":
+    from devtools import pprint
+
     path = "docs/examples/data/20240719_biotek_FDH.V9_0.02enzyme_kinetics.xlsx"
 
-    print(read_biotek(path, ph=7.4))
+    p = read_biotek(path, ph=7.4)
+    pprint(p.wells[0])
