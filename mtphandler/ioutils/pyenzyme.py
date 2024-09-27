@@ -367,7 +367,6 @@ class Plate_to_EnzymeMLDocument:
                 time_unit=EnzML_UnitDef(**time_unit.model_dump()),
                 data_type=DataTypes.CONCENTRATION,
             )
-            print(f"added temp unit {time_unit.name}")
 
     @staticmethod
     def map_protein(protein: Protein, vessel_id: str) -> pe.Protein:
