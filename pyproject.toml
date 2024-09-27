@@ -5,7 +5,7 @@ description = "Tool to work with microtiter plate data."
 authors = ["haeussma <83341109+haeussma@users.noreply.github.com>"]
 license = "MIT License"
 readme = "README.md"
-packages = [{ include = "mtphandler" }]
+packages = [{ include = "MTPHandler" }]
 include = ["mtphandler/units/ontomaps.toml"]
 
 
