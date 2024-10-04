@@ -497,6 +497,56 @@ class PlateManager(BaseModel):
                 f" {init_conc} {conc_unit} to all wells except {well_ids}."
             )
 
+    def create_assignment_spreadsheet(
+        self,
+        path: str = "assignment.xlsx",
+    ):
+        """Create an Excel spreadsheet for assigning initial concentrations. The spreadsheet
+        contains a separate sheet for each species defined on the plate, with validation
+        to allow only numerical values in the input cells and prevent changes to all other cells.
+        """
+
+        with pd.ExcelWriter(path, engine="xlsxwriter") as writer:
+            df = pd.DataFrame(
+                index=[chr(65 + i) for i in range(8)],
+                columns=[str(i + 1) for i in range(12)],
+            )
+            df.to_excel(writer, sheet_name="pH", index=True)
+            worksheet = writer.sheets["pH"]
+
+            worksheet.data_validation(
+                "B2:M9",
+                {
+                    "validate": "decimal",
+                    "criteria": "between",
+                    "minimum": 0,
+                    "maximum": 12,
+                    "error_message": "pH must be a numerical value between 0 and 12",
+                },
+            )
+            for species in self.molecules + self.proteins:
+                df = pd.DataFrame(
+                    index=[chr(65 + i) for i in range(8)],
+                    columns=[str(i + 1) for i in range(12)],
+                )
+
+                df.to_excel(writer, sheet_name=species.id, index=True)
+
+                worksheet = writer.sheets[species.id]
+
+                worksheet.data_validation(
+                    "B2:M9",
+                    {
+                        "validate": "decimal",
+                        "criteria": "between",
+                        "minimum": 0,
+                        "maximum": 1e18,
+                        "error_message": "This cell only accepts numerical values",
+                    },
+                )
+
+        print(f"Created assignment spreadsheet at {path}.")
+
     def assign_init_conditions_from_spreadsheet(
         self,
         conc_unit: UnitDefinition,
@@ -1116,6 +1166,43 @@ class PlateManager(BaseModel):
         return cls(**data)
 
     @classmethod
+    def read_new_device(
+        cls,
+        path: str,
+        temperature: float,
+        ph: float | None = None,
+        name: str | None = None,
+        temperature_unit: UnitDefinition = C,
+    ) -> PlateManager:
+        """Read a `*.xlsx` file exported from a new device and create a PlateManager object.
+
+        Args:
+            path (str): Path to the file.
+            temperature (float): The temperature of the measurements.
+            ph (float | None, optional): The pH value of the measurements. Defaults to None.
+            name (str | None, optional): Name of the plate. Defaults to None.
+            temperature_unit (UnitDefinition, optional): Unit of temperature. Defaults to C.
+
+        Returns:
+            PlateManager: PlateManager object.
+        """
+        from mtphandler.readers import read_new_device as reader
+
+        data: dict[str, Any] = {
+            "plate": reader(
+                path=path,
+                temperature=[temperature],
+                temperature_unit=temperature_unit,
+                ph=ph,
+            )
+        }
+
+        if name is not None:
+            data["name"] = name
+
+        return cls(**data)
+
+    @classmethod
     def read_multiskan_sky(
         cls,
         path: str,
@@ -1143,137 +1230,11 @@ class PlateManager(BaseModel):
 
 
 if __name__ == "__main__":
-    # path = (
-    #     "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/spectra_max_190.txt"
-    # )
+    path = "docs/examples/data/ BioTek_Epoch2.xlsx"
 
-    # pm = PlateManager.read_spectra_max_190(path, ph=6.9)
-    # pm.visualize()
+    p = PlateManager.read_biotek(path)
+    p.define_molecule("alc", 123)
+    p.define_molecule("ala", 124)
+    p.define_protein("asd", "adfaddf")
 
-    # pm
-
-    # h1 = pm.get_well("H1")
-
-    # print(h1.id)
-    # print(h1.x_pos)
-    # print(h1.y_pos)
-    # print(h1.measurements[0].absorption[0])
-    # print(h1.measurements[0].absorption[-1])
-
-    # path = "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/tekan_spark.xlsx"
-    # from mtphandler.model import Plate
-
-    # p = PlateManager.read_tecan_spark(path, 7.4)
-
-    # print(p.plate.temperatures)
-
-    # p.visualize()
-
-    # path = "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/magellan.xlsx"
-
-    # plate = PlateManager.read_tekan_magellan(path, wavelength=600, ph=7)
-
-    # plate.visualize()
-
-    # path = (
-    #     "/Users/max/Documents/training_course/jules/Spectramax190 molecular Devices.txt"
-    # )
-
-    # from mtphandler.units import mM
-
-    # pm = PlateManager.read_spectra_max_190(path, ph=7)
-    # # pm.visualize()
-    # testo = pm.define_molecule("testo", 60857, "testosterone")
-    # mpi = pm.define_molecule("mpi", 60961, "methylparaben")
-
-    # pm.assign_species(
-    #     species=testo,
-    #     init_conc=0.1,
-    #     conc_unit=mM,
-    #     to="all",
-    # )
-
-    # path = (
-    #     "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/ BioTek_Epoch2.xlsx"
-    # )
-
-    # from mtphandler.units import mM
-
-    # p = PlateManager.read_biotek(path, ph=7.4)
-    # p.visualize()
-
-    # testo = p.define_molecule("testo", 60857, "testosterone")
-    # aldolase = p.define_protein("aldolase", "Aldolase")
-
-    # p.assign_init_conditions(
-    #     species=testo,
-    #     init_conc=0.1,
-    #     conc_unit=mM,
-    #     to="all",
-    # )
-
-    # aldo = p.define_protein("aldolase", "Aldolase")
-    # p.assign_init_conditions(
-    #     species=aldo, init_conc=0.1, conc_unit=mM, to="all", contributes_to_signal=False
-    # )
-
-    # enz = p.to_enzymeml(name="Test EnzymeML", wells_with_protein_only=False)
-
-    # with open("enz.json", "w") as f:
-    #     f.write(enz.model_dump_json(indent=4))
-    # print(len(enz.measurements))
-
-    # from mtphandler.units import C, min
-
-    # path = "docs/examples/data/multiskan_spectrum_1500.txt"
-
-    # ph = 7.0
-    # wavelength = 450.0
-
-    # time = np.arange(0, 15.5, 0.5).tolist()
-    # print(f"the thime is {time}")
-
-    # plate = PlateManager.read_multiskan_spectrum_1500(
-    #     path=path,
-    #     ph=ph,
-    #     time=time,
-    #     time_unit=min,
-    #     temperature=37.0,
-    #     temperature_unit=C,
-    # )
-    # plate.visualize()
-
-    path = (
-        "/Users/max/Documents/GitHub/MTPHandler/docs/examples/data/Multiskan Sky.xlsx"
-    )
-
-    p = PlateManager.read_multiskan_sky(path, ph=None)
-    p.visualize(darkmode=True)
-    print(p)
-
-
-class BlankResult(BaseModel):
-    species_id: str = Field(
-        description="The id of the species for which the blank was calculated.",
-        default=None,
-    )
-    wavelength: float = Field(
-        description="The wavelength at which the blank was calculated.",
-        default=None,
-    )
-    control_well_ids: list[str] = Field(
-        description="The ids of the wells used to calculate the blank.",
-        default=[],
-    )
-    mean_contribution: float = Field(
-        description="The mean contribution of the species to the signal.",
-        default=None,
-    )
-    std_contribution: float = Field(
-        description="The standard deviation of the contribution of the species to the signal.",
-        default=None,
-    )
-    applied_to_well_ids: list[str] = Field(
-        description="The ids of the wells to which the blank was applied.",
-        default=[],
-    )
+    p.create_assignment_spreadsheet()
