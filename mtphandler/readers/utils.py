@@ -10,8 +10,10 @@ def xy_to_id(x: int, y: int) -> str:
 
 
 def id_to_xy(well_id: str) -> tuple[int, int]:
-    """Well ID to well coordinates"""
-    return int(well_id[1:]) - 1, ord(well_id[0].upper()) - 65
+    """Convert well ID (e.g., A01 or A1) to well coordinates"""
+    row = ord(well_id[0].upper()) - 65
+    column = int(well_id[1:]) - 1
+    return column, row
 
     def get_well(self, id: str) -> Well:
         for well in self.plate.wells:
@@ -26,3 +28,6 @@ if __name__ == "__main__":
     print(id_to_xy("A1"))
     print(id_to_xy("H12"))
     print(id_to_xy("C3"))
+    print(id_to_xy("A02"))
+    print(id_to_xy("A01"))
+    print(id_to_xy("A11"))

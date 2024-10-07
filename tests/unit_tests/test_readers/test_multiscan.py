@@ -12,7 +12,6 @@ ph = 6.9
 def test_read_multiskan_spectrum_1500():
     # Arrange
     path = "docs/examples/data/multiskan_spectrum_1500.txt"
-    print(time)
 
     # Act
     plate = read_multiskan_spectrum_1500(
