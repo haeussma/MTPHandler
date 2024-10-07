@@ -23,12 +23,12 @@ graph LR
     K1 --> TNB[<b>2-nitro-5-thiobenzoate</b><br> detected at λ<sub>412 nm</sub>]
 ```
 
-Kinetic enzyme assays for the hydrolysis of _S_-adenosyl-_L_-homocysteine (`SAH`) or _S_-adenosyl-_L_-cysteine (`SIH`), catalyzed by four different _S_-adenosyl-_L_-homocysteine hydrolase (SAHH) enzymes, were conducted using a 96-well plate. Each reaction was carried out in triplicate for the respective enzymes as shown in the plate layout.  
-For detection, Ellman's reagent 5,5'-dithiobis-2-nitrobenzoate (`DTNB`) was used. It reacts with the homocysteine (`Hcy`) produced from the hydrolysis of SAH or SIH to form 2-nitro-5-thiobenzoate (`TNB`), which can be measured at an absorbance of 412 nm. The concentration of TNB was quantified using a calibration curve, which was also recorded on the same plate.
+Kinetic enzyme assays for the hydrolysis of _S_-adenosyl-_L_-homocysteine (`SAH`) or _S_-inosly-_L_-homocysteine (`SIH`), catalyzed by four different _S_-adenosyl-_L_-homocysteine hydrolase (SAHH) enzymes, were conducted using a 96-well plate. Each reaction was carried out in triplicate for the respective enzymes as shown in the plate layout.  
+For detection, Ellman's reagent 5,5'-dithiobis-2-nitrobenzoate (`DTNB`) was used. It reacts with the homocysteine (`Hcy`) produced from the hydrolysis of SAH or SIH to form 2-nitro-5-thiobenzoate (`TNB`), which has an absorbance maximum at 412 nm. The concentration of TNB was quantified using a calibration curve, which was also recorded on the same plate.
 
 ![Plate Layout](images/plate SAHH.png){: style="height:350px", align=right}
 
-The SAHH enzymes from _Mycoplasma capricolum_ (`McSAHH`), _Mycobacterium tuberculosis_ (`MtSAHH`), _Mycoplasma hyorhinis_ (`MhSAHH`), and _Thermotoga maritima_ (`TmSAHH`) were applied at a concentration of 5 µM, whereas the substrate concentration was 200 µM in all assays. The calibration curve for TNB was prepared in the range of 0 to 250 µM. Ellman's reagent was used at a concentration of 500 µM.
+The SAHH enzymes from _Methanocella conradii_ (`McSAHH`), Methanohalobium evestigatum (`MeSAHH`), _Methanocaldocossus infernus_ (`MiSAHH`), and _Methanothrix thermoacetophila_ (`MtSAHH`) were applied at a concentration of 5 µM, whereas the substrate concentration was 200 µM in all assays. The calibration curve for TNB was prepared in the range of 0 to 250 µM. Ellman's reagent was used at a concentration of 500 µM.
 
 The goal of this workflow is to yield concentration time courses for the product TNB for each of the four enzymes and the two substrates, alongside the assigned reaction conditions in the standardized EnzymeML format. This enables further processing and fitting of the data with kinetic models to yield kinetic parameters for the respective enzymes.
 
@@ -147,34 +147,31 @@ __Optional arguments:__
 
     ```python
     McSAHH = plate.define_protein(
-        id="McSAHH", name="Mycoplasma capricolum SAHH", constant=True
+        id="McSAHH", name="Methanocella conradii SAHH", constant=True
+    )
+
+    MeSAHH = plate.define_protein(
+        id="MeSAHH", name="Methanohalobium evestigatum SAHH", constant=True,
+    )
+
+    MiSAHH = plate.define_protein(
+        id="MiSAHH", name="Methanocaldocossus infernus SAHH", constant=True
     )
 
     MtSAHH = plate.define_protein(
-        id="MtSAHH",
-        name="Mycobacterium tuberculosis SAHH",
-        constant=True,
-        uniprot_id="P9WGV3",
-    )
-
-    MhSAHH = plate.define_protein(
-        id="MhSAHH", name="Mycoplasma hyorhinis SAHH", constant=True
-    )
-
-    TmSAHH = plate.define_protein(
-        id="TmSAHH", name="Thermotoga maritima SAHH", constant=True, uniprot_id="O51933"
+        id="MtSAHH", name="Methanothrix thermoacetophila SAHH", constant=True
     )
     ```
 
 ## Assign initial concentrations
 
-After defining the molecules and proteins, the initial concentrations of each molecule and protein in the respective wells need to be assigned. The most convenient way to do this is by using an Excel spreadsheet - especially when dealing with many different species and initial conditions like in this example. To read the in the Excel file, the `assign_init_conditions_from_spreadsheet` method is used. Therefore, only the `path` and the `concentration_unit` arguments are required. This method goes through the sheets of an Excel spreadsheet. Each sheet represents the plate map of a molecule or protein. The sheet name must match the id of the molecule or protein defined for the plate. The initial concentration from the plate map in the Excel spreadsheet is assigned to the respective well. The following requirements must be met for the structure of the Excel spreadsheet:
+After defining the molecules and proteins, an Excel spreadsheet can be generated using the `create_assignment_spreadsheet` method to assign the initial concentrations and pH values for each species in the respective wells. The spreadsheet can then be filled out with the respective initial conditions.
+
+To read the Excel file, the `assign_init_conditions_from_spreadsheet` method is used. Therefore, only the `path` and the `concentration_unit` arguments are required. This method goes through the sheets of the Excel spreadsheet and assigns the initial concentration from the plate map to the respective well.
 
 __Requirements structure of the Excel spreadsheet:__
 
-- The first row must contain the column numbers from 1 to 12.
-- The first column must contain the row letters from A to H.
-- Leaving cells empty is means that the respective species in not present in the well over the course of the experiment.
+- Leaving cells empty means that the respective species in not present in the well over the course of the experiment.
 - Products of the reaction need to be set to a concentration of 0.
 
 !!! example ":material-microsoft-excel: Excel spreadsheet with initial concentrations of SAHH kinetic assay"
@@ -184,7 +181,7 @@ __Requirements structure of the Excel spreadsheet:__
         !!! note "Leaving wells empty"
             Wells in which a molecule or protein is not present throughout the assay are left empty. In this assay the outermost wells were filled with water only and thus not considered in the analysis.
 
-        | µM | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
+        |    | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
         |----|----|----|----|----|----|----|----|----|----|----|----|----|
         | A  |    |    |    |    |    |    |    |    |    |    |    |    |
         | B  |    | 50 | 50 | 50 | 50 | 50 | 50 | 50 | 50 | 50 | 50 |    |
@@ -202,7 +199,7 @@ __Requirements structure of the Excel spreadsheet:__
 
             Here we additionally defined that the `TNB` concentration in our buffer-only wells (`D11`, `E11`, `F11`, `G11`) is 0 µM. Therefore, these wells are automatically detected as suitable wells for creating a calibration model for the detected `TNB` molecule.
 
-        | µM | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
+        |    | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
         |----|----|----|----|----|----|----|----|----|----|----|----|----|
         | A  |    |    |    |    |    |    |    |    |    |    |    |    |
         | B  |    | 250| 250| 250| 0  | 0  | 0  | 0  | 0  | 0  |    |    |
@@ -215,7 +212,7 @@ __Requirements structure of the Excel spreadsheet:__
 
     === "`SAH`"
 
-        | µM | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
+        |    | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
         |----|----|----|----|----|----|----|----|----|----|----|----|----|
         | A  |    |    |    |    |    |    |    |    |    |    |    |    |
         | B  |    |    |    |    |    |    |    |    |    |    | 200|    |
@@ -228,7 +225,7 @@ __Requirements structure of the Excel spreadsheet:__
 
     === "`SIH`"
 
-        | µM | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
+        |    | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
         |----|----|----|----|----|----|----|----|----|----|----|----|----|
         | A  |    |    |    |    |    |    |    |    |    |    |    |    |
         | B  |    |    |    |    |    |    |    |    |    |    |    |    |
@@ -241,7 +238,7 @@ __Requirements structure of the Excel spreadsheet:__
 
     === "`Hyc`"
 
-        | µM | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
+        |    | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
         |----|----|----|----|----|----|----|----|----|----|----|----|----|
         | A  |    |    |    |    |    |    |    |    |    |    |    |    |
         | B  |    |    |    |    |    |    |    |    |    |    |    |    |
@@ -254,20 +251,20 @@ __Requirements structure of the Excel spreadsheet:__
 
     === "`DNTB`"
 
-        | µM | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
+        |    | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
         |----|----|----|----|----|----|----|----|----|----|----|----|----|
         | A  |    |    |    |    |    |    |    |    |    |    |    |    |
         | B  |    |    |    |    |    |    |    |    |    |    |    |    |
-        | C  |    |    | 500| 500| 500| 500| 500| 500|    |    |    |    |
-        | D  |    |    | 500| 500| 500| 500| 500| 500|    |    |    |    |
+        | C  |    |    | 400| 400| 400| 400| 400| 400|    |    |    |    |
+        | D  |    |    | 400| 400| 400| 400| 400| 400|    |    |    |    |
         | E  |    |    |    |    |    |    |    |    |    |    |    |    |
-        | F  |    |    | 500| 500| 500| 500| 500| 500|    |    |    |    |
-        | G  |    |    | 500| 500| 500| 500| 500| 500|    |    |    |    |
+        | F  |    |    | 400| 400| 400| 400| 400| 400|    |    |    |    |
+        | G  |    |    | 400| 400| 400| 400| 400| 400|    |    |    |    |
         | H  |    |    |    |    |    |    |    |    |    |    |    |    |
 
     === "`McSAHH`"
 
-        | µM | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
+        |    | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
         |----|----|----|----|----|----|----|----|----|----|----|----|----|
         | A  |    |    |    |    |    |    |    |    |    |    |    |    |
         | B  |    |    |    |    | 5  | 5  | 5  |    |    |    |    |    |
@@ -278,9 +275,9 @@ __Requirements structure of the Excel spreadsheet:__
         | G  |    |    |    |    |    |    |    |    |    |    |    |    |
         | H  |    |    |    |    |    |    |    |    |    |    |    |    |
 
-    === "`MtSAHH`"
+    === "`MeSAHH`"
 
-        | µM | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
+        |    | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
         |----|----|----|----|----|----|----|----|----|----|----|----|----|
         | A  |    |    |    |    |    |    |    |    |    |    |    |    |
         | B  |    |    |    |    |    |    |    |    |    |    |    |    |
@@ -291,9 +288,9 @@ __Requirements structure of the Excel spreadsheet:__
         | G  |    |    |    |    | 5  | 5  | 5  |    |    |    |    |    |
         | H  |    |    |    |    |    |    |    |    |    |    |    |    |
 
-    === "`MhSAHH`"
+    === "`MiSAHH`"
 
-        | µM | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
+        |    | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
         |----|----|----|----|----|----|----|----|----|----|----|----|----|
         | A  |    |    |    |    |    |    |    |    |    |    |    |    |
         | B  |    |    |    |    |    |    |    | 5  | 5  | 5  |    |    |
@@ -304,9 +301,9 @@ __Requirements structure of the Excel spreadsheet:__
         | G  |    |    |    |    |    |    |    |    |    |    |    |    |
         | H  |    |    |    |    |    |    |    |    |    |    |    |    |
 
-    === "`TmSAHH`"
+    === "`MtSAHH`"
 
-        | µM | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
+        |    | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 |
         |----|----|----|----|----|----|----|----|----|----|----|----|----|
         | A  |    |    |    |    |    |    |    |    |    |    |    |    |
         | B  |    |    |    |    |    |    |    |    |    |    |    |    |
@@ -317,7 +314,7 @@ __Requirements structure of the Excel spreadsheet:__
         | G  |    |    |    |    |    |    |    | 5  | 5  | 5  |    |    |
         | H  |    |    |    |    |    |    |    |    |    |    |    |    |
 
-After the Excel spreadsheet is created, the initial concentrations can be assigned to the respective wells using the `assign_init_conditions_from_spreadsheet` method.
+After the Excel spreadsheet is filled out, the initial concentrations can be assigned to the respective wells using the `assign_init_conditions_from_spreadsheet` method.
 
 !!! example "Assign initial concentrations from Excel spreadsheet"
     !!! tip "Predefined units"

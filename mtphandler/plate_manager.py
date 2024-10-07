@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from collections import defaultdict
 from typing import Any, Literal, Optional, Tuple, get_args
 
@@ -500,12 +501,21 @@ class PlateManager(BaseModel):
     def create_assignment_spreadsheet(
         self,
         path: str = "assignment.xlsx",
+        overwrite: bool = False,
     ):
         """Create an Excel spreadsheet for assigning initial concentrations. The spreadsheet
         contains a separate sheet for each species defined on the plate, with validation
         to allow only numerical values in the input cells and prevent changes to all other cells.
+
+        Args:
+            path (str, optional): Path to save the assignment spreadsheet. Defaults to "assignment.xlsx".
+            overwrite (bool, optional): If True, the file is overwritten if it already exists. Defaults to False.
         """
 
+        if not overwrite:
+            if os.path.exists(path):
+                print(f"File {path} already exists. Set 'overwrite=True' to overwrite.")
+                return
         with pd.ExcelWriter(path, engine="xlsxwriter") as writer:
             df = pd.DataFrame(
                 index=[chr(65 + i) for i in range(8)],
@@ -611,9 +621,24 @@ class PlateManager(BaseModel):
                     well, species_id, init_conc, contributes_to_signal=None
                 )
 
+        ph_set = False
+        if "pH" in sheet_names:
+            df = pd.read_excel(io=path, header=header, index_col=index, sheet_name="pH")
+            for well in self.plate.wells:
+                ph = df.iloc[well.y_pos, well.x_pos]
+
+                if np.isnan(ph):
+                    continue
+
+                well.ph = ph
+
+                count += 1
+                ph_set = True
+
         if not silent:
+            ph_message = "[bold magenta]pH[/] and" if ph_set else ""
             print(
-                f"📍 Assigned {count} initial concentration coditions for [bold magenta]{list(species_matches)}[/]"
+                f"📍 Assigned {count} initial concentration coditions for {ph_message} [bold magenta]{list(species_matches)}[/]"
                 f" from {path} to the plate."
             )
 
@@ -1217,7 +1242,7 @@ class PlateManager(BaseModel):
             name (str | None, optional): Name of the plate. Defaults to None.
 
         Returns:
-            PlateManager: _description_
+            PlateManager: The PlateManager object.
         """
         from mtphandler.readers import read_multiskan_sky as reader
 
@@ -1230,11 +1255,18 @@ class PlateManager(BaseModel):
 
 
 if __name__ == "__main__":
+    from devtools import pprint
+
+    from mtphandler.units import mM
+
     path = "docs/examples/data/ BioTek_Epoch2.xlsx"
 
     p = PlateManager.read_biotek(path)
     p.define_molecule("alc", 123)
     p.define_molecule("ala", 124)
     p.define_protein("asd", "adfaddf")
+    # p.visualize()
 
     p.create_assignment_spreadsheet()
+    p.assign_init_conditions_from_spreadsheet(conc_unit=mM, path="assignment.xlsx")
+    pprint(p.get_well("B2").ph)
